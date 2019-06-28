@@ -106,7 +106,6 @@ class PanelMap(wx.Panel):
 
         for sensorPos in self.sensorList: 
             if  l <= sensorPos[1] <= r and  t<= sensorPos[2] <=b:
-                print("xx")
                 if sensorPos[0]<2:
                     dc.DrawLine(sensorPos[1]+5, sensorPos[2]+10, sensorPos[1]+5, sensorPos[2]+40)
                 elif 2 < sensorPos[0]:
@@ -115,25 +114,7 @@ class PanelMap(wx.Panel):
                     dc.DrawLine(sensorPos[1], sensorPos[2], sensorPos[1]+30, sensorPos[2])
         self.toggle = not self.toggle
         return
-        # Dc Draw the detection area.
-        penColor = 'BLUE' if self.toggle else 'RED'
-        dc.SetPen(wx.Pen(penColor, width=2, style=wx.PENSTYLE_LONG_DASH))
-        w, h = self.bitmapSZ[0]//2, self.bitmapSZ[1]//2
-        # High Light the user selected area.
-        self.DrawHighLight(dc, w, h)
-        # draw the sensor as a flag rectangle:
-        dc.SetPen(wx.Pen('blue', width=1, style=wx.PENSTYLE_SOLID))
-        dc.SetBrush(wx.Brush(wx.Colour(penColor)))
-        dc.DrawRectangle(112, 60, 11, 11)
-        # Draw the transparent rectangle to represent how many people in the area.
-        gdc = wx.GCDC(dc)
-        r = g = b = 120
-        r = r+self.pplNum*7 if r+self.pplNum*7 < 255 else 254
-        brushclr = wx.Colour(r, g, b, 128)   # half transparent
-        gdc.SetBrush(wx.Brush(brushclr))
-        gdc.DrawRectangle(1, 1, w, h)
-        self.toggle = not self.toggle # set the toggle display flag.
-
+        
     #-----------------------------------------------------------------------------
     def DrawHighLight(self, dc, w, h):
         """ High light the area user clicked"""
@@ -194,13 +175,48 @@ class PanelPLC(wx.Panel):
         wx.Panel.__init__(self, parent, size=(190, 240))
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
         self.plcName = name
-        self.bitmap = wx.Bitmap("firmwSign\\images.jpg")
-        self.bitmapSZ = self.bitmap.GetSize()
+        self.ipAddr = '127.0.0.1'
+        #self.bitmap = wx.Bitmap("firmwSign\\images.jpg")
+        #self.bitmapSZ = self.bitmap.GetSize()
         self.toggle = True      # Display toggle flag.     
         self.pplNum = 0         # Number of peopel.
         self.highLightIdx = 0   # High light area. 
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        #self.Bind(wx.EVT_PAINT, self.OnPaint)
         #self.Bind(wx.EVT_LEFT_DOWN, self.OnClick)
+        mainUISizer = self.buidUISizer()
+        self.SetSizer(mainUISizer)
+        self.Refresh(True)
+        self.Layout()
+
+    def buidUISizer(self):
+        """ Build the UI with 2 columns.left: Map, right: sensor data Grid."""
+        flagsT = wx.RIGHT
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        vsizer = wx.BoxSizer(wx.VERTICAL)
+        self.nameLb = wx.StaticText(self, label="PLC Name: "+self.plcName)
+        vsizer.Add(self.nameLb, flag=flagsR, border=2)
+        self.ipaddrLb = wx.StaticText(self, label="PLC IPaddr: "+self.ipAddr)
+        vsizer.Add(self.ipaddrLb, flag=flagsR, border=2)
+        self.connLb = wx.StaticText(self, label="Connection: [connected]")
+        vsizer.Add(self.connLb, flag=flagsR, border=2)
+        vsizer.AddSpacer(10)
+        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1), style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        vsizer.AddSpacer(10)
+        for i in range(8):
+            hsizer = wx.BoxSizer(wx.HORIZONTAL)
+            # Added the input indicator.
+            lbtext = "R_%I0."+str(i) if i <4 else "F_%I0."+str(i)
+            inputLb = wx.StaticText(self, label=lbtext.center(10))
+            inputLb.SetBackgroundColour(wx.Colour(120, 120, 120))
+            hsizer.Add(inputLb, flag=flagsR, border=2)
+            hsizer.AddSpacer(15)
+            hsizer.Add(wx.StaticText(self, label=str("%Q0."+str(i)+':').center(10)), flag=flagsR, border=2)
+            hsizer.AddSpacer(5)
+            hsizer.Add(wx.Button(self, label='OFF', size=(50, 17)), flag=flagsR, border=2)
+
+            vsizer.Add(hsizer, flag=flagsR, border=2)
+            vsizer.AddSpacer(3)
+        return vsizer
 
     #-----------------------------------------------------------------------------
     def OnPaint(self, event):
@@ -210,7 +226,6 @@ class PanelPLC(wx.Panel):
         #dc.SetFont()
         dc.SetTextForeground('Green')
         dc.SetPen(wx.Pen('#CE8349', width=2, style=wx.PENSTYLE_SOLID))
-
         dc.DrawText(self.plcName, 15, 15 )
         return
 
@@ -221,7 +236,7 @@ class SensorReaderFrame(wx.Frame):
     """ XAKA people counting sensor reader with sensor registration function. """
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
-        wx.Frame.__init__(self, parent, id, title, size=(600, 670))
+        wx.Frame.__init__(self, parent, id, title, size=(620, 670))
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         bgPanel = wx.Panel(self) # background panel.
         bgPanel.SetBackgroundColour(wx.Colour(200, 210, 200))
@@ -229,13 +244,17 @@ class SensorReaderFrame(wx.Frame):
         nb = wx.Notebook(bgPanel)
         plcBgPanel = wx.Panel(nb)
         hbox  = wx.BoxSizer(wx.HORIZONTAL)
-        plc1Panel = PanelPLC(plcBgPanel, 'Schneider m221')
+        
+        hbox.AddSpacer(5)
+        plc1Panel = PanelPLC(plcBgPanel, 'PLC1 [m221]')
         hbox.Add(plc1Panel, flag=flagsR, border=2)
         hbox.AddSpacer(5)
-        plc2Panel = PanelPLC(plcBgPanel, 'Schneider m221')
+        
+        plc2Panel = PanelPLC(plcBgPanel, 'PLC2 [m221]')
         hbox.Add(plc2Panel, flag=flagsR, border=2)        
         hbox.AddSpacer(5)
-        plc3Panel = PanelPLC(plcBgPanel, 'Siemens S7-1200')
+
+        plc3Panel = PanelPLC(plcBgPanel, 'PLC3 [S7-1200]')
         hbox.Add(plc3Panel, flag=flagsR, border=2)
         plcBgPanel.SetSizer(hbox)
 
