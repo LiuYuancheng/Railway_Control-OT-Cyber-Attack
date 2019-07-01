@@ -80,6 +80,7 @@ class PanelPLC(wx.Panel):
             outputBt = wx.Button(self, label='OFF', size=(50, 17), name=str(i))
             outputBt.Bind(wx.EVT_BUTTON, self.relayOn)
             hsizer.Add(outputBt, flag=flagsR, border=2)
+
             mSizer.Add(hsizer, flag=flagsR, border=2)
             mSizer.AddSpacer(3)
         return mSizer
@@ -89,10 +90,13 @@ class PanelPLC(wx.Panel):
         if idx >= 8 or not status in [0,1]: 
             print("PLC panel: the input parameter is not valid") 
             return
+        print((idx, status))
         if self.gpioInList[idx] != status:
+            self.gpioInList[idx] = status
             # Change the indicator status.
-            color = wx.Colour('Green') if status else wx.Colour(120, 120, 120)
-            self.gpioLbList.SetBackgroundColour(color)
+            color = wx.Colour('GREEN') if status else wx.Colour(120, 120, 120)
+            self.gpioLbList[idx].SetBackgroundColour(color)
+            self.Refresh(False)
 
     def relayOn(self, event): 
         """ Turn on the related ralay based on the user's action and update the 
@@ -135,6 +139,7 @@ class PanelMap(wx.Panel):
         # set the train moving range.
         self.left, self.top, self.right, self.btm = 20, 20, 550, 330
         # set the sensor position.
+        self.sensorid = -1
         self.sensorList = [(0, 400, 20), (1, 140, 20), (2, 20, 180),
                            (3, 156, 330), (4, 286, 330), (5, 412, 330)]
         self.toggle = False
@@ -157,23 +162,46 @@ class PanelMap(wx.Panel):
                 point[1] += 10
             elif point[1] == self.btm and point[0] != self.right:
                 point[0] += 10
-            dc.DrawRectangle(point[0]-5, point[1]-5, 15, 15)
+            dc.DrawRectangle(point[0]-7, point[1]-7, 19, 19)
         # High light the sensor which detected the train.
-        penColor = 'BLUE' if self.toggle else 'RED'
+        penColor = 'GREEN' if self.toggle else 'RED'
         dc.SetPen(wx.Pen(penColor, width=4, style=wx.PENSTYLE_LONG_DASH))
+        if self.sensorid >= 0:
+            sensorPos = self.sensorList[self.sensorid]
+            if self.sensorid<2: # top sensors 
+                dc.DrawLine(sensorPos[1]+5, sensorPos[2]+10, sensorPos[1]+5, sensorPos[2]+35)
+            elif 2 < sensorPos[0]: # left sensors
+                dc.DrawLine(sensorPos[1]-5, sensorPos[2]-10, sensorPos[1]-5, sensorPos[2]-35)
+            else:   # buttom sensors.
+                dc.DrawLine(sensorPos[1]+10, sensorPos[2], sensorPos[1]+35, sensorPos[2])
+        self.toggle = not self.toggle
+    
+
+    def checkSensor(self):
+        """ Check which sensor has detected the train pass."""
         head, tail = self.trainPts[0], self.trainPts[-1]
         l, r = min(head[0], tail[0]), max(head[0], tail[0])
         t, b = min(head[1], tail[1]), max(head[1], tail[1])
-        for sensorPos in self.sensorList: 
+        for sensorPos in self.sensorList:
             if  l <= sensorPos[1] <= r and  t<= sensorPos[2] <=b:
-                if sensorPos[0]<2: # top sensors 
-                    dc.DrawLine(sensorPos[1]+5, sensorPos[2]+10, sensorPos[1]+5, sensorPos[2]+40)
-                elif 2 < sensorPos[0]: # left sensors
-                    dc.DrawLine(sensorPos[1]-5, sensorPos[2], sensorPos[1]-5, sensorPos[2]-40)
-                else:   # buttom sensors.
-                    dc.DrawLine(sensorPos[1], sensorPos[2], sensorPos[1]+30, sensorPos[2])
-        self.toggle = not self.toggle
-        
+                return sensorPos[0] # return the sensor index
+        return -1 # return -1 if there is no sensor detected. 
+
+
+    def periodic(self , now):
+        """ periodicly call back to do needed calcualtion/panel update"""
+        # Set the detect sensor status related to PLC status
+        sensorid = self.checkSensor()
+        if self.sensorid != sensorid:
+            [idx, state] =[self.sensorid, 0] if self.sensorid >= 0 and sensorid <= 0 else [sensorid, 1]
+            if gv.iPlcPanelList[0]:
+                gv.iPlcPanelList[0].updateInput(idx, state)
+            self.sensorid = sensorid
+
+        # Update the panel.
+        self.updateDisplay()
+
+
     #-----------------------------------------------------------------------------
     def OnClick(self, event):
         """ Handle the click event."""
@@ -186,5 +214,5 @@ class PanelMap(wx.Panel):
             update the panel, if called as updateDisplay(updateFlag=?) the function will 
             set the self update flag.
         """
-        self.Refresh(True)
+        self.Refresh(False)
         self.Update()

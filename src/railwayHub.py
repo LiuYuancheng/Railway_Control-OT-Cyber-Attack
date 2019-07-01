@@ -37,14 +37,17 @@ class railWayHubFrame(wx.Frame):
         plcBgPanel = wx.Panel(nb)
         hbox  = wx.BoxSizer(wx.HORIZONTAL)
         hbox.AddSpacer(5)
-        plc1Panel = rwp.PanelPLC(plcBgPanel, 'PLC1 [m221]', "127.0.0.1")
+        plc1Panel = rwp.PanelPLC(plcBgPanel, 'PLC1 [m221]', "192.168.0.101")
         hbox.Add(plc1Panel, flag=flagsR, border=2)
+        gv.iPlcPanelList.append(plc1Panel)
         hbox.AddSpacer(5)
-        plc2Panel = rwp.PanelPLC(plcBgPanel, 'PLC2 [m221]', "127.0.0.1")
-        hbox.Add(plc2Panel, flag=flagsR, border=2)        
+        plc2Panel = rwp.PanelPLC(plcBgPanel, 'PLC2 [m221]', "192.168.0.102")
+        hbox.Add(plc2Panel, flag=flagsR, border=2)
+        gv.iPlcPanelList.append(plc2Panel)  
         hbox.AddSpacer(5)
-        plc3Panel = rwp.PanelPLC(plcBgPanel, 'PLC3 [S7-1200]', "127.0.0.1")
+        plc3Panel = rwp.PanelPLC(plcBgPanel, 'PLC3 [S7-1200]', "192.168.0.103")
         hbox.Add(plc3Panel, flag=flagsR, border=2)
+        gv.iPlcPanelList.append(plc3Panel)
         plcBgPanel.SetSizer(hbox)
         nb.AddPage(plcBgPanel, "PLC control")
         # Set the PLC data display panel.
@@ -53,6 +56,7 @@ class railWayHubFrame(wx.Frame):
         
         # Row idx = 1 : set the train map panel
         self.mapPanel = rwp.PanelMap(bgPanel)
+        gv.iMapPanel = self.mapPanel
         vsizer.Add(self.mapPanel, flag=flagsR, border=2)
         bgPanel.SetSizer(vsizer)
 
@@ -64,7 +68,8 @@ class railWayHubFrame(wx.Frame):
     #-----------------------------------------------------------------------------
     def periodic(self, event):
         """ Call back every periodic time."""
-        self.mapPanel.updateDisplay()
+        timeStr = time.time()
+        self.mapPanel.periodic(timeStr)
 
 #-----------------------------------------------------------------------------
 class MyApp(wx.App):
