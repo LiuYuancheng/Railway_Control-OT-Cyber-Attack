@@ -35,15 +35,15 @@ class railWayHubFrame(wx.Frame):
         # Set the PLC contorl panel
         plcBgPanel = wx.Panel(nb, size=(600,250))
         hbox  = wx.BoxSizer(wx.HORIZONTAL)
-        hbox.AddSpacer(5)
+        hbox.AddSpacer(10)
         plc1Panel = rwp.PanelPLC(plcBgPanel, 'PLC1 [m221]', "192.168.0.101")
         hbox.Add(plc1Panel, flag=flagsR, border=2)
         gv.iPlcPanelList.append(plc1Panel)
-        hbox.AddSpacer(5)
+        hbox.AddSpacer(10)
         plc2Panel = rwp.PanelPLC(plcBgPanel, 'PLC2 [m221]', "192.168.0.102")
         hbox.Add(plc2Panel, flag=flagsR, border=2)
         gv.iPlcPanelList.append(plc2Panel)  
-        hbox.AddSpacer(5)
+        hbox.AddSpacer(10)
         plc3Panel = rwp.PanelPLC(plcBgPanel, 'PLC3 [S7-1200]', "192.168.0.103")
         hbox.Add(plc3Panel, flag=flagsR, border=2)
         gv.iPlcPanelList.append(plc3Panel)
@@ -51,7 +51,9 @@ class railWayHubFrame(wx.Frame):
         nb.AddPage(plcBgPanel, "PLC control")
 
         # Set the PLC data display panel.
-        nb.AddPage(wx.Panel(nb), "Data Display")
+        self.dataPanel = rwp.PanelInfoGrid(nb)
+        #nb.AddPage(wx.Panel(nb), "Data Display")
+        nb.AddPage(self.dataPanel, "Data Display")
         vsizer.Add(nb, flag=flagsR, border=2)
         
         # Row idx = 1 : set the train map panel
@@ -82,7 +84,7 @@ class railWayHubFrame(wx.Frame):
 #-----------------------------------------------------------------------------
 class MyApp(wx.App):
     def OnInit(self):
-        mainFrame = railWayHubFrame(None, -1, 'RainWay PLC contorl Hub')
+        mainFrame = railWayHubFrame(None, -1, 'RailWay PLC contorl Hub')
         mainFrame.Show(True)
         return True
 

@@ -27,6 +27,45 @@ class PanelPlaceHolder(wx.Panel):
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         wx.StaticText(self, -1, "Place Holder:", (20, 20))
 
+
+
+class PanelInfoGrid(wx.Panel):
+    """ Mutli-information panel used to show all sensor's detection situation on the 
+        office topview map, sensor connection status and show a Grid to show all the 
+        sensor's detection data.
+    """
+    def __init__(self, parent):
+        """ Init the panel."""
+        wx.Panel.__init__(self, parent)
+        self.SetBackgroundColour(wx.Colour(200, 210, 200))
+
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        for i in range(3):
+            vSizer = wx.BoxSizer(wx.VERTICAL)
+            nameLb = wx.StaticText(self, label="PLC Name: ".ljust(15))
+            vSizer.Add(nameLb, flag=flagsR, border=2)
+            vSizer.AddSpacer(10)
+            vSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1), style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+            vSizer.AddSpacer(10)
+
+            grid = wx.grid.Grid(self, -1)
+            grid.CreateGrid(8, 4)
+            grid.SetRowLabelSize(30)
+            grid.SetColSize(0, 40)
+            grid.SetColSize(1, 40)
+            grid.SetColSize(2, 40)
+            grid.SetColSize(3, 40)
+            # Set the label: 
+            grid.SetColLabelValue(0, 'IN')
+            grid.SetColLabelValue(1, 'Val')
+            grid.SetColLabelValue(2, 'OUT')
+            grid.SetColLabelValue(3, 'Val')
+            vSizer.Add(grid, flag=flagsR, border=2)
+            hsizer.Add(vSizer, flag=flagsR, border=2)
+            hsizer.AddSpacer(5)
+        self.SetSizer(hsizer)
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelPLC(wx.Panel):
@@ -84,6 +123,7 @@ class PanelPLC(wx.Panel):
             mSizer.AddSpacer(3)
         return mSizer
 
+    #-----------------------------------------------------------------------------
     def updateInput(self, idx, status): 
         """ Update the input status for each PLC input indicator."""
         if idx >= 8 or not status in [0,1]: 
@@ -96,6 +136,7 @@ class PanelPLC(wx.Panel):
             self.gpioLbList[idx].SetBackgroundColour(color)
             self.Refresh(False)
 
+    #-----------------------------------------------------------------------------
     def relayOn(self, event): 
         """ Turn on the related ralay based on the user's action and update the 
             button's display situation.
