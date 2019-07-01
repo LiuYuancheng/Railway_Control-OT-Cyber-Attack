@@ -15,7 +15,7 @@ dirpath = os.getcwd()
 print("Current working directory is : %s" %dirpath)
 
 BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg.png"])
-
+WKPNG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
 
 #-----------------------------------------------------------------------------
 # Set the global reference here.

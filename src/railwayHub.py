@@ -28,13 +28,12 @@ class railWayHubFrame(wx.Frame):
         """ Init the UI and parameters """
         wx.Frame.__init__(self, parent, id, title, size=(620, 670))
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
-        bgPanel = wx.Panel(self) # background panel.
-        bgPanel.SetBackgroundColour(wx.Colour(200, 210, 200))
+        self.SetBackgroundColour(wx.Colour(200, 210, 200))
         vsizer = wx.BoxSizer(wx.VERTICAL)
         # Row idx = 0 : Set all hte information and feed in a wx NoteBook
-        nb = wx.Notebook(bgPanel)
+        nb = wx.Notebook(self)
         # Set the PLC contorl panel
-        plcBgPanel = wx.Panel(nb)
+        plcBgPanel = wx.Panel(nb, size=(600,250))
         hbox  = wx.BoxSizer(wx.HORIZONTAL)
         hbox.AddSpacer(5)
         plc1Panel = rwp.PanelPLC(plcBgPanel, 'PLC1 [m221]', "192.168.0.101")
@@ -50,26 +49,35 @@ class railWayHubFrame(wx.Frame):
         gv.iPlcPanelList.append(plc3Panel)
         plcBgPanel.SetSizer(hbox)
         nb.AddPage(plcBgPanel, "PLC control")
+
         # Set the PLC data display panel.
         nb.AddPage(wx.Panel(nb), "Data Display")
         vsizer.Add(nb, flag=flagsR, border=2)
         
         # Row idx = 1 : set the train map panel
-        self.mapPanel = rwp.PanelMap(bgPanel)
+        self.mapPanel = rwp.PanelMap(self)
         gv.iMapPanel = self.mapPanel
         vsizer.Add(self.mapPanel, flag=flagsR, border=2)
-        bgPanel.SetSizer(vsizer)
+        self.SetSizer(vsizer)
 
         self.lastPeriodicTime = time.time() 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.periodic)
         self.timer.Start(PERIODIC)  # every 500 ms
 
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+
     #-----------------------------------------------------------------------------
     def periodic(self, event):
         """ Call back every periodic time."""
         timeStr = time.time()
         self.mapPanel.periodic(timeStr)
+
+    #-----------------------------------------------------------------------------
+    def OnClose(self, event):
+        #self.ser.close()
+        self.Destroy()
+
 
 #-----------------------------------------------------------------------------
 class MyApp(wx.App):

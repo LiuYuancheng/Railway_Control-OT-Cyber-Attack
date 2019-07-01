@@ -18,7 +18,6 @@ import random
 import railwayGlobal as gv 
 
 PERIODIC = 500  # how many ms the periodic call back
-
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelPlaceHolder(wx.Panel):
@@ -35,7 +34,7 @@ class PanelPLC(wx.Panel):
     """
     def __init__(self, parent, name, ipAddr):
         """ Init the panel."""
-        wx.Panel.__init__(self, parent, size=(190, 240))
+        wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
         self.plcName = name
         self.ipAddr = ipAddr
@@ -45,13 +44,13 @@ class PanelPLC(wx.Panel):
         self.gpioOuList = [False]*8 # PLC GPIO output situation list.
         mainUISizer = self.buidUISizer()
         self.SetSizer(mainUISizer)
-        self.Layout()
+        #self.Layout() # must call the layout if the panel size is set to fix.
     
 #-----------------------------------------------------------------------------
     def buidUISizer(self):
         """ Build the UI sizer"""
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         mSizer = wx.BoxSizer(wx.VERTICAL) # main sizer
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         mSizer.AddSpacer(5)
         # Row idx = 0 : set the basic PLC informaiton.
         self.nameLb = wx.StaticText(self, label="PLC Name: ".ljust(15)+self.plcName)
@@ -90,7 +89,6 @@ class PanelPLC(wx.Panel):
         if idx >= 8 or not status in [0,1]: 
             print("PLC panel: the input parameter is not valid") 
             return
-        print((idx, status))
         if self.gpioInList[idx] != status:
             self.gpioInList[idx] = status
             # Change the indicator status.
@@ -130,6 +128,8 @@ class PanelMap(wx.Panel):
         wx.Panel.__init__(self, parent, size=(600, 360))
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.bitmap = wx.Bitmap(gv.BGPNG_PATH)
+        self.wkbitmap = wx.Bitmap(gv.WKPNG_PATH)
+
         self.bitmapSZ = self.bitmap.GetSize()
         self.toggle = True      # Display toggle flag.     
         self.pplNum = 0         # Number of peopel.
@@ -144,6 +144,8 @@ class PanelMap(wx.Panel):
                            (3, 156, 330), (4, 286, 330), (5, 412, 330)]
         self.toggle = False
         self.Bind(wx.EVT_PAINT, self.OnPaint)
+        # gate contorl parameters 
+        self.gateCount = 15
         #self.Bind(wx.EVT_LEFT_DOWN, self.OnClick)
         
     #-----------------------------------------------------------------------------
@@ -174,9 +176,41 @@ class PanelMap(wx.Panel):
                 dc.DrawLine(sensorPos[1]-5, sensorPos[2]-10, sensorPos[1]-5, sensorPos[2]-35)
             else:   # buttom sensors.
                 dc.DrawLine(sensorPos[1]+10, sensorPos[2], sensorPos[1]+35, sensorPos[2])
+        self.DrawGate(dc)
+        if self.toggle and self.gateCount == 15: 
+            dc.DrawBitmap(self.wkbitmap, 250, 7)
+        
+        #self.DrawStation(dc)
         self.toggle = not self.toggle
     
+    #def DrawStation(self, dc):
 
+    #-----------------------------------------------------------------------------
+    def DrawGate(self, dc): 
+        """ Draw the people passing gate."""
+
+        # Draw the bridge
+        if self.gateCount == 15 :
+            dc.SetPen(wx.Pen('BLACK', width=1, style=wx.PENSTYLE_DOT))
+            dc.SetBrush(wx.Brush(wx.Colour('Black')))
+            dc.DrawRectangle(250, 9, 31 ,25)
+
+        penColor = 'GREEN' if self.gateCount == 0 else 'RED'
+        dc.SetPen(wx.Pen(penColor, width=1, style=wx.PENSTYLE_DOT))
+        dc.DrawLine(250, 0, 250, 45)
+        dc.DrawLine(280, 0, 280, 45)
+
+        penColor = 'RED' if self.gateCount == 0 else 'GREEN'
+
+        # Draw the Door 
+        doCount = self.gateCount
+        dc.SetPen(wx.Pen(penColor, width=2, style=wx.PENSTYLE_SOLID))
+        dc.DrawLine(265+doCount, 7, 265+doCount+15, 7)
+        dc.DrawLine(265-doCount, 7, 265-doCount-15, 7)
+        dc.DrawLine(265+doCount, 37, 265+doCount+15, 37)
+        dc.DrawLine(265-doCount, 37, 265-doCount-15, 37)
+
+    #-----------------------------------------------------------------------------
     def checkSensor(self):
         """ Check which sensor has detected the train pass."""
         head, tail = self.trainPts[0], self.trainPts[-1]
@@ -187,7 +221,7 @@ class PanelMap(wx.Panel):
                 return sensorPos[0] # return the sensor index
         return -1 # return -1 if there is no sensor detected. 
 
-
+    #-----------------------------------------------------------------------------
     def periodic(self , now):
         """ periodicly call back to do needed calcualtion/panel update"""
         # Set the detect sensor status related to PLC status
@@ -198,9 +232,16 @@ class PanelMap(wx.Panel):
                 gv.iPlcPanelList[0].updateInput(idx, state)
             self.sensorid = sensorid
 
+
+        elif self.sensorid == 0: 
+            self.gateCount -= 3
+        elif self.sensorid == 1: 
+            self.gateCount += 3
+
+        if self.gateCount < 0: self.gateCount = 0 
+        if  self.gateCount > 15: self.gateCount = 15
         # Update the panel.
         self.updateDisplay()
-
 
     #-----------------------------------------------------------------------------
     def OnClick(self, event):
