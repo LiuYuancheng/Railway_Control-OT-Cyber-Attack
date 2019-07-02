@@ -59,8 +59,6 @@ class railWayHubFrame(wx.Frame):
         nb.AddPage(self.setPanel, "Setting")
 
         vsizer.Add(nb, flag=flagsR, border=2)
-
-
         
         # Row idx = 1 : set the train map panel
         self.mapPanel = rwp.PanelMap(self)
