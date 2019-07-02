@@ -210,6 +210,8 @@ class PanelMap(wx.Panel):
         self.left, self.top, self.right, self.btm = 20, 20, 550, 330
         # set the sensor position.
         # Id of the sensor which detected the train passing.
+        self.dockCount = 0       # flag to identify train in the station. 
+        self.stationRg = (110, 210) # train station range.
         self.sensorid = -1
         self.sensorList = [(0, 400, 20), (1, 140, 20), (2, 20, 180),
                            (3, 156, 330), (4, 286, 330), (5, 412, 330)]
@@ -223,14 +225,15 @@ class PanelMap(wx.Panel):
         # Draw the train on the map.
         dc.SetBrush(wx.Brush('#CE8349'))
         for point in self.trainPts:
-            if point[0] == self.right and point[1] != self.top:
-                point[1] -= 10
-            elif point[1] == self.top and point[0] != self.left:
-                point[0] -= 10
-            elif point[0] == self.left and point[1] != self.btm:
-                point[1] += 10
-            elif point[1] == self.btm and point[0] != self.right:
-                point[0] += 10
+            if self.dockCount == 0:
+                if point[0] == self.right and point[1] != self.top:
+                    point[1] -= 10
+                elif point[1] == self.top and point[0] != self.left:
+                    point[0] -= 10
+                elif point[0] == self.left and point[1] != self.btm:
+                    point[1] += 10
+                elif point[1] == self.btm and point[0] != self.right:
+                    point[0] += 10
             dc.DrawRectangle(point[0]-7, point[1]-7, 19, 19)
         # High light the sensor which detected the train.
         penColor = 'GREEN' if self.toggle else 'RED'
@@ -244,6 +247,7 @@ class PanelMap(wx.Panel):
             else:   # left sensors.
                 dc.DrawLine(sensorPos[1]+10, sensorPos[2], sensorPos[1]+35, sensorPos[2])
         self.DrawGate(dc)
+        self.DrawStation(dc)
         # Update the display flash toggle flag. 
         self.toggle = not self.toggle
     
@@ -269,6 +273,21 @@ class PanelMap(wx.Panel):
         # Draw the pedestrians signal.
         if self.toggle and self.gateCount == 15:
             dc.DrawBitmap(self.wkbitmap, 250, 7)
+    
+    #-----------------------------------------------------------------------------
+    def DrawStation(self, dc):
+        """ Draw the station part"""
+        dc.SetPen(wx.Pen('BLACK', width=1, style=wx.PENSTYLE_DOT))
+        dc.SetBrush(wx.Brush(wx.Colour('Black')))
+        if self.dockCount == 0:    
+            dc.DrawRectangle(568, 110, 30, 30)
+            dc.DrawRectangle(568, 180, 30, 30)
+        else:
+            y = 110 if self.toggle else 180
+            dc.DrawRectangle(568, y, 30, 30)
+            dc.SetPen(wx.Pen('#FFC000', width=1, style=wx.PENSTYLE_SOLID))
+            dc.SetBrush(wx.Brush(wx.Colour('#FFC000')))
+            dc.DrawRectangle(536, 116, 29, 90)
 
     #-----------------------------------------------------------------------------
     def checkSensor(self):
@@ -280,6 +299,11 @@ class PanelMap(wx.Panel):
             if  l <= sensorPos[1] <= r and  t<= sensorPos[2] <=b:
                 return sensorPos[0] # return the sensor index
         return -1 # return -1 if there is no sensor detected. 
+
+    #-----------------------------------------------------------------------------
+    def getTrainPos(self):
+        """ return the current train position."""
+        return self.trainPts
 
     #-----------------------------------------------------------------------------
     def periodic(self , now):
@@ -297,6 +321,13 @@ class PanelMap(wx.Panel):
             self.gateCount += 3
         # make the count in side the range. 
         self.gateCount = min(15, max(0, self.gateCount))
+        # Check whether train in side the station.
+        head = self.trainPts[0]
+
+        if head[0] == self.right and head[1] == self.stationRg[0] and self.dockCount == 0: 
+            print("Train has got to the station.wait for 10s for people get in.")
+            self.dockCount = 20
+        if self.dockCount > 0: self.dockCount-=1
         # Update the panel.
         self.updateDisplay()
 
