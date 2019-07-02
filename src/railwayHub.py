@@ -49,10 +49,8 @@ class railWayHubFrame(wx.Frame):
         gv.iPlcPanelList.append(plc3Panel)
         plcBgPanel.SetSizer(hbox)
         nb.AddPage(plcBgPanel, "PLC control")
-
         # Set the PLC data display panel.
         self.dataPanel = rwp.PanelInfoGrid(nb)
-        #nb.AddPage(wx.Panel(nb), "Data Display")
         nb.AddPage(self.dataPanel, "Data Display")
 
         self.setPanel = rwp.PanelPlaceHolder(nb)
@@ -65,7 +63,6 @@ class railWayHubFrame(wx.Frame):
         gv.iMapPanel = self.mapPanel
         vsizer.Add(self.mapPanel, flag=flagsR, border=2)
         self.SetSizer(vsizer)
-
 
         self.lastPeriodicTime = time.time() 
         self.timer = wx.Timer(self)
