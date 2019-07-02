@@ -36,15 +36,15 @@ class railWayHubFrame(wx.Frame):
         plcBgPanel = wx.Panel(nb, size=(600,250))
         hbox  = wx.BoxSizer(wx.HORIZONTAL)
         hbox.AddSpacer(10)
-        plc1Panel = rwp.PanelPLC(plcBgPanel, 'PLC1 [m221]', "192.168.0.101")
+        plc1Panel = rwp.PanelPLC(plcBgPanel, 'PLC0 [m221]', "192.168.0.101")
         hbox.Add(plc1Panel, flag=flagsR, border=2)
         gv.iPlcPanelList.append(plc1Panel)
         hbox.AddSpacer(10)
-        plc2Panel = rwp.PanelPLC(plcBgPanel, 'PLC2 [m221]', "192.168.0.102")
+        plc2Panel = rwp.PanelPLC(plcBgPanel, 'PLC1 [m221]', "192.168.0.102")
         hbox.Add(plc2Panel, flag=flagsR, border=2)
         gv.iPlcPanelList.append(plc2Panel)  
         hbox.AddSpacer(10)
-        plc3Panel = rwp.PanelPLC(plcBgPanel, 'PLC3 [S7-1200]', "192.168.0.103")
+        plc3Panel = rwp.PanelPLC(plcBgPanel, 'PLC2 [S7-1200]', "192.168.0.103")
         hbox.Add(plc3Panel, flag=flagsR, border=2)
         gv.iPlcPanelList.append(plc3Panel)
         plcBgPanel.SetSizer(hbox)
@@ -54,13 +54,20 @@ class railWayHubFrame(wx.Frame):
         self.dataPanel = rwp.PanelInfoGrid(nb)
         #nb.AddPage(wx.Panel(nb), "Data Display")
         nb.AddPage(self.dataPanel, "Data Display")
+
+        self.setPanel = rwp.PanelPlaceHolder(nb)
+        nb.AddPage(self.setPanel, "Setting")
+
         vsizer.Add(nb, flag=flagsR, border=2)
+
+
         
         # Row idx = 1 : set the train map panel
         self.mapPanel = rwp.PanelMap(self)
         gv.iMapPanel = self.mapPanel
         vsizer.Add(self.mapPanel, flag=flagsR, border=2)
         self.SetSizer(vsizer)
+
 
         self.lastPeriodicTime = time.time() 
         self.timer = wx.Timer(self)

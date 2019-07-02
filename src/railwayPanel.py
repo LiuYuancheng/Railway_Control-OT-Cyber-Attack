@@ -27,8 +27,8 @@ class PanelPlaceHolder(wx.Panel):
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         wx.StaticText(self, -1, "Place Holder:", (20, 20))
 
-
-
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 class PanelInfoGrid(wx.Panel):
     """ Mutli-information panel used to show all sensor's detection situation on the 
         office topview map, sensor connection status and show a Grid to show all the 
@@ -38,20 +38,33 @@ class PanelInfoGrid(wx.Panel):
         """ Init the panel."""
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
+        self.nameLbList = []    # PLC name/type list 
+        self.gpioLbList = []    # PLC GPIO display list
+        self.gridList = []      # PLC data display grid list 
+        hsizer = self.buidUISizer()
+        self.preSetData()
+        self.SetSizer(hsizer)
 
+#-----------------------------------------------------------------------------
+    def buidUISizer(self):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         for i in range(3):
             vSizer = wx.BoxSizer(wx.VERTICAL)
             nameLb = wx.StaticText(self, label="PLC Name: ".ljust(15))
+            self.nameLbList.append(nameLb)
             vSizer.Add(nameLb, flag=flagsR, border=2)
+            vSizer.AddSpacer(10)
+            gpioLbN = wx.StaticText(self, label="PLC I/O usage: ".ljust(15))
+            vSizer.Add(gpioLbN, flag=flagsR, border=2)
+            self.gpioLbList.append(gpioLbN)
             vSizer.AddSpacer(10)
             vSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1), style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
             vSizer.AddSpacer(10)
-
             grid = wx.grid.Grid(self, -1)
             grid.CreateGrid(8, 4)
             grid.SetRowLabelSize(30)
+            grid.SetColLabelSize(22)
             grid.SetColSize(0, 40)
             grid.SetColSize(1, 40)
             grid.SetColSize(2, 40)
@@ -62,9 +75,29 @@ class PanelInfoGrid(wx.Panel):
             grid.SetColLabelValue(2, 'OUT')
             grid.SetColLabelValue(3, 'Val')
             vSizer.Add(grid, flag=flagsR, border=2)
+            self.gridList.append(grid)
             hsizer.Add(vSizer, flag=flagsR, border=2)
             hsizer.AddSpacer(5)
-        self.SetSizer(hsizer)
+        return hsizer
+#-----------------------------------------------------------------------------
+    def preSetData(self):
+        """ Pre-set the grid data. """
+        for i in range(3):
+            dataTuple = gv.PLC_CFG['PLC'+str(i)]
+            self.setName(i, 'PLC'+str(i)+ dataTuple[0])
+            self.setIOLB(i, dataTuple[3], dataTuple[4])
+            for j in range(8):
+                self.gridList[i].SetCellValue(j, 0, '%I0.'+str(j))
+                self.gridList[i].SetCellValue(j, 1, '0')
+                self.gridList[i].SetCellValue(j, 2, '%Q0.'+str(j))
+                self.gridList[i].SetCellValue(j, 3, '0')
+
+    def setName(self, idx , name):
+        self.nameLbList[idx].SetLabel("PLC Name:".ljust(15)+str(name))
+
+    def setIOLB(self, idx, inputN, outputN):
+        lbStr = "PLC I/O usage:  [ " +str(inputN)+'/'+str(outputN)+' ]'
+        self.gpioLbList[idx].SetLabel(lbStr)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -272,9 +305,8 @@ class PanelMap(wx.Panel):
             if gv.iPlcPanelList[0]:
                 gv.iPlcPanelList[0].updateInput(idx, state)
             self.sensorid = sensorid
-
-
-        elif self.sensorid == 0: 
+        # Start to close the gate.
+        if self.sensorid == 0: 
             self.gateCount -= 3
         elif self.sensorid == 1: 
             self.gateCount += 3

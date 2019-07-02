@@ -17,6 +17,13 @@ print("Current working directory is : %s" %dirpath)
 BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg.png"])
 WKPNG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
 
+# PLC basic config: (type, IP address, port, input_#, output_#)
+PLC_CFG = {
+    'PLC0'  : ('[m221]', "192.168.0.101", '4343', 8, 8), 
+    'PLC1'  : ('[m221]', "192.168.0.102", '4343', 8, 8), 
+    'PLC2'  : ('[S7-1200]', "192.168.0.103", '4343', 8, 8)
+}
+
 #-----------------------------------------------------------------------------
 # Set the global reference here.
 iPlcPanelList = []  # Plc panel list. 
