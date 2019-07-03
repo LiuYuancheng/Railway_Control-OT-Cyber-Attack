@@ -12,6 +12,7 @@
 #-----------------------------------------------------------------------------
 import railwayGlobal as gv 
 
+#-----------------------------------------------------------------------------
 class AgentPLC(object):
     """ Object hook to control the PLC."""
     def __init__(self, parent, idx, name, ipAddr, port):
@@ -19,8 +20,31 @@ class AgentPLC(object):
         self.idx = idx
         self.plcName = name
         self.ipAddr = ipAddr
-        self.port = port 
+        self.port = port
+        self.SensorCount = 0 # current free index can be hook a sensor.
+        self.sensorIDList = [-1]*6 # list to 
+        self.inputStates = [0]*8
+        self.outputStates = [0]*8
+    
+    #-----------------------------------------------------------------------------
+    def hookSensor(self, sensorID, ioInPos):
+        """ Hook sensor to the PLC. """
+        if self.SensorCount > 8 or ioInPos > 7: 
+            print("AgentPLC:    All the GPIO input has been hooked to sensor." ) 
+            return
+        if ioInPos < 0:
+            ioInPos = self.SensorCount 
+        self.sensorIDList[ioInPos] = sensorID
+        self.SensorCount+=1
 
+    #-----------------------------------------------------------------------------
+    def updateInput(self, sensorID, state):
+        """ Update the sensor input state."""
+        try:
+            idx = self.sensorIDList.index(sensorID)
+            self.inputStates[idx] = state
+        except:
+            print("AgentPLC:    The sensor with %s is not hooked to this PLC" %str(sensorID))
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

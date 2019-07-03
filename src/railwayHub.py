@@ -57,7 +57,6 @@ class railWayHubFrame(wx.Frame):
         nb.AddPage(self.setPanel, "Setting")
 
         vsizer.Add(nb, flag=flagsR, border=2)
-        
         # Row idx = 1 : set the train map panel
         self.mapPanel = rwp.PanelMap(self)
         gv.iMapPanel = self.mapPanel
@@ -81,7 +80,6 @@ class railWayHubFrame(wx.Frame):
     def OnClose(self, event):
         #self.ser.close()
         self.Destroy()
-
 
 #-----------------------------------------------------------------------------
 class MyApp(wx.App):

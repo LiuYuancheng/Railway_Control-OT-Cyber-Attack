@@ -154,7 +154,7 @@ class PanelPLC(wx.Panel):
             hsizer.Add(wx.StaticText(self, label=str("%Q0."+str(i)+':').center(10)), flag=flagsR, border=2)
             # Col idx =2: OLC output ON/OFF contorl buttons.
             hsizer.AddSpacer(5)
-            outputBt = wx.Button(self, label='OFF', size=(50, 17), name=str(i))
+            outputBt = wx.Button(self, label='OFF', size=(50, 17), name=self.plcName+':'+str(i))
             outputBt.Bind(wx.EVT_BUTTON, self.relayOn)
             hsizer.Add(outputBt, flag=flagsR, border=2)
             mSizer.Add(hsizer, flag=flagsR, border=2)
@@ -181,7 +181,7 @@ class PanelPLC(wx.Panel):
         """
         obj = event.GetEventObject()
         print("PLC panel:   Button idx %s" % str(obj.GetName()))
-        idx = int(obj.GetName())
+        idx = int(obj.GetName().split(':')[-1])
         self.gpioOuList[idx] = not self.gpioOuList[idx]
         [lbtext, color] = ['ON', wx.Colour('Green')] if self.gpioOuList[idx] else [
             'OFF', wx.Colour(200, 200, 200)]
@@ -215,12 +215,23 @@ class PanelMap(wx.Panel):
         self.sensorList = []
         # Add the rail way sensors.
         sensorList = [(405, 20, 0), (145, 20, 0), (20, 180, 1),
-                    (156, 330,2), (286, 330,2), (412, 330,2)]
+                      (156, 330, 2), (286, 330, 2), (412, 330, 2)]
         for item in sensorList:
-            sensor = agent.AgentSensor(self, -1,(item[:2]),item[-1])
+            sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
             self.sensorList.append(sensor)
         # Add the station sensors.
+        stSensorList = [(550, 100, 3), (550, 230, 3)]
 
+        for item in stSensorList:
+            sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
+            self.sensorList.append(sensor)
+
+
+        conerSenList = [(550, 20, 3), (20, 20, 0), (20, 330, 1), (550, 330, 2)]
+
+        for item in conerSenList:
+            sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
+            self.sensorList.append(sensor)
 
         self.Bind(wx.EVT_PAINT, self.OnPaint)
 
@@ -232,19 +243,9 @@ class PanelMap(wx.Panel):
         # Draw the train on the map.
         dc.SetBrush(wx.Brush('#CE8349'))
         for point in self.trainPts:
-            if self.dockCount == 0:
-                if point[0] == self.right and point[1] != self.top:
-                    point[1] -= 10
-                elif point[1] == self.top and point[0] != self.left:
-                    point[0] -= 10
-                elif point[0] == self.left and point[1] != self.btm:
-                    point[1] += 10
-                elif point[1] == self.btm and point[0] != self.right:
-                    point[0] += 10
             dc.DrawRectangle(point[0]-7, point[1]-7, 19, 19)
         # High light the sensor which detected the train.
         penColor = 'GREEN' if self.toggle else 'RED'
-        
         dc.SetBrush(wx.Brush(penColor))
         if self.sensorid >= 0:
             sensor = self.sensorList[self.sensorid]
@@ -293,6 +294,10 @@ class PanelMap(wx.Panel):
             dc.SetPen(wx.Pen('#FFC000', width=1, style=wx.PENSTYLE_SOLID))
             dc.SetBrush(wx.Brush(wx.Colour('#FFC000')))
             dc.DrawRectangle(536, 116, 29, 90)
+            points = [(530, 114), (565, 114), (565, 208), (530, 208), (530, 114)]
+            dc.SetPen(wx.Pen('Green', width=4, style=wx.PENSTYLE_SOLID))
+            for i in range(len(points)-1):
+                dc.DrawLine(points[i], points[i+1])
 
     #-----------------------------------------------------------------------------
     def checkSensor(self):
@@ -303,7 +308,7 @@ class PanelMap(wx.Panel):
 
         for sensor in self.sensorList:
             sensorPos = sensor.pos
-            if  l <= sensorPos[0] <= r and  t<= sensorPos[1] <=b:
+            if  l <= sensorPos[0] <= r and t<= sensorPos[1] <=b:
                 sensor.setSensorState(1)
                 return sensor.sensorID # return the sensor index
         return -1 # return -1 if there is no sensor detected. 
@@ -317,12 +322,16 @@ class PanelMap(wx.Panel):
     def periodic(self , now):
         """ periodicly call back to do needed calcualtion/panel update"""
         # Set the detect sensor status related to PLC status
+        self.updateTrainPos()
         sensorid = self.checkSensor()
         if self.sensorid != sensorid:
             [idx, state] =[self.sensorid, 0] if self.sensorid >= 0 and sensorid <= 0 else [sensorid, 1]
-            if gv.iPlcPanelList[0]: gv.iPlcPanelList[0].updateInput(idx, state)
+            # get related plc Idx 
+            plcidx = idx//8 
+            if gv.iPlcPanelList[plcidx]: gv.iPlcPanelList[plcidx].updateInput(plcidx%8, state)
+
             if self.sensorid > 0:
-                self.sensorList[self.sensorid ].setSensorState(0)
+                self.sensorList[self.sensorid].setSensorState(0)
             self.sensorid = sensorid
         # Start to close the gate.
         if self.sensorid == 0: 
@@ -346,7 +355,20 @@ class PanelMap(wx.Panel):
         """ Handle the click on the map event."""
         x, y = event.GetPosition()
         pass
-
+    
+    def updateTrainPos(self):
+        """ update the train position."""
+        if self.dockCount != 0: return
+        for point in self.trainPts: 
+            if point[0] == self.right and point[1] != self.top:
+                point[1] -= 10
+            elif point[1] == self.top and point[0] != self.left:
+                point[0] -= 10
+            elif point[0] == self.left and point[1] != self.btm:
+                point[1] += 10
+            elif point[1] == self.btm and point[0] != self.right:
+                point[0] += 10
+        
     #-----------------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):
         """ Set/Update the display: if called as updateDisplay() the function will 
