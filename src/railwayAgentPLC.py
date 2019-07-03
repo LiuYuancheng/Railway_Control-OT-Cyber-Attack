@@ -1,7 +1,8 @@
 #-----------------------------------------------------------------------------
-# Name:        railwayAgent.py
+# Name:        railwayAgentPLC.py
 #
-# Purpose:     This module is the agent module to communicate to PLC 
+# Purpose:     This module is the agent module to communicate to PLC or make 
+#              communication to the sensor.
 #              
 # Author:      Yuancheng Liu
 #
@@ -9,3 +10,45 @@
 # Copyright:   YC
 # License:     YC
 #-----------------------------------------------------------------------------
+import railwayGlobal as gv 
+
+class AgentPLC(object):
+    """ Object hook to control the PLC."""
+    def __init__(self, parent, idx, name, ipAddr, port):
+        self.parent = parent
+        self.idx = idx
+        self.plcName = name
+        self.ipAddr = ipAddr
+        self.port = port 
+
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class AgentSensor(object):
+    """ Object hook to control the sensor."""
+    def __init__(self, parent, idx, pos, lineIdx, plc=None):
+        self.parent = parent
+        # sensor unique ID -1 for auto set.
+        self.sensorID = gv.iSensorCount if idx < gv.iSensorCount else idx 
+        gv.iSensorCount += 1 
+        self.pos = pos
+        self.lineIdx = lineIdx
+        self.plc = plc # The PLC sensor hooked to. 
+        self.actFlag = 0 # sensor active flag.
+
+    #-----------------------------------------------------------------------------
+    def setSensorState(self, flag):
+        """ Set sensor status, flag(int) 0-OFF 1~9 ON"""
+        if flag != self.actFlag: 
+            self.actFlag = flag
+            self.feedBackPLC()
+
+    #-----------------------------------------------------------------------------
+    def getSensorState(self):
+        return self.actFlag
+
+    #-----------------------------------------------------------------------------
+    def feedBackPLC(self):
+        if not self.plc is None: 
+            self.plc.updateInput(self.sensorID, self.actFlag)
+

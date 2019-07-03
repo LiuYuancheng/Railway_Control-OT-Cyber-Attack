@@ -16,8 +16,7 @@ import wx.grid
 import time
 import random
 import railwayGlobal as gv 
-
-PERIODIC = 500  # how many ms the periodic call back
+import railwayAgentPLC as agent
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -213,10 +212,18 @@ class PanelMap(wx.Panel):
         self.dockCount = 0       # flag to identify train in the station. 
         self.stationRg = (110, 210) # train station range.
         self.sensorid = -1
-        self.sensorList = [(0, 400, 20), (1, 140, 20), (2, 20, 180),
-                           (3, 156, 330), (4, 286, 330), (5, 412, 330)]
+        self.sensorList = []
+        # Add the rail way sensors.
+        sensorList = [(405, 20, 0), (145, 20, 0), (20, 180, 1),
+                    (156, 330,2), (286, 330,2), (412, 330,2)]
+        for item in sensorList:
+            sensor = agent.AgentSensor(self, -1,(item[:2]),item[-1])
+            self.sensorList.append(sensor)
+        # Add the station sensors.
+
+
         self.Bind(wx.EVT_PAINT, self.OnPaint)
-                
+
     #-----------------------------------------------------------------------------
     def OnPaint(self, event):
         """ Draw the whole panel. """
@@ -237,15 +244,13 @@ class PanelMap(wx.Panel):
             dc.DrawRectangle(point[0]-7, point[1]-7, 19, 19)
         # High light the sensor which detected the train.
         penColor = 'GREEN' if self.toggle else 'RED'
-        dc.SetPen(wx.Pen(penColor, width=4, style=wx.PENSTYLE_LONG_DASH))
+        
+        dc.SetBrush(wx.Brush(penColor))
         if self.sensorid >= 0:
-            sensorPos = self.sensorList[self.sensorid]
-            if self.sensorid<2: # top sensors 
-                dc.DrawLine(sensorPos[1]+5, sensorPos[2]+10, sensorPos[1]+5, sensorPos[2]+35)
-            elif 2 < sensorPos[0]: # buttom sensors
-                dc.DrawLine(sensorPos[1]-5, sensorPos[2]-10, sensorPos[1]-5, sensorPos[2]-35)
-            else:   # left sensors.
-                dc.DrawLine(sensorPos[1]+10, sensorPos[2], sensorPos[1]+35, sensorPos[2])
+            sensor = self.sensorList[self.sensorid]
+            sensorPos = sensor.pos
+            dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
+        
         self.DrawGate(dc)
         self.DrawStation(dc)
         # Update the display flash toggle flag. 
@@ -295,9 +300,12 @@ class PanelMap(wx.Panel):
         head, tail = self.trainPts[0], self.trainPts[-1]
         l, r = min(head[0], tail[0]), max(head[0], tail[0])
         t, b = min(head[1], tail[1]), max(head[1], tail[1])
-        for sensorPos in self.sensorList:
-            if  l <= sensorPos[1] <= r and  t<= sensorPos[2] <=b:
-                return sensorPos[0] # return the sensor index
+
+        for sensor in self.sensorList:
+            sensorPos = sensor.pos
+            if  l <= sensorPos[0] <= r and  t<= sensorPos[1] <=b:
+                sensor.setSensorState(1)
+                return sensor.sensorID # return the sensor index
         return -1 # return -1 if there is no sensor detected. 
 
     #-----------------------------------------------------------------------------
@@ -313,6 +321,8 @@ class PanelMap(wx.Panel):
         if self.sensorid != sensorid:
             [idx, state] =[self.sensorid, 0] if self.sensorid >= 0 and sensorid <= 0 else [sensorid, 1]
             if gv.iPlcPanelList[0]: gv.iPlcPanelList[0].updateInput(idx, state)
+            if self.sensorid > 0:
+                self.sensorList[self.sensorid ].setSensorState(0)
             self.sensorid = sensorid
         # Start to close the gate.
         if self.sensorid == 0: 

@@ -28,5 +28,8 @@ PLC_CFG = {
 
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
 # Set the global reference here.
+
 iPlcPanelList = []  # Plc panel list. 
 iMapPanel = None    # History chart panel
+iMainFrame = None   # Main frame. 
+iSensorCount = 0    # number of sensors. 
