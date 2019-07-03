@@ -17,7 +17,9 @@ print("Current working directory is : %s" %dirpath)
 
 #------<CONSTANTS>-------------------------------------------------------------
 BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg.png"])
-WKPNG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
+WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
+LTPNG_PATH = "".join([dirpath, "\\img\\left.png"])
+
 
 # PLC basic config: (type, IP address, port, input_#, output_#)
 PLC_CFG = {

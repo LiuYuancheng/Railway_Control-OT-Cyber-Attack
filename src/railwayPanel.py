@@ -197,7 +197,8 @@ class PanelMap(wx.Panel):
         wx.Panel.__init__(self, parent, size=(600, 360))
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.bitmap = wx.Bitmap(gv.BGPNG_PATH)      # background bitmap
-        self.wkbitmap = wx.Bitmap(gv.WKPNG_PATH)    # pedestrians wald bitmap.
+        self.wkbitmap = wx.Bitmap(gv.WKJPG_PATH)    # pedestrians wald bitmap.
+        #self.leftTimge = wx.Image(png)
         self.toggle = False     # Display flash toggle flag.
         # gate contorl parameters.(The 0-total close, 15-total open)
         self.gateCount = 15
@@ -213,6 +214,13 @@ class PanelMap(wx.Panel):
         self.stationRg = (110, 210) # train station range.
         self.sensorid = -1
         self.sensorList = []
+        self.addSensors()
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+
+    #-----------------------------------------------------------------------------
+    def addSensors(self):
+        """ added the train detection sensors in the sensor List 
+        """
         # Add the rail way sensors.
         sensorList = [(405, 20, 0), (145, 20, 0), (20, 180, 1),
                       (156, 330, 2), (286, 330, 2), (412, 330, 2)]
@@ -221,19 +229,14 @@ class PanelMap(wx.Panel):
             self.sensorList.append(sensor)
         # Add the station sensors.
         stSensorList = [(550, 100, 3), (550, 230, 3)]
-
         for item in stSensorList:
             sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
             self.sensorList.append(sensor)
-
-
+        # Add the train turn sensors.
         conerSenList = [(550, 20, 3), (20, 20, 0), (20, 330, 1), (550, 330, 2)]
-
         for item in conerSenList:
             sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
             self.sensorList.append(sensor)
-
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
 
     #-----------------------------------------------------------------------------
     def OnPaint(self, event):
