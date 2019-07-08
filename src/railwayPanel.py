@@ -205,7 +205,7 @@ class PanelMap(wx.Panel):
         # Set the tain head and body position.
         headPos = [550, 160]  # train station start point(train head)
         self.trainPts = [headPos] + \
-            [[headPos[0], headPos[1] + 20*(i+1)] for i in range(5)]
+            [[headPos[0], headPos[1] + 20*(i+1)] for i in range(4)]
         # set the train moving range.
         self.left, self.top, self.right, self.btm = 20, 20, 550, 330
         # set the sensor position.
@@ -228,7 +228,7 @@ class PanelMap(wx.Panel):
             sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
             self.sensorList.append(sensor)
         # Add the station sensors.
-        stSensorList = [(550, 100, 3), (550, 230, 3)]
+        stSensorList = [(550, 130, 3)]
         for item in stSensorList:
             sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
             self.sensorList.append(sensor)
@@ -331,7 +331,7 @@ class PanelMap(wx.Panel):
             [idx, state] =[self.sensorid, 0] if self.sensorid >= 0 and sensorid <= 0 else [sensorid, 1]
             # get related plc Idx 
             plcidx = idx//8 
-            if gv.iPlcPanelList[plcidx]: gv.iPlcPanelList[plcidx].updateInput(plcidx%8, state)
+            if gv.iPlcPanelList[plcidx]: gv.iPlcPanelList[plcidx].updateInput(idx%8, state)
 
             if self.sensorid > 0:
                 self.sensorList[self.sensorid].setSensorState(0)
