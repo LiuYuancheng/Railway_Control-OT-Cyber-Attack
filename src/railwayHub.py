@@ -53,7 +53,7 @@ class railWayHubFrame(wx.Frame):
         self.dataPanel = rwp.PanelInfoGrid(nb)
         nb.AddPage(self.dataPanel, "Data Display")
 
-        self.setPanel = rwp.PanelPlaceHolder(nb)
+        self.setPanel = rwp.PanelTrainCtrl(nb)
         nb.AddPage(self.setPanel, "Setting")
 
         vsizer.Add(nb, flag=flagsR, border=2)

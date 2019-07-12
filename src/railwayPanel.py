@@ -302,6 +302,9 @@ class PanelMap(wx.Panel):
             for i in range(len(points)-1):
                 dc.DrawLine(points[i], points[i+1])
 
+            dc.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+            dc.DrawText( str(self.dockCount//2).zfill(2)+"S", 535, 130)
+
     #-----------------------------------------------------------------------------
     def checkSensor(self):
         """ Check which sensor has detected the train pass."""
@@ -380,3 +383,110 @@ class PanelMap(wx.Panel):
         """
         self.Refresh(False)
         self.Update()
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class PanelTrainCtrl(wx.Panel):
+    """ Train contorl panel"""
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent, size=(200, 240))
+        self.SetBackgroundColour(wx.Colour(200, 200, 200))
+        
+        self.statDict = {
+            '0': ('Running',    'GREEN'),
+            '1': ('ShowDown',   'YELLOW'),
+            '2': ('Accelerate', '03AC15'),
+            '3': ('Turning',    '93CB8B'),
+            '4': ('Waiting',    'ORANGE'),
+            '5': ('Stopped',    'Red')
+        }
+        hsizer = self.buidUISizer()
+        self.SetSizer(hsizer)
+    
+    def buidUISizer(self):
+        pass 
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        vsizer = wx.BoxSizer(wx.VERTICAL)
+        vsizer.Add(wx.StaticText(self, label="Train Control"), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
+                                     style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        # Row idx = 0: train state control.
+        hbox0 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox0.Add(wx.StaticText(self, label="Train status:"), flag=flagsR, border=2)
+        hbox0.AddSpacer(5)
+        self.statLb = wx.StaticText(self, label="run".center(16))
+        #self.statLb.SetBackgroundColour(wx.Colour('GREEN'))
+        self.setState(0)
+
+        hbox0.Add(self.statLb, flag=flagsR, border=2)
+        vsizer.Add(hbox0, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        # Row idx = 1: Train speed contorl
+        
+        vsizer.Add(wx.StaticText(self, label="Train Speed:"), flag=flagsR, border=2)
+        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+        self.speedDisplay = wx.Gauge(self, range = 20, size = (100, 25), style =  wx.GA_HORIZONTAL)
+        hbox1.Add(self.speedDisplay, flag=flagsR, border=2)
+        hbox1.AddSpacer(5)
+        self.speedLb = wx.StaticText(self, label="[ 80km/h ]")
+        hbox1.Add(self.speedLb, flag=flagsR, border=2)
+        vsizer.Add(hbox1, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+
+
+        vsizer.AddSpacer(5)
+        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
+                                     style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+
+        # Row idx = 2: Train direction contorl
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox2.Add(wx.StaticText(self, label="Direction :"), flag=flagsR, border=2)
+        
+        self.dirCtrl = wx.ComboBox(self, -1, choices=['anticlockwise', 'clockwise'], style=wx.CB_READONLY)
+        self.dirCtrl.SetSelection(0)
+        hbox2.Add(self.dirCtrl, flag=flagsR, border=2)
+        vsizer.Add(hbox2, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+
+        # Row idx =3 : Train speed control
+        hbox3 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox3.Add(wx.StaticText(self, label="Speed Ctrl [*10km]"), flag=flagsR, border=2)
+        self.speedCtrl = wx.SpinCtrl(self, -1, '8', size = (50, -1), min=1, max=10) 
+        hbox3.Add(self.speedCtrl, flag=flagsR, border=2)
+        hbox3.AddSpacer(5)
+        vsizer.Add(hbox3, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        #self.speedDisplay.SetValue(8)
+        
+        
+        # Row idx = 4: Station wait time contorl
+        hbox4 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox4.Add(wx.StaticText(self, label="Station waitT [sec]:"), flag=flagsR, border=2)
+        self.wTimeCtrl = wx.SpinCtrl(self, -1, '10', size = (50, -1), min=1, max=20)
+        hbox4.Add(self.wTimeCtrl, flag=flagsR, border=2)
+        vsizer.Add(hbox4, flag=flagsR, border=2)
+
+
+        # Row idx = 5: Station wait time contorl
+        hbox5 = wx.BoxSizer(wx.HORIZONTAL)
+        bmp = wx.Bitmap(gv.EMGST_PATH, wx.BITMAP_TYPE_ANY)
+        self.stopbtn1 = wx.BitmapButton(self, id = wx.ID_ANY, bitmap = bmp,
+         size = (bmp.GetWidth()+10, bmp.GetHeight()+10)) 
+        hbox5.Add(self.stopbtn1, flag=flagsR, border=2)
+        hbox5.AddSpacer(10)
+        bmp1 = wx.Bitmap(gv.RECOV_PATH, wx.BITMAP_TYPE_ANY)
+        self.recbtn1 = wx.BitmapButton(self, id = wx.ID_ANY, bitmap = bmp1,
+         size = (bmp1.GetWidth()+10, bmp1.GetHeight()+10)) 
+        hbox5.Add(self.recbtn1, flag=flagsR, border=2)
+        vsizer.Add(hbox5, flag=flagsR, border=2)
+        return vsizer
+
+    def setState(self, idx): 
+        """ Set the train running state. """
+        state = self.statDict[str(idx)]
+        self.statLb.SetLabel(str(state[0]).center(16))
+        self.statLb.SetBackgroundColour(wx.Colour(state[1]))
+        self.statLb.Refresh()
