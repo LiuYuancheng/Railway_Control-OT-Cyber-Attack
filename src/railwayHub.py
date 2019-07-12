@@ -53,8 +53,23 @@ class railWayHubFrame(wx.Frame):
         self.dataPanel = rwp.PanelInfoGrid(nb)
         nb.AddPage(self.dataPanel, "Data Display")
 
-        self.setPanel = rwp.PanelTrainCtrl(nb)
-        nb.AddPage(self.setPanel, "Setting")
+        hbox2  = wx.BoxSizer(wx.HORIZONTAL)
+        setBgPanel = wx.Panel(nb)
+        
+        gv.iTrainPanel = self.setPanel = rwp.PanelTrainCtrl(setBgPanel)
+        hbox2.Add(self.setPanel, flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
+
+        self.simuPanel = rwp.PanelSimuCtrl(setBgPanel)
+        hbox2.Add(self.simuPanel, flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
+        setBgPanel.SetSizer(hbox2)
+
+
+
+
+
+        nb.AddPage(setBgPanel, "Setting")
 
         vsizer.Add(nb, flag=flagsR, border=2)
         # Row idx = 1 : set the train map panel
@@ -73,6 +88,7 @@ class railWayHubFrame(wx.Frame):
     #-----------------------------------------------------------------------------
     def periodic(self, event):
         """ Call back every periodic time."""
+        if gv.iEmgStop: return
         timeStr = time.time()
         self.mapPanel.periodic(timeStr)
 
