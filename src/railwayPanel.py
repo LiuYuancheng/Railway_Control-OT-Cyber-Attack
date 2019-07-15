@@ -214,9 +214,10 @@ class PanelMap(wx.Panel):
         # Id of the sensor which detected the train passing.
         self.dockCount = 0       # flag to identify train in the station. 
         self.stationRg = (110, 210) # train station range.
-        self.attackPts = [(340, 110)]
+        self.attackPts = [(340, 110), (134, 80), (90, 177), (156, 272), (286, 272), (412, 272) ]
         self.selectedPts = None
         self.sensorid = -1
+        self.msgPop = True
         self.sensorList = []
         self.addSensors()
         self.infoWindow = None
@@ -283,6 +284,7 @@ class PanelMap(wx.Panel):
                 'Attack Point', pos=(x+10, y+10), size=(150, 150),
                 style=wx.DEFAULT_FRAME_STYLE)
             gv.iDetailPanel = PanelAttackSet(self.infoWindow)
+            gv.iDetailPanel.updateState(idx=1, state='Normal', origalV=0, changedV=0)
             self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)
             self.infoWindow.Show()
 
@@ -305,12 +307,19 @@ class PanelMap(wx.Panel):
         for point in self.trainPts:
             dc.DrawRectangle(point[0]-7, point[1]-7, 19, 19)
         # High light the sensor which detected the train.
+        dc.SetBrush(wx.Brush('GRAY'))
+        for sensor in self.sensorList:
+            sensorPos = sensor.pos
+            dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
+
         penColor = 'GREEN' if self.toggle else 'RED'
         dc.SetBrush(wx.Brush(penColor))
         if self.sensorid >= 0:
             sensor = self.sensorList[self.sensorid]
             sensorPos = sensor.pos
             dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
+        # draw all the sensors: 
+
         self.DrawAttackPt(dc)
         self.DrawGate(dc)
         self.DrawStation(dc)
@@ -323,13 +332,14 @@ class PanelMap(wx.Panel):
         if (not self.selectedPts is None) and self.toggle:
             dc.SetBrush(wx.Brush('GRAY'))
             dc.DrawCircle(self.selectedPts[0], self.selectedPts[1], 8)
-        color = '#CE8349' if self.hakedSensorID >=0 else 'BLUE'
+        color = 'RED' if self.hakedSensorID >=0 else 'BLUE'
         dc.SetBrush(wx.Brush(color))
-
-        attackPt = self.attackPts[0]
-        dc.DrawCircle(attackPt[0], attackPt[1], 5)
-        
-
+        for idx, attackPt in enumerate(self.attackPts):
+            color = 'RED' if self.hakedSensorID ==0 else 'BLUE'
+            dc.DrawCircle(attackPt[0], attackPt[1], 5)
+        if self.hakedSensorID ==0:
+            dc.SetPen(wx.Pen('RED', width=1, style=wx.PENSTYLE_DOT))
+            dc.DrawLine(130, 110, 335, 110)
 
     #-----------------------------------------------------------------------------
     def DrawGate(self, dc):
@@ -351,13 +361,17 @@ class PanelMap(wx.Panel):
         dc.DrawLine(265+self.gateCount, 37, 265+self.gateCount+15, 37)
         dc.DrawLine(265-self.gateCount, 37, 265-self.gateCount-15, 37)
         # Draw the pedestrians signal.
-        print(self.sensorid)
+        #print(self.sensorid)
         if self.toggle and self.gateCount == 15:
             if self.sensorid == 11 or self.gateDanger:
                 dc.DrawBitmap(self.hitbitmap, 250, 7)
                 if not self.gateDanger: 
                     self.gateDanger = True
-                    mbox = wx.MessageBox('Train Accident Happened!', 'Caution!', wx.OK | wx.ICON_ERROR)
+                    if self.msgPop:
+                        self.msgPop = False
+                        gv.iEmgStop = True
+                        wx.MessageBox('Train Accident Happened!', 'Caution!', wx.OK | wx.ICON_ERROR)
+                        gv.iEmgStop = False
             else:
                 dc.DrawBitmap(self.wkbitmap, 250, 7)
        
@@ -423,6 +437,13 @@ class PanelMap(wx.Panel):
         elif self.sensorid == 1: 
             self.gateCount += 3
         
+        if self.sensorid == 0:
+            if gv.iDetailPanel:
+                gv.iDetailPanel.updateState(origalV=1)
+        if  self.hakedSensorID == 0 and sensorid == -1:
+            if gv.iDetailPanel:
+                gv.iDetailPanel.updateState(origalV=0)
+
         self.updateTrainState(self.sensorid)
         if self.gateDanger and self.sensorid == 1:
             self.gateDanger = False
@@ -636,7 +657,7 @@ class PanelSimuCtrl(wx.Panel):
         idLb = wx.StaticText(self, label="Attack point ID: [001] ")
         vsizer.Add(idLb, flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-        vsizer.Add(wx.StaticText(self, label="Active type:"), flag=flagsR, border=2)
+        vsizer.Add(wx.StaticText(self, label="Active attack type:"), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
         self.simuCb1 = wx.CheckBox(self, -1 ,'1. Random some where')
         vsizer.Add(self.simuCb1, flag=flagsR, border=2)
@@ -662,6 +683,7 @@ class PanelSimuCtrl(wx.Panel):
         hsizer.AddSpacer(5)
         
         self.tc1 = wx.TextCtrl(self, -1, "", size=(40, -1), style=wx.TE_PROCESS_ENTER)
+        self.tc1.SetValue("1")
         hsizer.Add(self.tc1, flag=flagsR, border=2)
         
         vsizer.Add(hsizer, flag=flagsR, border=2)
@@ -686,9 +708,14 @@ class PanelSimuCtrl(wx.Panel):
         if buttonLb == 'Set Attack': 
             gv.iMapPanel.setHackedPt(0)
             gv.iMapPanel.updateDisplay()
+            hackedV = self.tc1.GetValue()
+            if gv.iDetailPanel:
+                gv.iDetailPanel.updateState(idx=1, state='Man in mid', origalV=0, changedV=hackedV)
         else:
             gv.iMapPanel.setHackedPt(-2)
             gv.iMapPanel.updateDisplay()
+            if gv.iDetailPanel:
+                gv.iDetailPanel.updateState(idx=1, state='Normal', origalV=0, changedV=0)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -697,14 +724,18 @@ class PanelAttackSet(wx.Panel):
         """ Set the attack situaltion."""
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
+        self.idx = 0 
+        self.hackState = ""
+        self.origalV = self.changedV = 0
         hsizer = self.buidUISizer()
+
         self.SetSizer(hsizer)
 
     def buidUISizer(self):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.idLb = wx.StaticText(self, label="Attack point ID: [001] ")
+        self.idLb = wx.StaticText(self, label="Attack point ID: [%s] " %str(self.idx).zfill(3))
         vsizer.Add(self.idLb, flag=flagsR, border=2)
         vsizer.AddSpacer(10)
 
@@ -714,6 +745,7 @@ class PanelAttackSet(wx.Panel):
         
 
         self.stateLb =  wx.StaticText(self, label="Normal")
+        self.stateLb.SetBackgroundColour(wx.Colour('GREEN'))
         vsizer.Add(self.stateLb, flag=flagsR, border=2)
         vsizer.AddSpacer(10)
 
@@ -721,8 +753,31 @@ class PanelAttackSet(wx.Panel):
         vsizer.Add(self.orignLb, flag=flagsR, border=2)
         vsizer.AddSpacer(10)
 
-        self.hackLb = wx.StaticText(self, label="Hacked input: ")
+        self.hackLb = wx.StaticText(self, label="Hacked input: None")
         vsizer.Add(self.hackLb, flag=flagsR, border=2)
         vsizer.AddSpacer(10)
 
         return vsizer
+
+    def updateState(self, idx=None, state=None, origalV=None, changedV=None):
+        if not idx is None and self.idx!= idx :
+            self.idx = idx
+            self.idLb.SetLabel("Attack point ID: [%s] " %str(self.idx).zfill(3))
+    
+        if not state is None and self.hackState != state:
+            self.hackState = state
+            if self.hackState != 'Normal':
+                self.stateLb.SetLabel(self.hackState)
+                self.stateLb.SetBackgroundColour(wx.Colour('RED'))
+            else: 
+                self.stateLb.SetLabel("Normal")
+                self.stateLb.SetBackgroundColour(wx.Colour('Green'))
+            self.Refresh(False)
+
+        if not origalV is None and self.origalV != origalV:
+            self.origalV = origalV
+            self.orignLb.SetLabel("Orignal input: %s" %str(origalV))
+
+        if not changedV is None and self.changedV != changedV:
+            self.changedV = changedV
+            self.hackLb.SetLabel("Hacked input: %s" %str(changedV))
