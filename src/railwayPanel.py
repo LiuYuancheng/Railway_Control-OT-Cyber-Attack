@@ -199,6 +199,7 @@ class PanelMap(wx.Panel):
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.bitmap = wx.Bitmap(gv.BGPNG_PATH)      # background bitmap
         self.wkbitmap = wx.Bitmap(gv.WKJPG_PATH)    # pedestrians wald bitmap.
+        self.hitbitmap = wx.Bitmap(gv.HTPNG_PATH) 
         #self.leftTimge = wx.Image(png)
         self.toggle = False     # Display flash toggle flag.
         # gate contorl parameters.(The 0-total close, 15-total open)
@@ -219,6 +220,7 @@ class PanelMap(wx.Panel):
         self.sensorList = []
         self.addSensors()
         self.infoWindow = None
+        self.gateDanger = False
         self.hakedSensorID = -2 # The hacked sensorID
         self.tranState = 0  # state of the train.0 normal -1: freezed.
         self.Bind(wx.EVT_PAINT, self.OnPaint)
@@ -245,6 +247,9 @@ class PanelMap(wx.Panel):
             sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
             self.sensorList.append(sensor)
 
+        gateDetector = agent.AgentSensor(self, -1, (290, 20), 0)
+        self.sensorList.append(gateDetector)
+
     def onClick(self, event):
         x1, y1 = event.GetPosition()
         print("The user has clicked the pos"+str((x1, y1 )))
@@ -254,17 +259,28 @@ class PanelMap(wx.Panel):
             if dist <= 20:
                 self.selectedPts = point
                 # Set the hacked sensor id 
-                self.hakedSensorID = 0 
                 self.showDetail()
+
+
+    def setHackedPt(self, id):
+        """ Set the hacked point in the railway system. """
+        self.hakedSensorID = id
+        if id < 0:
+            self.selectedPts = None
+
 
     #--PanelBaseInfo---------------------------------------------------------------
     def showDetail(self):
         """ Pop up the detail window to show all the sensor parameters value."""
         if self.infoWindow is None and gv.iDetailPanel is None:
             posF = gv.iMainFrame.GetPosition()
+            x = posF[0]
+            y = posF[1]+300
+            if not self.selectedPts is None:
+                x += self.selectedPts[0]
+                y += self.selectedPts[1]
             self.infoWindow = wx.MiniFrame(gv.iMainFrame, -1,
-                'Attack Point', pos=(posF[0]+600, posF[1]),
-                size=(150, 150),
+                'Attack Point', pos=(x+10, y+10), size=(150, 150),
                 style=wx.DEFAULT_FRAME_STYLE)
             gv.iDetailPanel = PanelAttackSet(self.infoWindow)
             self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)
@@ -307,8 +323,9 @@ class PanelMap(wx.Panel):
         if (not self.selectedPts is None) and self.toggle:
             dc.SetBrush(wx.Brush('GRAY'))
             dc.DrawCircle(self.selectedPts[0], self.selectedPts[1], 8)
+        color = '#CE8349' if self.hakedSensorID >=0 else 'BLUE'
+        dc.SetBrush(wx.Brush(color))
 
-        dc.SetBrush(wx.Brush('BLUE'))
         attackPt = self.attackPts[0]
         dc.DrawCircle(attackPt[0], attackPt[1], 5)
         
@@ -334,9 +351,16 @@ class PanelMap(wx.Panel):
         dc.DrawLine(265+self.gateCount, 37, 265+self.gateCount+15, 37)
         dc.DrawLine(265-self.gateCount, 37, 265-self.gateCount-15, 37)
         # Draw the pedestrians signal.
+        print(self.sensorid)
         if self.toggle and self.gateCount == 15:
-            dc.DrawBitmap(self.wkbitmap, 250, 7)
-    
+            if self.sensorid == 11 or self.gateDanger:
+                dc.DrawBitmap(self.hitbitmap, 250, 7)
+                if not self.gateDanger: 
+                    self.gateDanger = True
+                    mbox = wx.MessageBox('Train Accident Happened!', 'Caution!', wx.OK | wx.ICON_ERROR)
+            else:
+                dc.DrawBitmap(self.wkbitmap, 250, 7)
+       
     #-----------------------------------------------------------------------------
     def DrawStation(self, dc):
         """ Draw the station part"""
@@ -400,6 +424,8 @@ class PanelMap(wx.Panel):
             self.gateCount += 3
         
         self.updateTrainState(self.sensorid)
+        if self.gateDanger and self.sensorid == 1:
+            self.gateDanger = False
 
 
         # make the count in side the range. 
@@ -623,7 +649,7 @@ class PanelSimuCtrl(wx.Panel):
         self.simuCb3 = wx.CheckBox(self, -1 ,'3. Trojar attack')
         vsizer.Add(self.simuCb3, flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-        self.simuCb4 = wx.CheckBox(self, -1 ,'4. Eletrical blue')
+        self.simuCb4 = wx.CheckBox(self, -1 ,'4. Eternal blue')
         vsizer.Add(self.simuCb4, flag=flagsR, border=2)
         self.simuCb4.Disable()
         vsizer.AddSpacer(5)
@@ -644,18 +670,25 @@ class PanelSimuCtrl(wx.Panel):
         hsizer1 = wx.BoxSizer(wx.HORIZONTAL)
 
         self.simuBt1 = wx.Button(self, label='Set Attack', style=wx.BU_LEFT, size=(60,25))
+        self.simuBt1.Bind(wx.EVT_BUTTON, self.setAttck)
         hsizer1.Add(self.simuBt1, flag=flagsR, border=2)
         hsizer1.AddSpacer(5)
         self.simuBt2 = wx.Button(self, label='Clear', style=wx.BU_LEFT, size=(60,25))
+        self.simuBt2.Bind(wx.EVT_BUTTON, self.setAttck)
         hsizer1.Add(self.simuBt2, flag=flagsR, border=2)
         vsizer.Add(hsizer1, flag=flagsR, border=2)
 
         vsizer.AddSpacer(5)
         return vsizer
 
-
-
-
+    def setAttck(self, event):
+        buttonLb = event.GetEventObject().GetLabel()
+        if buttonLb == 'Set Attack': 
+            gv.iMapPanel.setHackedPt(0)
+            gv.iMapPanel.updateDisplay()
+        else:
+            gv.iMapPanel.setHackedPt(-2)
+            gv.iMapPanel.updateDisplay()
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

@@ -29,7 +29,7 @@ class railWayHubFrame(wx.Frame):
         wx.Frame.__init__(self, parent, id, title, size=(620, 670))
 
         gv.iMainFrame = self
-        
+
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         vsizer = wx.BoxSizer(wx.VERTICAL)
@@ -99,7 +99,7 @@ class railWayHubFrame(wx.Frame):
 #-----------------------------------------------------------------------------
 class MyApp(wx.App):
     def OnInit(self):
-        mainFrame = railWayHubFrame(None, -1, 'RailWay PLC contorl Hub')
+        mainFrame = railWayHubFrame(None, -1, 'RailWay PLC Control Hub')
         mainFrame.Show(True)
         return True
 

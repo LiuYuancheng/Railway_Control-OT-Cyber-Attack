@@ -18,6 +18,7 @@ print("Current working directory is : %s" %dirpath)
 #------<CONSTANTS>-------------------------------------------------------------
 BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg.png"])
 WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
+HTPNG_PATH = "".join([dirpath, "\\img\\hitPPl.png"])
 LTPNG_PATH = "".join([dirpath, "\\img\\left.png"])
 EMGST_PATH = "".join([dirpath, "\\img\\emg.png"])
 RECOV_PATH = "".join([dirpath, "\\img\\rec.png"])

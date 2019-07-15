@@ -67,6 +67,9 @@ class AgentSensor(object):
             self.actFlag = flag
             self.feedBackPLC()
 
+    def getSensorPos(self):
+        return self.pos
+
     #-----------------------------------------------------------------------------
     def getSensorState(self):
         return self.actFlag
