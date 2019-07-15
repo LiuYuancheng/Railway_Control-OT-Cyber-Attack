@@ -214,7 +214,7 @@ class PanelMap(wx.Panel):
         # Id of the sensor which detected the train passing.
         self.dockCount = 0       # flag to identify train in the station. 
         self.stationRg = (110, 210) # train station range.
-        self.attackPts = [(340, 110), (134, 80), (90, 177), (156, 272), (286, 272), (412, 272) ]
+        self.attackPts = [(340, 110), (145, 80), (90, 177), (156, 272), (286, 272), (412, 272) ]
         self.selectedPts = None
         self.sensorid = -1
         self.msgPop = True
@@ -254,13 +254,13 @@ class PanelMap(wx.Panel):
     def onClick(self, event):
         x1, y1 = event.GetPosition()
         print("The user has clicked the pos"+str((x1, y1 )))
-        for point in self.attackPts:
+        for idx, point in enumerate(self.attackPts):
             (x2, y2) = point
             dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
             if dist <= 20:
                 self.selectedPts = point
                 # Set the hacked sensor id 
-                self.showDetail()
+                self.showDetail(idx)
 
 
     def setHackedPt(self, id):
@@ -271,7 +271,7 @@ class PanelMap(wx.Panel):
 
 
     #--PanelBaseInfo---------------------------------------------------------------
-    def showDetail(self):
+    def showDetail(self, idx):
         """ Pop up the detail window to show all the sensor parameters value."""
         if self.infoWindow is None and gv.iDetailPanel is None:
             posF = gv.iMainFrame.GetPosition()
@@ -283,8 +283,8 @@ class PanelMap(wx.Panel):
             self.infoWindow = wx.MiniFrame(gv.iMainFrame, -1,
                 'Attack Point', pos=(x+10, y+10), size=(150, 150),
                 style=wx.DEFAULT_FRAME_STYLE)
-            gv.iDetailPanel = PanelAttackSet(self.infoWindow)
-            gv.iDetailPanel.updateState(idx=1, state='Normal', origalV=0, changedV=0)
+            gv.iDetailPanel = PanelAttackSet(self.infoWindow, idx)
+            gv.iDetailPanel.updateState(idx=idx, state='Normal', origalV=0, changedV=0)
             self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)
             self.infoWindow.Show()
 
@@ -332,11 +332,13 @@ class PanelMap(wx.Panel):
         if (not self.selectedPts is None) and self.toggle:
             dc.SetBrush(wx.Brush('GRAY'))
             dc.DrawCircle(self.selectedPts[0], self.selectedPts[1], 8)
-        color = 'RED' if self.hakedSensorID >=0 else 'BLUE'
-        dc.SetBrush(wx.Brush(color))
+        #color = 'RED' if self.hakedSensorID >=0 else 'BLUE'
+        #dc.SetBrush(wx.Brush(color))
         for idx, attackPt in enumerate(self.attackPts):
-            color = 'RED' if self.hakedSensorID ==0 else 'BLUE'
+            color = 'RED' if self.hakedSensorID == idx else 'BLUE'
+            dc.SetBrush(wx.Brush(color))
             dc.DrawCircle(attackPt[0], attackPt[1], 5)
+        
         if self.hakedSensorID ==0:
             dc.SetPen(wx.Pen('RED', width=1, style=wx.PENSTYLE_DOT))
             dc.DrawLine(130, 110, 335, 110)
@@ -720,11 +722,11 @@ class PanelSimuCtrl(wx.Panel):
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelAttackSet(wx.Panel):
-    def __init__(self, parent, size=(140, 150)):
+    def __init__(self, parent, idx, size=(140, 150)):
         """ Set the attack situaltion."""
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
-        self.idx = 0 
+        self.idx = idx 
         self.hackState = ""
         self.origalV = self.changedV = 0
         hsizer = self.buidUISizer()
