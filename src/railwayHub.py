@@ -27,6 +27,9 @@ class railWayHubFrame(wx.Frame):
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
         wx.Frame.__init__(self, parent, id, title, size=(620, 670))
+
+        gv.iMainFrame = self
+        
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         vsizer = wx.BoxSizer(wx.VERTICAL)
@@ -64,10 +67,6 @@ class railWayHubFrame(wx.Frame):
         hbox2.Add(self.simuPanel, flag=flagsR, border=2)
         hbox2.AddSpacer(10)
         setBgPanel.SetSizer(hbox2)
-
-
-
-
 
         nb.AddPage(setBgPanel, "Setting")
 

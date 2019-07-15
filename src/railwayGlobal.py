@@ -38,3 +38,4 @@ iTrainPanel = None  # Train control panel.
 iMainFrame = None   # Main frame. 
 iSensorCount = 0    # number of sensors. 
 iEmgStop = False    # emergency stop 
+iDetailPanel = None 

@@ -14,6 +14,7 @@
 import wx
 import wx.grid
 import time
+import math
 import random
 import railwayGlobal as gv 
 import railwayAgentPLC as agent
@@ -212,10 +213,16 @@ class PanelMap(wx.Panel):
         # Id of the sensor which detected the train passing.
         self.dockCount = 0       # flag to identify train in the station. 
         self.stationRg = (110, 210) # train station range.
+        self.attackPts = [(340, 110)]
+        self.selectedPts = None
         self.sensorid = -1
         self.sensorList = []
         self.addSensors()
+        self.infoWindow = None
+        self.hakedSensorID = -2 # The hacked sensorID
+        self.tranState = 0  # state of the train.0 normal -1: freezed.
         self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_LEFT_DOWN, self.onClick)
 
     #-----------------------------------------------------------------------------
     def addSensors(self):
@@ -238,13 +245,47 @@ class PanelMap(wx.Panel):
             sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
             self.sensorList.append(sensor)
 
+    def onClick(self, event):
+        x1, y1 = event.GetPosition()
+        print("The user has clicked the pos"+str((x1, y1 )))
+        for point in self.attackPts:
+            (x2, y2) = point
+            dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+            if dist <= 20:
+                self.selectedPts = point
+                # Set the hacked sensor id 
+                self.hakedSensorID = 0 
+                self.showDetail()
+
+    #--PanelBaseInfo---------------------------------------------------------------
+    def showDetail(self):
+        """ Pop up the detail window to show all the sensor parameters value."""
+        if self.infoWindow is None and gv.iDetailPanel is None:
+            posF = gv.iMainFrame.GetPosition()
+            self.infoWindow = wx.MiniFrame(gv.iMainFrame, -1,
+                'Attack Point', pos=(posF[0]+600, posF[1]),
+                size=(150, 150),
+                style=wx.DEFAULT_FRAME_STYLE)
+            gv.iDetailPanel = PanelAttackSet(self.infoWindow)
+            self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)
+            self.infoWindow.Show()
+
+    #--PanelBaseInfo---------------------------------------------------------------
+    def infoWinClose(self, event):
+        """ Close the pop-up detail information window"""
+        if self.infoWindow:
+            self.infoWindow.Destroy()
+            gv.iDetailPanel = None
+            self.infoWindow = None
+
     #-----------------------------------------------------------------------------
     def OnPaint(self, event):
         """ Draw the whole panel. """
         dc = wx.PaintDC(self)
         dc.DrawBitmap(self.bitmap, 1, 1)
         # Draw the train on the map.
-        dc.SetBrush(wx.Brush('#CE8349'))
+        trainColor = 'RED' if self.tranState == -1 else '#CE8349'
+        dc.SetBrush(wx.Brush(trainColor))
         for point in self.trainPts:
             dc.DrawRectangle(point[0]-7, point[1]-7, 19, 19)
         # High light the sensor which detected the train.
@@ -254,12 +295,25 @@ class PanelMap(wx.Panel):
             sensor = self.sensorList[self.sensorid]
             sensorPos = sensor.pos
             dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
-        
+        self.DrawAttackPt(dc)
         self.DrawGate(dc)
         self.DrawStation(dc)
         # Update the display flash toggle flag. 
         self.toggle = not self.toggle
-    
+
+    def DrawAttackPt(self, dc):
+        """ Draw the attack points. """
+        #print("this is the ")
+        if (not self.selectedPts is None) and self.toggle:
+            dc.SetBrush(wx.Brush('GRAY'))
+            dc.DrawCircle(self.selectedPts[0], self.selectedPts[1], 8)
+
+        dc.SetBrush(wx.Brush('BLUE'))
+        attackPt = self.attackPts[0]
+        dc.DrawCircle(attackPt[0], attackPt[1], 5)
+        
+
+
     #-----------------------------------------------------------------------------
     def DrawGate(self, dc):
         """ Draw the pedestrians walking gate for passing the railway."""
@@ -298,7 +352,7 @@ class PanelMap(wx.Panel):
             dc.SetBrush(wx.Brush(wx.Colour('#FFC000')))
             dc.DrawRectangle(536, 116, 29, 90)
             points = [(530, 114), (565, 114), (565, 208), (530, 208), (530, 114)]
-            dc.SetPen(wx.Pen('Green', width=4, style=wx.PENSTYLE_SOLID))
+            dc.SetPen(wx.Pen('Green', width=2, style=wx.PENSTYLE_SOLID))
             for i in range(len(points)-1):
                 dc.DrawLine(points[i], points[i+1])
 
@@ -340,7 +394,7 @@ class PanelMap(wx.Panel):
                 self.sensorList[self.sensorid].setSensorState(0)
             self.sensorid = sensorid
         # Start to close the gate.
-        if self.sensorid == 0: 
+        if self.sensorid == 0 and self.hakedSensorID != 0 : 
             self.gateCount -= 3
         elif self.sensorid == 1: 
             self.gateCount += 3
@@ -513,10 +567,17 @@ class PanelTrainCtrl(wx.Panel):
 
     def emgStop(self, event):
         gv.iEmgStop = True
+        if gv.iMapPanel:
+            gv.iMapPanel.tranState = -1
+            gv.iMapPanel.updateDisplay()
+
         self.setState(5)
 
     def emgRec(self, event):
         gv.iEmgStop = False
+        if gv.iMapPanel:
+            gv.iMapPanel.tranState = 0
+            gv.iMapPanel.updateDisplay()
 
     def setState(self, idx): 
         """ Set the train running state. """
@@ -531,7 +592,7 @@ class PanelTrainCtrl(wx.Panel):
 #-----------------------------------------------------------------------------
 class PanelSimuCtrl(wx.Panel):
     """ Simulation contorl panel"""
-    def __init__(self, parent, size=(140, 250)):
+    def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
         hsizer = self.buidUISizer()
@@ -540,17 +601,95 @@ class PanelSimuCtrl(wx.Panel):
     def buidUISizer(self):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
-        vsizer.Add(wx.StaticText(self, label=" Active attack simulation:"), flag=flagsR, border=2)
+        vsizer.Add(wx.StaticText(self, label="Active attack simulation:"), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
+        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(165, -1),
+                                     style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+
+        idLb = wx.StaticText(self, label="Attack point ID: [001] ")
+        vsizer.Add(idLb, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        vsizer.Add(wx.StaticText(self, label="Active type:"), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        self.simuCb1 = wx.CheckBox(self, -1 ,'1. Random some where')
+        vsizer.Add(self.simuCb1, flag=flagsR, border=2)
+        self.simuCb1.Disable()
+
+        vsizer.AddSpacer(5)
+        self.simuCb2 = wx.CheckBox(self, -1 ,'2. Man in middle')
+        vsizer.Add(self.simuCb2, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        self.simuCb3 = wx.CheckBox(self, -1 ,'3. Trojar attack')
+        vsizer.Add(self.simuCb3, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        self.simuCb4 = wx.CheckBox(self, -1 ,'4. Eletrical blue')
+        vsizer.Add(self.simuCb4, flag=flagsR, border=2)
+        self.simuCb4.Disable()
+        vsizer.AddSpacer(5)
+        self.attackCtrl = wx.ComboBox(self, -1, choices=['Overwrite input', 'Overwrite output'], style=wx.CB_READONLY)
+        self.attackCtrl.SetSelection(0)
+        vsizer.Add(self.attackCtrl, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        hsizer.Add(wx.StaticText(self, label="Overwrite data:"), flag=flagsR, border=2)
+        hsizer.AddSpacer(5)
+        
+        self.tc1 = wx.TextCtrl(self, -1, "", size=(40, -1), style=wx.TE_PROCESS_ENTER)
+        hsizer.Add(self.tc1, flag=flagsR, border=2)
+        
+        vsizer.Add(hsizer, flag=flagsR, border=2)
+        vsizer.AddSpacer(10)
+
+        hsizer1 = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.simuBt1 = wx.Button(self, label='Set Attack', style=wx.BU_LEFT, size=(60,25))
+        hsizer1.Add(self.simuBt1, flag=flagsR, border=2)
+        hsizer1.AddSpacer(5)
+        self.simuBt2 = wx.Button(self, label='Clear', style=wx.BU_LEFT, size=(60,25))
+        hsizer1.Add(self.simuBt2, flag=flagsR, border=2)
+        vsizer.Add(hsizer1, flag=flagsR, border=2)
+
+        vsizer.AddSpacer(5)
+        return vsizer
+
+
+
+
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class PanelAttackSet(wx.Panel):
+    def __init__(self, parent, size=(140, 150)):
+        """ Set the attack situaltion."""
+        wx.Panel.__init__(self, parent)
+        self.SetBackgroundColour(wx.Colour(200, 200, 200))
+        hsizer = self.buidUISizer()
+        self.SetSizer(hsizer)
+
+    def buidUISizer(self):
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        vsizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.idLb = wx.StaticText(self, label="Attack point ID: [001] ")
+        vsizer.Add(self.idLb, flag=flagsR, border=2)
+        vsizer.AddSpacer(10)
+
         vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(135, -1),
                                      style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-        self.simuBt1 = wx.Button(self, label='1. Random some where', style=wx.BU_LEFT, size=(120, 23))
-        vsizer.Add(self.simuBt1, flag=flagsR, border=2)
-        self.simuBt2 = wx.Button(self, label='2. Man in middle', style=wx.BU_LEFT, size=(120, 23))
-        vsizer.Add(self.simuBt2, flag=flagsR, border=2)
-        self.simuBt3 = wx.Button(self, label='3. Trojar attack', style=wx.BU_LEFT, size=(120, 23))
-        vsizer.Add(self.simuBt3, flag=flagsR, border=2)
-        self.simuBt4 = wx.Button(self, label='4. Eletrical blue', style=wx.BU_LEFT, size=(120, 23))
-        vsizer.Add(self.simuBt4, flag=flagsR, border=2)
+        
+
+        self.stateLb =  wx.StaticText(self, label="Normal")
+        vsizer.Add(self.stateLb, flag=flagsR, border=2)
+        vsizer.AddSpacer(10)
+
+        self.orignLb = wx.StaticText(self, label="Orignal input: ")
+        vsizer.Add(self.orignLb, flag=flagsR, border=2)
+        vsizer.AddSpacer(10)
+
+        self.hackLb = wx.StaticText(self, label="Hacked input: ")
+        vsizer.Add(self.hackLb, flag=flagsR, border=2)
+        vsizer.AddSpacer(10)
+
         return vsizer
