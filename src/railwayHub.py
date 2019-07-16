@@ -65,6 +65,7 @@ class railWayHubFrame(wx.Frame):
         hbox2.AddSpacer(10)
 
         self.simuPanel = rwp.PanelSimuCtrl(setBgPanel)
+        gv.iAttackCtrlPanel = self.simuPanel
         hbox2.Add(self.simuPanel, flag=flagsR, border=2)
         hbox2.AddSpacer(10)
         setBgPanel.SetSizer(hbox2)
@@ -88,10 +89,7 @@ class railWayHubFrame(wx.Frame):
     #-----------------------------------------------------------------------------
     def periodic(self, event):
         """ Call back every periodic time."""
-
-        
-
-
+        # Set the title of the frame.
         self.SetTitle( ' '.join((gv.APP_NAME, datetime.now().strftime("[ %m/%d/%Y, %H:%M:%S ]"))))
         if gv.iEmgStop: return
         timeStr = time.time()

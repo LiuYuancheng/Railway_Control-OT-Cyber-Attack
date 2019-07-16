@@ -17,8 +17,6 @@ print("Current working directory is : %s" %dirpath)
 
 APP_NAME = 'RailWay PLC Control Hub'
 
-
-
 #------<CONSTANTS>-------------------------------------------------------------
 BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg.png"])
 WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
@@ -45,4 +43,5 @@ iTrainPanel = None  # Train control panel.
 iMainFrame = None   # Main frame. 
 iSensorCount = 0    # number of sensors. 
 iEmgStop = False    # emergency stop 
-iDetailPanel = None 
+iDetailPanel = None
+iAttackCtrlPanel = None 

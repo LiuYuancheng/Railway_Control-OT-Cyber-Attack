@@ -189,6 +189,15 @@ class PanelPLC(wx.Panel):
         obj.SetLabel(lbtext)
         obj.SetBackgroundColour(color)
 
+        if str(obj.GetName()) == 'PLC0 [m221]:0':
+            if lbtext == 'ON':
+                gv.iMapPanel.lightOn = 2
+                gv.iMapPanel.updateDisplay()
+            else:
+                gv.iMapPanel.lightOn = 1
+                gv.iMapPanel.updateDisplay()
+        else:
+            gv.iMapPanel.lightOn = 0
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelMap(wx.Panel):
@@ -230,6 +239,7 @@ class PanelMap(wx.Panel):
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_LEFT_DOWN, self.onClick)
         self.timeCount = 166 # 50 second.
+        self.lightOn = True
 
     #-----------------------------------------------------------------------------
     def addSensors(self):
@@ -289,8 +299,18 @@ class PanelMap(wx.Panel):
                 style=wx.DEFAULT_FRAME_STYLE)
             gv.iDetailPanel = PanelAttackSet(self.infoWindow, idx)
             gv.iDetailPanel.updateState(idx=idx, state='Normal', origalV=0, changedV=0)
+            gv.iAttackCtrlPanel.loatAttPtState(idx)
             self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)
             self.infoWindow.Show()
+        else:
+            posF = gv.iMainFrame.GetPosition()
+            x = posF[0]
+            y = posF[1]+300
+            if not self.selectedPts is None:
+                x += self.selectedPts[0]
+                y += self.selectedPts[1]
+            self.infoWindow.SetPosition(wx.Point(x+10,y+10))
+            gv.iDetailPanel.updateState(idx=idx, state='Normal', origalV=0, changedV=0)
 
     #--PanelBaseInfo---------------------------------------------------------------
     def infoWinClose(self, event):
@@ -352,13 +372,19 @@ class PanelMap(wx.Panel):
     def DrawGate(self, dc):
         """ Draw the pedestrians walking gate for passing the railway."""
         # Draw the bridge(left and right)
-        if self.gateCount == 15:
+        if self.gateCount == 15 :
             dc.SetPen(wx.Pen('BLACK', width=1, style=wx.PENSTYLE_DOT))
             dc.SetBrush(wx.Brush(wx.Colour('Black')))
             dc.DrawRectangle(250, 9, 30, 30)
             dc.DrawBitmap(self.passbitmap, 280, 50)
         else:
             dc.DrawBitmap(self.stopbitmap, 280, 50)
+
+        if self.lightOn == 1:
+            dc.DrawBitmap(self.passbitmap, 280, 50)
+        elif self.lightOn == 2:
+            dc.DrawBitmap(self.stopbitmap, 280, 50)
+
         dc.SetPen(wx.Pen('GREEN', width=1, style=wx.PENSTYLE_SOLID))
         dc.DrawLine(294, 80, 294, 110)
 
@@ -678,8 +704,8 @@ class PanelSimuCtrl(wx.Panel):
                                      style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
 
-        idLb = wx.StaticText(self, label="Attack point ID: [001] ")
-        vsizer.Add(idLb, flag=flagsR, border=2)
+        self.idLb = wx.StaticText(self, label="Attack point ID: [001] ")
+        vsizer.Add(self.idLb, flag=flagsR, border=2)
         vsizer.AddSpacer(5)
         vsizer.Add(wx.StaticText(self, label="Active attack type:"), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
@@ -726,6 +752,11 @@ class PanelSimuCtrl(wx.Panel):
 
         vsizer.AddSpacer(5)
         return vsizer
+
+    def loatAttPtState(self, id):
+        """ Load the attack point's state. 
+        """
+        self.idLb.SetLabel("Attack point ID: [%s] " %str(id).zfill(3))
 
     def setAttck(self, event):
         buttonLb = event.GetEventObject().GetLabel()
