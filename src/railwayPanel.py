@@ -199,7 +199,10 @@ class PanelMap(wx.Panel):
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.bitmap = wx.Bitmap(gv.BGPNG_PATH)      # background bitmap
         self.wkbitmap = wx.Bitmap(gv.WKJPG_PATH)    # pedestrians wald bitmap.
-        self.hitbitmap = wx.Bitmap(gv.HTPNG_PATH) 
+        self.hitbitmap = wx.Bitmap(gv.HTPNG_PATH)
+        self.passbitmap = wx.Bitmap(gv.LPJPG_PATH)
+        self.stopbitmap = wx.Bitmap(gv.LSJPG_PATH)
+
         #self.leftTimge = wx.Image(png)
         self.toggle = False     # Display flash toggle flag.
         # gate contorl parameters.(The 0-total close, 15-total open)
@@ -226,6 +229,7 @@ class PanelMap(wx.Panel):
         self.tranState = 0  # state of the train.0 normal -1: freezed.
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_LEFT_DOWN, self.onClick)
+        self.timeCount = 166 # 50 second.
 
     #-----------------------------------------------------------------------------
     def addSensors(self):
@@ -352,12 +356,17 @@ class PanelMap(wx.Panel):
             dc.SetPen(wx.Pen('BLACK', width=1, style=wx.PENSTYLE_DOT))
             dc.SetBrush(wx.Brush(wx.Colour('Black')))
             dc.DrawRectangle(250, 9, 30, 30)
-        penColor = 'GREEN' if self.gateCount == 0 else 'RED'
-        dc.SetPen(wx.Pen(penColor, width=1, style=wx.PENSTYLE_DOT))
-        dc.DrawLine(250, 0, 250, 45)
-        dc.DrawLine(280, 0, 280, 45)
-        # Draw the pedestrians block door
+            dc.DrawBitmap(self.passbitmap, 280, 50)
+        else:
+            dc.DrawBitmap(self.stopbitmap, 280, 50)
+        dc.SetPen(wx.Pen('GREEN', width=1, style=wx.PENSTYLE_SOLID))
+        dc.DrawLine(294, 80, 294, 110)
+
         penColor = 'RED' if self.gateCount == 0 else 'GREEN'
+        dc.SetPen(wx.Pen(penColor, width=1, style=wx.PENSTYLE_DOT))
+        dc.DrawLine(250, 0, 250, 80)
+        dc.DrawLine(280, 0, 280, 50)
+        # Draw the pedestrians block door
         dc.SetPen(wx.Pen(penColor, width=2, style=wx.PENSTYLE_SOLID))
         dc.DrawLine(265+self.gateCount, 7, 265+self.gateCount+15, 7)
         dc.DrawLine(265-self.gateCount, 7, 265-self.gateCount-15, 7)
@@ -386,6 +395,13 @@ class PanelMap(wx.Panel):
         if self.dockCount == 0:    
             dc.DrawRectangle(568, 110, 30, 30)
             dc.DrawRectangle(568, 180, 30, 30)
+            if not self.toggle:
+                dc.DrawBitmap(self.stopbitmap, 564, 145)
+            else:
+                dc.SetBrush(wx.Brush(wx.Colour('LIGHT GRAY')))
+                dc.DrawRectangle(564, 145, 30, 30)
+                dc.SetFont(wx.Font(9, wx.DEFAULT, wx.NORMAL, wx.BOLD))
+                dc.DrawText( str(self.timeCount//2).zfill(2)+"S", 568, 150)
         else:
             y = 110 if self.toggle else 180
             dc.DrawRectangle(568, y, 30, 30)
@@ -396,9 +412,11 @@ class PanelMap(wx.Panel):
             dc.SetPen(wx.Pen('Green', width=2, style=wx.PENSTYLE_SOLID))
             for i in range(len(points)-1):
                 dc.DrawLine(points[i], points[i+1])
-
             dc.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD))
             dc.DrawText( str(self.dockCount//2).zfill(2)+"S", 535, 130)
+            img = self.passbitmap if self.toggle else self.wkbitmap
+            dc.DrawBitmap(img, 564, 145)
+            self.timeCount = 166
 
     #-----------------------------------------------------------------------------
     def checkSensor(self):
@@ -460,7 +478,10 @@ class PanelMap(wx.Panel):
         if head[0] == self.right and head[1] == self.stationRg[0] and self.dockCount == 0: 
             print("Train has got to the station.wait for 10s for people get in.")
             self.dockCount = 20
-        if self.dockCount > 0: self.dockCount-=1
+        if self.dockCount > 0:
+            self.dockCount-=1
+        else:
+            self.timeCount-=1
         # Update the panel.
         self.updateDisplay()
 

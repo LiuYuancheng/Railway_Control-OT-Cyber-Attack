@@ -15,6 +15,7 @@
 
 import wx # use wx to build the UI.
 import time
+from datetime import datetime
 import railwayGlobal as gv 
 import railwayPanel as rwp
 
@@ -87,8 +88,14 @@ class railWayHubFrame(wx.Frame):
     #-----------------------------------------------------------------------------
     def periodic(self, event):
         """ Call back every periodic time."""
+
+        
+
+
+        self.SetTitle( ' '.join((gv.APP_NAME, datetime.now().strftime("[ %m/%d/%Y, %H:%M:%S ]"))))
         if gv.iEmgStop: return
         timeStr = time.time()
+        
         self.mapPanel.periodic(timeStr)
 
     #-----------------------------------------------------------------------------
@@ -99,7 +106,7 @@ class railWayHubFrame(wx.Frame):
 #-----------------------------------------------------------------------------
 class MyApp(wx.App):
     def OnInit(self):
-        mainFrame = railWayHubFrame(None, -1, 'RailWay PLC Control Hub')
+        mainFrame = railWayHubFrame(None, -1, gv.APP_NAME)
         mainFrame.Show(True)
         return True
 
