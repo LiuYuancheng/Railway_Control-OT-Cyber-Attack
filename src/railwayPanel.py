@@ -326,6 +326,7 @@ class PanelMap(wx.Panel):
         # Update the display flash toggle flag. 
         self.toggle = not self.toggle
 
+    #-----------------------------------------------------------------------------
     def DrawAttackPt(self, dc):
         """ Draw the attack points. """
         #print("this is the ")
