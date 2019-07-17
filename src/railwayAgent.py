@@ -76,7 +76,7 @@ class AgentRailWay(AgentTarget):
         AgentTarget.__init__(self, parent, idx, pos)
         self.railwayPts = railwayPts
         # init the train points
-        self.pos = [pos] + [[pos[0], pos[1] + 20*(i+1)] for i in range(4)]
+        self.pos = [pos] + [[pos[0], pos[1] + 10*(i+1)] for i in range(6)]
         # The train next distination index
         self.trainDistList = [0]*len(self.pos)
         self.trainSpeed = 10    # train speed: pixel/periodic loop

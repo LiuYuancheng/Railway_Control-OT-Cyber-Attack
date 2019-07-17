@@ -28,7 +28,7 @@ class railWayHubFrame(wx.Frame):
     """ XAKA people counting sensor reader with sensor registration function. """
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
-        wx.Frame.__init__(self, parent, id, title, size=(620, 670))
+        wx.Frame.__init__(self, parent, id, title, size=(620, 720))
 
         gv.iMainFrame = self
 

@@ -23,7 +23,7 @@ class PanelMap(wx.Panel):
     """RailWay top view map panel to show the rail way contorl situaiton."""
     def __init__(self, parent):
         """ Init the panel."""
-        wx.Panel.__init__(self, parent, size=(600, 360))
+        wx.Panel.__init__(self, parent, size=(600, 480))
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.bitmap = wx.Bitmap(gv.BGPNG_PATH)      # background bitmap
         self.wkbitmap = wx.Bitmap(gv.WKJPG_PATH)    # pedestrians wald bitmap.
@@ -42,8 +42,9 @@ class PanelMap(wx.Panel):
         # set the train moving range.
         self.left, self.top, self.right, self.btm = 20, 20, 550, 330
         
-        railWayPoints = [(550, 20), (20, 20), (20, 330), (550, 330)]
-        self.railWay = agent.AgentRailWay(self, -1, headPos, railWayPoints[::-1])
+        railWayPoints = [(550, 20), (20, 20), (20, 330),
+                         (130, 330), (180, 390), (500, 390), (550, 330)]
+        self.railWay = agent.AgentRailWay(self, -1, headPos, railWayPoints)
 
         # set the sensor position.
         # Id of the sensor which detected the train passing.
@@ -155,7 +156,7 @@ class PanelMap(wx.Panel):
         #for point in self.trainPts:
         
         for point in self.railWay.getPos():
-            dc.DrawRectangle(point[0]-7, point[1]-7, 19, 19)
+            dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)
 
         # High light the sensor which detected the train.
         dc.SetBrush(wx.Brush('GRAY'))

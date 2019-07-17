@@ -18,7 +18,7 @@ print("Current working directory is : %s" %dirpath)
 APP_NAME = 'RailWay PLC Control Hub'
 
 #------<CONSTANTS>-------------------------------------------------------------
-BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg.png"])
+BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg1.png"])
 WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
 HTPNG_PATH = "".join([dirpath, "\\img\\hitPPl.png"])
 LTPNG_PATH = "".join([dirpath, "\\img\\left.png"])
