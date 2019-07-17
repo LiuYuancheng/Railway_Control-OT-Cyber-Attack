@@ -18,6 +18,7 @@ import time
 from datetime import datetime
 import railwayGlobal as gv 
 import railwayPanel as rwp
+import railwayPanelMap as rwpm 
 
 PERIODIC = 300
 
@@ -74,7 +75,7 @@ class railWayHubFrame(wx.Frame):
 
         vsizer.Add(nb, flag=flagsR, border=2)
         # Row idx = 1 : set the train map panel
-        self.mapPanel = rwp.PanelMap(self)
+        self.mapPanel = rwpm.PanelMap(self)
         gv.iMapPanel = self.mapPanel
         vsizer.Add(self.mapPanel, flag=flagsR, border=2)
         self.SetSizer(vsizer)

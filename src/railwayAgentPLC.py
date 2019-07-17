@@ -10,6 +10,7 @@
 # Copyright:   YC
 # License:     YC
 #-----------------------------------------------------------------------------
+import math
 import railwayGlobal as gv 
 
 #-----------------------------------------------------------------------------
@@ -48,14 +49,33 @@ class AgentPLC(object):
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
-class AgentSensor(object):
+class AgentTarget(object):
+
+    def __init__(self, parent, tgtID, pos):
+        self.parent = parent
+        self.id = tgtID
+        self.pos = pos 
+
+    def getID(self):
+        return self.id
+    
+    def getPos(self):
+        return self.pos
+    
+    def checkNear(self, posX, posY, threshold):
+        """ Check whether a point is near the selected point."""
+        dist = math.sqrt((self.pos[0] - posX)**2 + (self.pos[1] - posY)**2)
+        return dist <= threshold
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class AgentSensor(AgentTarget):
     """ Object hook to control the sensor."""
     def __init__(self, parent, idx, pos, lineIdx, plc=None):
-        self.parent = parent
+        AgentTarget.__init__(self, parent, idx, pos)
         # sensor unique ID -1 for auto set.
         self.sensorID = gv.iSensorCount if idx < gv.iSensorCount else idx 
         gv.iSensorCount += 1 
-        self.pos = pos
         self.lineIdx = lineIdx
         self.plc = plc # The PLC sensor hooked to. 
         self.actFlag = 0 # sensor active flag.
@@ -66,9 +86,6 @@ class AgentSensor(object):
         if flag != self.actFlag: 
             self.actFlag = flag
             self.feedBackPLC()
-
-    def getSensorPos(self):
-        return self.pos
 
     #-----------------------------------------------------------------------------
     def getSensorState(self):
