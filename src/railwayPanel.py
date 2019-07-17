@@ -17,7 +17,7 @@ import time
 import math
 import random
 import railwayGlobal as gv 
-import railwayAgentPLC as agent
+import railwayAgent as agent
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

@@ -67,6 +67,50 @@ class AgentTarget(object):
         dist = math.sqrt((self.pos[0] - posX)**2 + (self.pos[1] - posY)**2)
         return dist <= threshold
 
+
+class AgentRailWay(AgentTarget):
+
+    def __init__(self, parent, idx, pos, railwayPts):
+        """
+        """
+        AgentTarget.__init__(self, parent, idx, pos)
+        self.railwayPts = railwayPts
+        # init the train points
+        self.pos = [pos] + [[pos[0], pos[1] + 20*(i+1)] for i in range(4)]
+        # The train next distination index
+        self.trainDistList = [0]*len(self.pos)
+        self.trainSpeed = 10    # train speed: pixel/periodic loop
+        self.direction = 0      # 0 - clockwise, 1 - anticlockwise
+
+    def setTrainSpeed(self, speed, direction=None):
+        if not direction is None: 
+            self.direction = direction
+        self.trainSpeed = speed
+
+    def updateTrainPos(self):
+        for i, trainPt in enumerate(self.pos):
+            nextPtIdx = self.trainDistList[i]
+            nextPt = list(self.railwayPts[nextPtIdx])
+            if trainPt == nextPt:
+                # Update the next train distination.
+                nextPtIdx = self.trainDistList[i] = (nextPtIdx + 1) % len(self.railwayPts)
+                nextPt = self.railwayPts[nextPtIdx]
+
+            # move the train to the point.
+            x, y = 0, 0
+            if nextPt[0] > trainPt[0]:
+                x = self.trainSpeed
+            elif nextPt[0] < trainPt[0]:
+                x = -self.trainSpeed
+
+            if nextPt[1] > trainPt[1]:
+                y = self.trainSpeed
+            elif nextPt[1] < trainPt[1]:
+                y = -self.trainSpeed
+                
+            trainPt[0] += x 
+            trainPt[1] += y 
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class AgentSensor(AgentTarget):

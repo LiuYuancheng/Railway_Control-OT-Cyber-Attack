@@ -15,7 +15,7 @@ import wx
 import math
 import railwayGlobal as gv 
 import railwayPanel as rwp
-import railwayAgentPLC as agent
+import railwayAgent as agent
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -41,6 +41,10 @@ class PanelMap(wx.Panel):
             [[headPos[0], headPos[1] + 20*(i+1)] for i in range(4)]
         # set the train moving range.
         self.left, self.top, self.right, self.btm = 20, 20, 550, 330
+        
+        railWayPoints = [(550, 20), (20, 20), (20, 330), (550, 330)]
+        self.railWay = agent.AgentRailWay(self, -1, headPos, railWayPoints[::-1])
+
         # set the sensor position.
         # Id of the sensor which detected the train passing.
         self.dockCount = 0       # flag to identify train in the station. 
@@ -147,8 +151,12 @@ class PanelMap(wx.Panel):
         # Draw the train on the map.
         trainColor = 'RED' if self.tranState == -1 else '#CE8349'
         dc.SetBrush(wx.Brush(trainColor))
-        for point in self.trainPts:
+        
+        #for point in self.trainPts:
+        
+        for point in self.railWay.getPos():
             dc.DrawRectangle(point[0]-7, point[1]-7, 19, 19)
+
         # High light the sensor which detected the train.
         dc.SetBrush(wx.Brush('GRAY'))
         for sensor in self.sensorList:
@@ -266,7 +274,8 @@ class PanelMap(wx.Panel):
     #-----------------------------------------------------------------------------
     def checkSensor(self):
         """ Check which sensor has detected the train pass."""
-        head, tail = self.trainPts[0], self.trainPts[-1]
+        trainPts = self.railWay.getPos()
+        head, tail = trainPts[0], trainPts[-1]
         l, r = min(head[0], tail[0]), max(head[0], tail[0])
         t, b = min(head[1], tail[1]), max(head[1], tail[1])
 
@@ -287,6 +296,8 @@ class PanelMap(wx.Panel):
         """ periodicly call back to do needed calcualtion/panel update"""
         # Set the detect sensor status related to PLC status
         self.updateTrainPos()
+        
+
         sensorid = self.checkSensor()
         if self.sensorid != sensorid:
             [idx, state] =[self.sensorid, 0] if self.sensorid >= 0 and sensorid <= 0 else [sensorid, 1]
@@ -318,8 +329,9 @@ class PanelMap(wx.Panel):
         # make the count in side the range. 
         self.gateCount = min(15, max(0, self.gateCount))
         # Check whether train in side the station.
-        head = self.trainPts[0]
-
+        #head = self.trainPts[0]
+        train = self.railWay.getPos()
+        head = train[0]
         if head[0] == self.right and head[1] == self.stationRg[0] and self.dockCount == 0: 
             print("Train has got to the station.wait for 10s for people get in.")
             self.dockCount = 20
@@ -339,15 +351,7 @@ class PanelMap(wx.Panel):
     def updateTrainPos(self):
         """ update the train position."""
         if self.dockCount != 0: return
-        for point in self.trainPts: 
-            if point[0] == self.right and point[1] != self.top:
-                point[1] -= 10
-            elif point[1] == self.top and point[0] != self.left:
-                point[0] -= 10
-            elif point[0] == self.left and point[1] != self.btm:
-                point[1] += 10
-            elif point[1] == self.btm and point[0] != self.right:
-                point[0] += 10
+        self.railWay.updateTrainPos()
         
     #-----------------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):
