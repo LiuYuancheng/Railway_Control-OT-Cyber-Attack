@@ -115,6 +115,45 @@ class AgentRailWay(AgentTarget):
             trainPt[1] += y 
     
 
+class AgentGate(AgentTarget):
+    def __init__(self, parent, idx, pos, direc, opened):
+        AgentTarget.__init__(self, parent, idx, pos)
+        self.direcH = direc
+        self.doorPts = []
+        self.gateCount = 15 if opened else 0
+        self.getGatePts()
+
+    def getGatePts(self):
+        # Horizontal gate
+        x, y = self.pos[0], self.pos[1]
+        if self.direcH:
+            self.doorPts = [(x-self.gateCount, y), (x+self.gateCount, y), (x-self.gateCount-20, y), (x+self.gateCount+20, y)]
+        else:
+            self.doorPts = [(x, y-self.gateCount), (x, y+self.gateCount), (x, y-self.gateCount-20), (x, y+self.gateCount+20)]
+        return self.doorPts
+
+    def moveDoor(self, openFg=None):
+        """ return:
+            0 - mid.
+            1 - total open position
+            2 - total closed position
+        """
+        if openFg is None: return
+        
+        if openFg:
+            if self.gateCount == 15:
+                return 1
+            self.gateCount += 3
+            return 0 
+        else:
+            if self.gateCount == 0:
+                return 2
+            self.gateCount -= 3
+            return 0 
+
+
+
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class AgentSensor(AgentTarget):

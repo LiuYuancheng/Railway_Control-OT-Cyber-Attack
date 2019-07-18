@@ -54,7 +54,7 @@ class PanelMap(wx.Panel):
         # Id of the sensor which detected the train passing.
         self.dockCount = 0       # flag to identify train in the station. 
         self.stationRg = (110, 210) # train station range.
-        self.attackPts = [(340, 110), (145, 80), (90, 177), (156, 272), (286, 272), (412, 272) ]
+        self.attackPts = [(340, 110), (145, 80), (90, 177), (156, 272), (286, 272), (412, 272), (350,380)]
         self.selectedPts = None
         self.sensorid = -1
         self.msgPop = True
@@ -68,8 +68,14 @@ class PanelMap(wx.Panel):
         self.Bind(wx.EVT_LEFT_DOWN, self.onClick)
         self.timeCount = 166 # 50 second.
         self.lightOn = True
-        self.forkSt = True # Railway fork control.
+        self.forkSt = False # Railway fork control.
         self.fordWide = 4   
+
+        # define the gates
+        self.gate1 = agent.AgentGate(self, -1, (265, 7), True, True )
+        self.gate2 = agent.AgentGate(self, -1, (265, 40), True, True )
+        self.gate3 = agent.AgentGate(self, -1, (145, 346), True, False )
+        self.gate4 = agent.AgentGate(self, -1, (165, 330), False, True )
 
     #-----------------------------------------------------------------------------
     def addSensors(self):
@@ -182,7 +188,6 @@ class PanelMap(wx.Panel):
         self.DrawGate(dc)
         self.DrawStation(dc)
 
- 
         if self.forkSt: 
             dc.DrawBitmap(self.forkStbitmap, 105, 321)
         else:
@@ -213,7 +218,7 @@ class PanelMap(wx.Panel):
     def DrawGate(self, dc):
         """ Draw the pedestrians walking gate for passing the railway."""
         # Draw the bridge(left and right)
-        if self.gateCount == 15 :
+        if self.gate1.gateCount == 15 :
             dc.SetPen(wx.Pen('BLACK', width=1, style=wx.PENSTYLE_DOT))
             dc.SetBrush(wx.Brush(wx.Colour('Black')))
             dc.DrawRectangle(250, 9, 30, 30)
@@ -229,19 +234,39 @@ class PanelMap(wx.Panel):
         dc.SetPen(wx.Pen('GREEN', width=1, style=wx.PENSTYLE_SOLID))
         dc.DrawLine(294, 80, 294, 110)
 
-        penColor = 'RED' if self.gateCount == 0 else 'GREEN'
+        penColor = 'RED' if self.gate1.gateCount == 0 else 'GREEN'
         dc.SetPen(wx.Pen(penColor, width=1, style=wx.PENSTYLE_DOT))
         dc.DrawLine(250, 0, 250, 80)
         dc.DrawLine(280, 0, 280, 50)
         # Draw the pedestrians block door
         dc.SetPen(wx.Pen(penColor, width=2, style=wx.PENSTYLE_SOLID))
-        dc.DrawLine(265+self.gateCount, 7, 265+self.gateCount+15, 7)
-        dc.DrawLine(265-self.gateCount, 7, 265-self.gateCount-15, 7)
-        dc.DrawLine(265+self.gateCount, 37, 265+self.gateCount+15, 37)
-        dc.DrawLine(265-self.gateCount, 37, 265-self.gateCount-15, 37)
+        [li,ri,lo,ro] = self.gate1.getGatePts()
+        dc.DrawLine(li[0], li[1], lo[0], lo[1])
+        dc.DrawLine(ri[0], ri[1], ro[0], ro[1])
+        
+        [li,ri,lo,ro] = self.gate2.getGatePts()
+        dc.DrawLine(li[0], li[1], lo[0], lo[1])
+        dc.DrawLine(ri[0], ri[1], ro[0], ro[1])
+
+        penColor = 'RED' if self.forkSt else 'GREEN'
+        dc.SetPen(wx.Pen(penColor, width=2, style=wx.PENSTYLE_SOLID))
+        [li,ri,lo,ro] = self.gate3.getGatePts()
+        dc.DrawLine(li[0], li[1], lo[0], lo[1])
+        dc.DrawLine(ri[0], ri[1], ro[0], ro[1])
+
+        penColor = 'RED' if not self.forkSt else 'GREEN'
+        dc.SetPen(wx.Pen(penColor, width=2, style=wx.PENSTYLE_SOLID))
+        [li,ri,lo,ro] = self.gate4.getGatePts()
+        dc.DrawLine(li[0], li[1], lo[0], lo[1])
+        dc.DrawLine(ri[0], ri[1], ro[0], ro[1])
+
+        #dc.DrawLine(265+self.gateCount, 7, 265+self.gateCount+15, 7)
+        #dc.DrawLine(265-self.gateCount, 7, 265-self.gateCount-15, 7)
+        #dc.DrawLine(265+self.gateCount, 37, 265+self.gateCount+15, 37)
+        #dc.DrawLine(265-self.gateCount, 37, 265-self.gateCount-15, 37)
         # Draw the pedestrians signal.
         #print(self.sensorid)
-        if self.toggle and self.gateCount == 15:
+        if self.toggle and self.gate1.gateCount == 15:
             if self.sensorid == 11 or self.gateDanger:
                 dc.DrawBitmap(self.hitbitmap, 250, 7)
                 if not self.gateDanger: 
@@ -318,10 +343,22 @@ class PanelMap(wx.Panel):
             self.sensorid = sensorid
         # Start to close the gate.
         if self.sensorid == 0 and self.hakedSensorID != 0 : 
-            self.gateCount -= 3
-        elif self.sensorid == 1: 
-            self.gateCount += 3
+            self.gate1.moveDoor(openFg=False)
+            #self.gateCount -= 3
+            self.gate2.moveDoor(openFg=False)
+        elif self.sensorid == 1:
+            self.gate1.moveDoor(openFg=True)
+            #self.gateCount += 3
+            self.gate2.moveDoor(openFg=True)
         
+        if self.forkSt:
+            self.gate3.moveDoor(openFg=False)
+            self.gate4.moveDoor(openFg=True)
+        else:
+            self.gate3.moveDoor(openFg=True)
+            self.gate4.moveDoor(openFg=False)
+
+
         if self.sensorid == 0:
             if gv.iDetailPanel:
                 gv.iDetailPanel.updateState(origalV=1)
@@ -336,6 +373,7 @@ class PanelMap(wx.Panel):
 
         # make the count in side the range. 
         self.gateCount = min(15, max(0, self.gateCount))
+
         # Check whether train in side the station.
         #head = self.trainPts[0]
         train = self.railWay.getPos()
