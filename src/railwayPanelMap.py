@@ -30,6 +30,8 @@ class PanelMap(wx.Panel):
         self.hitbitmap = wx.Bitmap(gv.HTPNG_PATH)
         self.passbitmap = wx.Bitmap(gv.LPJPG_PATH)
         self.stopbitmap = wx.Bitmap(gv.LSJPG_PATH)
+        self.forkStbitmap = wx.Bitmap(gv.FSJPG_PATH)
+        self.forkRtbitmap = wx.Bitmap(gv.FRJPG_PATH)
 
         #self.leftTimge = wx.Image(png)
         self.toggle = False     # Display flash toggle flag.
@@ -41,11 +43,13 @@ class PanelMap(wx.Panel):
             [[headPos[0], headPos[1] + 20*(i+1)] for i in range(4)]
         # set the train moving range.
         self.left, self.top, self.right, self.btm = 20, 20, 550, 330
-        
         railWayPoints = [(550, 20), (20, 20), (20, 330),
-                         (130, 330), (180, 390), (500, 390), (550, 330)]
-        self.railWay = agent.AgentRailWay(self, -1, headPos, railWayPoints)
+                         (130, 330), (550, 330)]
 
+        #railWayPoints = [(550, 20), (20, 20), (20, 330),
+        #                 (130, 330), (180, 390), (500, 390), (550, 330)]
+        self.railWay = agent.AgentRailWay(self, -1, headPos, railWayPoints)
+        gv.iRailWay = self.railWay
         # set the sensor position.
         # Id of the sensor which detected the train passing.
         self.dockCount = 0       # flag to identify train in the station. 
@@ -64,6 +68,8 @@ class PanelMap(wx.Panel):
         self.Bind(wx.EVT_LEFT_DOWN, self.onClick)
         self.timeCount = 166 # 50 second.
         self.lightOn = True
+        self.forkSt = True # Railway fork control.
+        self.fordWide = 4   
 
     #-----------------------------------------------------------------------------
     def addSensors(self):
@@ -175,6 +181,13 @@ class PanelMap(wx.Panel):
         self.DrawAttackPt(dc)
         self.DrawGate(dc)
         self.DrawStation(dc)
+
+ 
+        if self.forkSt: 
+            dc.DrawBitmap(self.forkStbitmap, 105, 321)
+        else:
+            dc.DrawBitmap(self.forkRtbitmap, 105, 321)
+        
         # Update the display flash toggle flag. 
         self.toggle = not self.toggle
 

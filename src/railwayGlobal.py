@@ -26,6 +26,8 @@ EMGST_PATH = "".join([dirpath, "\\img\\emg.png"])
 RECOV_PATH = "".join([dirpath, "\\img\\rec.png"])
 LPJPG_PATH = "".join([dirpath, "\\img\\Ppass.jpg"])   # light for people pass 
 LSJPG_PATH = "".join([dirpath, "\\img\\Pstop.jpg"]) 
+FSJPG_PATH = "".join([dirpath, "\\img\\forkSt.png"]) 
+FRJPG_PATH = "".join([dirpath, "\\img\\forkRt.png"]) 
 
 # PLC basic config: (type, IP address, port, input_#, output_#)
 PLC_CFG = {
@@ -36,7 +38,7 @@ PLC_CFG = {
 
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
 # Set the global reference here.
-
+iRailWay = None
 iPlcPanelList = []  # Plc panel list. 
 iMapPanel = None    # History chart panel.
 iTrainPanel = None  # Train control panel. 

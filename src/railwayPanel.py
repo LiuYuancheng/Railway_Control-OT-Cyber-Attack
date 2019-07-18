@@ -196,6 +196,19 @@ class PanelPLC(wx.Panel):
             else:
                 gv.iMapPanel.lightOn = 1
                 gv.iMapPanel.updateDisplay()
+        elif str(obj.GetName()) == 'PLC1 [m221]:0':
+            if lbtext == 'ON':
+                railWayPoints = [(550, 20), (20, 20), (20, 330),
+                         (130, 330), (180, 390), (500, 390), (550, 330)]
+                gv.iRailWay.setRailWayPts(railWayPoints)
+                gv.iMapPanel.forkSt = False
+
+            else:
+                railWayPoints = [(550, 20), (20, 20), (20, 330),
+                         (130, 330), (550, 330)]
+                gv.iRailWay.setRailWayPts(railWayPoints)
+                gv.iMapPanel.forkSt = True
+            gv.iMapPanel.fordWide = 0
         else:
             gv.iMapPanel.lightOn = 0
 
