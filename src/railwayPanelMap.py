@@ -272,19 +272,13 @@ class PanelMap(wx.Panel):
             dc.DrawBitmap(img, 564, 145)
             self.timeCount = 166
 
-    #-----------------------------------------------------------------------------
+   #-----------------------------------------------------------------------------
     def checkSensor(self):
         """ Check which sensor has detected the train pass."""
-        trainPts = self.railWay.getPos()
-        head, tail = trainPts[0], trainPts[-1]
-        l, r = min(head[0], tail[0]), max(head[0], tail[0])
-        t, b = min(head[1], tail[1]), max(head[1], tail[1])
-
-        for sensor in self.sensorList:
-            sensorPos = sensor.pos
-            if  l <= sensorPos[0] <= r and t<= sensorPos[1] <=b:
-                sensor.setSensorState(1)
-                return sensor.sensorID # return the sensor index
+        for trainPts in self.railWay.getPos():
+            for sensor in self.sensorList:
+                if sensor.checkNear(trainPts[0], trainPts[1], 10):
+                    return sensor.sensorID # return the sensor index
         return -1 # return -1 if there is no sensor detected. 
 
     #-----------------------------------------------------------------------------

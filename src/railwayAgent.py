@@ -87,6 +87,9 @@ class AgentRailWay(AgentTarget):
             self.direction = direction
         self.trainSpeed = speed
 
+    def setRailWayPts(self, railwayPts):
+        self.railwayPts = railwayPts
+
     def updateTrainPos(self):
         for i, trainPt in enumerate(self.pos):
             nextPtIdx = self.trainDistList[i]
@@ -110,6 +113,7 @@ class AgentRailWay(AgentTarget):
                 
             trainPt[0] += x 
             trainPt[1] += y 
+    
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
