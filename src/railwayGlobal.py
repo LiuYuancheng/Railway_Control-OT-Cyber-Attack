@@ -28,6 +28,7 @@ LPJPG_PATH = "".join([dirpath, "\\img\\Ppass.jpg"])   # light for people pass
 LSJPG_PATH = "".join([dirpath, "\\img\\Pstop.jpg"]) 
 FSJPG_PATH = "".join([dirpath, "\\img\\forkSt.png"]) 
 FRJPG_PATH = "".join([dirpath, "\\img\\forkRt.png"]) 
+CLPNG_PATH = "".join([dirpath, "\\img\\clash.png"]) 
 
 # PLC basic config: (type, IP address, port, input_#, output_#)
 PLC_CFG = {

@@ -32,6 +32,7 @@ class PanelMap(wx.Panel):
         self.stopbitmap = wx.Bitmap(gv.LSJPG_PATH)
         self.forkStbitmap = wx.Bitmap(gv.FSJPG_PATH)
         self.forkRtbitmap = wx.Bitmap(gv.FRJPG_PATH)
+        self.clashbitmap = wx.Bitmap(gv.CLPNG_PATH)
 
         #self.leftTimge = wx.Image(png)
         self.toggle = False     # Display flash toggle flag.
@@ -50,6 +51,14 @@ class PanelMap(wx.Panel):
         #                 (130, 330), (180, 390), (500, 390), (550, 330)]
         self.railWay = agent.AgentRailWay(self, -1, headPos, railWayPoints)
         gv.iRailWay = self.railWay
+
+
+        headPos = [130, 390]  # train station start point(train head)
+        self.trainPts = [[headPos[0]-10*(i), headPos[1] ] for i in range(4)]
+
+        self.railWay2 = agent.AgentRailWay(self, -1, headPos, [(130, 390), (550,390)])
+        self.railWay2.pos = self.trainPts
+
         # set the sensor position.
         # Id of the sensor which detected the train passing.
         self.dockCount = 0       # flag to identify train in the station. 
@@ -69,8 +78,10 @@ class PanelMap(wx.Panel):
         self.timeCount = 166 # 50 second.
         self.lightOn = True
         self.forkSt = False # Railway fork control.
-        self.fordWide = 4   
+        self.fordWide = 4
 
+        self.train2Lock = False   
+        self.trainClash = False
         # define the gates
         self.gate1 = agent.AgentGate(self, -1, (265, 7), True, True )
         self.gate2 = agent.AgentGate(self, -1, (265, 40), True, True )
@@ -161,14 +172,19 @@ class PanelMap(wx.Panel):
         """ Draw the whole panel. """
         dc = wx.PaintDC(self)
         dc.DrawBitmap(self.bitmap, 1, 1)
-        # Draw the train on the map.
+        # Draw the train1 on the map.
         trainColor = 'RED' if self.tranState == -1 else '#CE8349'
         dc.SetBrush(wx.Brush(trainColor))
-        
-        #for point in self.trainPts:
-        
         for point in self.railWay.getPos():
             dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)
+        # Draw the train2 on the map.
+        trainColor = 'RED' if (self.train2Lock or self.trainClash) else '#FFC000'
+        dc.SetBrush(wx.Brush(trainColor))
+        
+        for i, point in enumerate(self.railWay2.getPos()):
+            dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)
+            if self.trainClash and i ==1:
+                dc.DrawBitmap(self.clashbitmap, point[0]-15, point[1]-15)
 
         # High light the sensor which detected the train.
         dc.SetBrush(wx.Brush('GRAY'))
@@ -188,10 +204,11 @@ class PanelMap(wx.Panel):
         self.DrawGate(dc)
         self.DrawStation(dc)
 
-        if self.forkSt: 
-            dc.DrawBitmap(self.forkStbitmap, 105, 321)
-        else:
-            dc.DrawBitmap(self.forkRtbitmap, 105, 321)
+        if self.toggle:
+            if self.forkSt: 
+                dc.DrawBitmap(self.forkStbitmap, 105, 321)
+            else:
+                dc.DrawBitmap(self.forkRtbitmap, 105, 321)
         
         # Update the display flash toggle flag. 
         self.toggle = not self.toggle
@@ -319,6 +336,17 @@ class PanelMap(wx.Panel):
                     return sensor.sensorID # return the sensor index
         return -1 # return -1 if there is no sensor detected. 
 
+    def checkClash(self):
+        for trainPts in self.railWay.getPos():
+            for trainPts2 in self.railWay2.getPos():
+                clashSensor = agent.AgentTarget(self, -1, trainPts2)
+                if clashSensor.checkNear(trainPts[0], trainPts[1], 10):
+                    return True
+                clashSensor = None
+        return False
+
+
+
     #-----------------------------------------------------------------------------
     def getTrainPos(self):
         """ return the current train position."""
@@ -329,9 +357,18 @@ class PanelMap(wx.Panel):
         """ periodicly call back to do needed calcualtion/panel update"""
         # Set the detect sensor status related to PLC status
         self.updateTrainPos()
-        
+        if not self.train2Lock and not self.trainClash:
+            self.railWay2.updateTrainPos()
 
         sensorid = self.checkSensor()
+        # Check whether 2 train clashed.
+        if not self.forkSt: 
+            self.trainClash = self.checkClash()
+            if self.trainClash:
+                gv.iEmgStop = True
+                wx.MessageBox('Train Accident Happened!', 'Caution!', wx.OK | wx.ICON_ERROR)
+                gv.iEmgStop = False
+
         if self.sensorid != sensorid:
             [idx, state] =[self.sensorid, 0] if self.sensorid >= 0 and sensorid <= 0 else [sensorid, 1]
             # get related plc Idx 
@@ -398,6 +435,7 @@ class PanelMap(wx.Panel):
         """ update the train position."""
         if self.dockCount != 0: return
         self.railWay.updateTrainPos()
+        
         
     #-----------------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):
