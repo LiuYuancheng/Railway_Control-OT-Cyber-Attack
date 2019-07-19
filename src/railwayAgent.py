@@ -67,6 +67,14 @@ class AgentTarget(object):
         dist = math.sqrt((self.pos[0] - posX)**2 + (self.pos[1] - posY)**2)
         return dist <= threshold
 
+class AgentAttackPt(AgentTarget):
+
+    def __init__(self, parent, idx, pos, attType):
+        """ The attack point 
+        """
+        AgentTarget.__init__(self, parent, idx, pos)
+        self.attType = attType # Attack point
+
 
 class AgentRailWay(AgentTarget):
 
