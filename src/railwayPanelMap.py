@@ -339,7 +339,7 @@ class PanelMap(wx.Panel):
     def checkClash(self):
         for trainPts in self.railWay.getPos():
             for trainPts2 in self.railWay2.getPos():
-                clashSensor = agent.AgentTarget(self, -1, trainPts2)
+                clashSensor = agent.AgentTarget(self, -1, trainPts2, 'T')
                 if clashSensor.checkNear(trainPts[0], trainPts[1], 10):
                     return True
                 clashSensor = None

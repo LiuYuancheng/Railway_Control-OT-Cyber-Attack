@@ -82,7 +82,7 @@ class AgentAttackPt(AgentTarget):
     def __init__(self, parent, idx, pos, attType):
         """ The attack point 
         """
-        AgentTarget.__init__(self, parent, idx, pos, 'AP')
+        AgentTarget.__init__(self, parent, idx, pos, ATTPT_TYPE)
         self.attType = attType # Attack point
 
 
@@ -91,7 +91,7 @@ class AgentRailWay(AgentTarget):
     def __init__(self, parent, idx, pos, railwayPts):
         """
         """
-        AgentTarget.__init__(self, parent, idx, pos, 'RW')
+        AgentTarget.__init__(self, parent, idx, pos, RAYWAY_TYPE)
         self.railwayPts = railwayPts
         # init the train points
         self.pos = [pos] + [[pos[0], pos[1] + 10*(i+1)] for i in range(6)]
@@ -135,7 +135,7 @@ class AgentRailWay(AgentTarget):
 
 class AgentGate(AgentTarget):
     def __init__(self, parent, idx, pos, direc, opened):
-        AgentTarget.__init__(self, parent, idx, pos, 'GT')
+        AgentTarget.__init__(self, parent, idx, pos, GATE_TYPE)
         self.direcH = direc
         self.doorPts = []
         self.gateCount = 15 if opened else 0
@@ -177,7 +177,7 @@ class AgentGate(AgentTarget):
 class AgentSensor(AgentTarget):
     """ Object hook to control the sensor."""
     def __init__(self, parent, idx, pos, lineIdx, plc=None):
-        AgentTarget.__init__(self, parent, idx, pos, 'SS')
+        AgentTarget.__init__(self, parent, idx, pos, SENSOR_TYPE)
         # sensor unique ID -1 for auto set.
         self.sensorID = gv.iSensorCount if idx < gv.iSensorCount else idx 
         gv.iSensorCount += 1 
