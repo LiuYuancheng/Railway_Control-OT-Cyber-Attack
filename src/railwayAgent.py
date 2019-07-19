@@ -13,6 +13,12 @@
 import math
 import railwayGlobal as gv 
 
+
+RAYWAY_TYPE = 'RW'
+SENSOR_TYPE = 'SS'
+GATE_TYPE = 'GT'
+ATTPT_TYPE = 'AP'
+
 #-----------------------------------------------------------------------------
 class AgentPLC(object):
     """ Object hook to control the PLC."""
@@ -51,16 +57,20 @@ class AgentPLC(object):
 #-----------------------------------------------------------------------------
 class AgentTarget(object):
 
-    def __init__(self, parent, tgtID, pos):
+    def __init__(self, parent, tgtID, pos, tType):
         self.parent = parent
         self.id = tgtID
-        self.pos = pos 
+        self.pos = pos
+        self.tType = tType #
 
     def getID(self):
         return self.id
     
     def getPos(self):
         return self.pos
+
+    def getType(self):
+        return self.tType
     
     def checkNear(self, posX, posY, threshold):
         """ Check whether a point is near the selected point."""
@@ -72,7 +82,7 @@ class AgentAttackPt(AgentTarget):
     def __init__(self, parent, idx, pos, attType):
         """ The attack point 
         """
-        AgentTarget.__init__(self, parent, idx, pos)
+        AgentTarget.__init__(self, parent, idx, pos, 'AP')
         self.attType = attType # Attack point
 
 
@@ -81,7 +91,7 @@ class AgentRailWay(AgentTarget):
     def __init__(self, parent, idx, pos, railwayPts):
         """
         """
-        AgentTarget.__init__(self, parent, idx, pos)
+        AgentTarget.__init__(self, parent, idx, pos, 'RW')
         self.railwayPts = railwayPts
         # init the train points
         self.pos = [pos] + [[pos[0], pos[1] + 10*(i+1)] for i in range(6)]
@@ -125,7 +135,7 @@ class AgentRailWay(AgentTarget):
 
 class AgentGate(AgentTarget):
     def __init__(self, parent, idx, pos, direc, opened):
-        AgentTarget.__init__(self, parent, idx, pos)
+        AgentTarget.__init__(self, parent, idx, pos, 'GT')
         self.direcH = direc
         self.doorPts = []
         self.gateCount = 15 if opened else 0
@@ -167,7 +177,7 @@ class AgentGate(AgentTarget):
 class AgentSensor(AgentTarget):
     """ Object hook to control the sensor."""
     def __init__(self, parent, idx, pos, lineIdx, plc=None):
-        AgentTarget.__init__(self, parent, idx, pos)
+        AgentTarget.__init__(self, parent, idx, pos, 'SS')
         # sensor unique ID -1 for auto set.
         self.sensorID = gv.iSensorCount if idx < gv.iSensorCount else idx 
         gv.iSensorCount += 1 
