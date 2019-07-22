@@ -37,27 +37,32 @@ class PanelMap(wx.Panel):
         #self.leftTimge = wx.Image(png)
         self.toggle = False     # Display flash toggle flag.
         # gate contorl parameters.(The 0-total close, 15-total open)
-        self.gateCount = 15
-        # Set the tain head and body position.
-        headPos = [550, 160]  # train station start point(train head)
-        self.trainPts = [headPos] + \
-            [[headPos[0], headPos[1] + 20*(i+1)] for i in range(4)]
-        # set the train moving range.
-        self.left, self.top, self.right, self.btm = 20, 20, 550, 330
-        railWayPoints = [(550, 20), (20, 20), (20, 330),
-                         (130, 330), (550, 330)]
 
-        #railWayPoints = [(550, 20), (20, 20), (20, 330),
-        #                 (130, 330), (180, 390), (500, 390), (550, 330)]
-        self.railWay = agent.AgentTrain(self, -1, headPos, railWayPoints)
-        gv.iRailWay = self.railWay
+        # Set the railway track A and B
+        self.trackA = [ (300, 50), (140,50), 
+                        (100, 90), (100, 150), (100, 210), (100, 330), 
+                        (140, 370), (300,370), (460, 370), 
+                        (500, 330), (500, 210), (500, 90),(460, 50)]
+        headPosA = [320, 50]
+        self.trackB = [ (300, 30), (140, 30), 
+                        (80, 90), (80, 150), (80,210), (80,330), 
+                        (140, 390), (300, 390), (460,390), 
+                        (520, 330), (520, 210), (520, 90), (460, 30)]
+
+        headPosB = [320, 30]
+
+        self.fockA = [(100, 210), (100, 330)]
+        self.fockB = [(80,210), (80,330)]
+
+
+
+        self.train = agent.AgentTrain(self, -1, headPosA, self.trackA)
+        gv.iRailWay = self.train
 
 
         headPos = [130, 390]  # train station start point(train head)
         self.trainPts = [[headPos[0]-10*(i), headPos[1] ] for i in range(4)]
-
-        self.railWay2 = agent.AgentTrain(self, -1, headPos, [(130, 390), (550,390)])
-        self.railWay2.pos = self.trainPts
+        self.train2 = agent.AgentTrain(self, -1, headPosB, self.trackB)
 
         # set the sensor position.
         # Id of the sensor which detected the train passing.
@@ -82,9 +87,12 @@ class PanelMap(wx.Panel):
 
         self.train2Lock = False   
         self.trainClash = False
+
+
+        self.dcDefPen = None
         # define the gates
-        self.gate1 = agent.AgentGate(self, -1, (265, 7), True, True )
-        self.gate2 = agent.AgentGate(self, -1, (265, 40), True, True )
+        self.gate1 = agent.AgentGate(self, -1, (300, 365), True, True )
+        self.gate2 = agent.AgentGate(self, -1, (300, 395), True, True )
         self.gate3 = agent.AgentGate(self, -1, (145, 346), True, False )
         self.gate4 = agent.AgentGate(self, -1, (165, 330), False, True )
 
@@ -93,24 +101,30 @@ class PanelMap(wx.Panel):
         """ added the train detection sensors in the sensor List 
         """
         # Add the rail way sensors.
-        sensorList = [(405, 20, 0), (145, 20, 0), (20, 180, 1),
-                      (156, 330, 2), (286, 330, 2), (412, 330, 2)]
-        for item in sensorList:
-            sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
-            self.sensorList.append(sensor)
-        # Add the station sensors.
-        stSensorList = [(550, 130, 3)]
-        for item in stSensorList:
-            sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
-            self.sensorList.append(sensor)
-        # Add the train turn sensors.
-        conerSenList = [(550, 20, 3), (20, 20, 0), (20, 330, 1), (550, 330, 2)]
-        for item in conerSenList:
-            sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
+
+        
+        for item in self.trackA:
+            sensor = agent.AgentSensor(self, -1, item)
             self.sensorList.append(sensor)
 
-        gateDetector = agent.AgentSensor(self, -1, (290, 20), 0)
-        self.sensorList.append(gateDetector)
+        for item in self.trackB:
+            sensor = agent.AgentSensor(self, -1, item)
+            self.sensorList.append(sensor)
+
+
+        # Add the station sensors.
+        #stSensorList = [(550, 130, 3)]
+        #for item in stSensorList:
+        #    sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
+        #    self.sensorList.append(sensor)
+        # Add the train turn sensors.
+        #conerSenList = [(550, 20, 3), (20, 20, 0), (20, 330, 1), (550, 330, 2)]
+        #for item in conerSenList:
+        #    sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
+        #    self.sensorList.append(sensor)
+
+        #gateDetector = agent.AgentSensor(self, -1, (290, 20), 0)
+        #self.sensorList.append(gateDetector)
 
     def onClick(self, event):
         x1, y1 = event.GetPosition()
@@ -172,16 +186,38 @@ class PanelMap(wx.Panel):
         """ Draw the whole panel. """
         dc = wx.PaintDC(self)
         dc.DrawBitmap(self.bitmap, 1, 1)
+        self.dcDefPen = dc.GetPen()
+        # Draw the railway. 
+        dc.SetPen(wx.Pen('WHITE', width=4, style=wx.PENSTYLE_SOLID))
+        for i in range(len(self.trackA)-1):
+            fromPt, toPt = self.trackA[i], self.trackA[i+1]
+            dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
+        fromPt, toPt = self.trackA[0], self.trackA[-1]
+        dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
+
+        for i in range(len(self.trackB)-1):
+            fromPt, toPt = self.trackB[i], self.trackB[i+1]
+            dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
+        fromPt, toPt = self.trackB[0], self.trackB[-1]
+        dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
+        # Draw the railway fork.
+
+
+
+
+
+        dc.SetPen(self.dcDefPen)
         # Draw the train1 on the map.
         trainColor = 'RED' if self.tranState == -1 else '#CE8349'
         dc.SetBrush(wx.Brush(trainColor))
-        for point in self.railWay.getPos():
+        for point in self.train.getPos():
             dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)
         # Draw the train2 on the map.
         trainColor = 'RED' if (self.train2Lock or self.trainClash) else '#FFC000'
         dc.SetBrush(wx.Brush(trainColor))
+
         
-        for i, point in enumerate(self.railWay2.getPos()):
+        for i, point in enumerate(self.train2.getPos()):
             dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)
             if self.trainClash and i ==1:
                 dc.DrawBitmap(self.clashbitmap, point[0]-15, point[1]-15)
@@ -253,8 +289,11 @@ class PanelMap(wx.Panel):
 
         penColor = 'RED' if self.gate1.gateCount == 0 else 'GREEN'
         dc.SetPen(wx.Pen(penColor, width=1, style=wx.PENSTYLE_DOT))
-        dc.DrawLine(250, 0, 250, 80)
-        dc.DrawLine(280, 0, 280, 50)
+        dc.DrawLine(285, 340, 285, 420)
+        dc.DrawLine(315, 340, 315, 420)
+
+
+
         # Draw the pedestrians block door
         dc.SetPen(wx.Pen(penColor, width=2, style=wx.PENSTYLE_SOLID))
         [li,ri,lo,ro] = self.gate1.getGatePts()
@@ -299,6 +338,20 @@ class PanelMap(wx.Panel):
     #-----------------------------------------------------------------------------
     def DrawStation(self, dc):
         """ Draw the station part"""
+
+        dc.SetPen(self.dcDefPen)
+        dc.SetBrush(wx.Brush(wx.Colour('LIGHT GRAY')))
+        
+        dc.DrawRectangle(480, 200, 15, 60)
+        dc.SetBrush(wx.Brush(wx.Colour('GRAY')))
+        dc.DrawRectangle(525, 200, 15, 60)
+        
+        return
+
+
+
+
+
         dc.SetPen(wx.Pen('BLACK', width=1, style=wx.PENSTYLE_DOT))
         dc.SetBrush(wx.Brush(wx.Colour('Black')))
         if self.dockCount == 0:    
@@ -330,15 +383,15 @@ class PanelMap(wx.Panel):
    #-----------------------------------------------------------------------------
     def checkSensor(self):
         """ Check which sensor has detected the train pass."""
-        for trainPts in self.railWay.getPos():
+        for trainPts in self.train.getPos():
             for sensor in self.sensorList:
                 if sensor.checkNear(trainPts[0], trainPts[1], 10):
                     return sensor.sensorID # return the sensor index
         return -1 # return -1 if there is no sensor detected. 
 
     def checkClash(self):
-        for trainPts in self.railWay.getPos():
-            for trainPts2 in self.railWay2.getPos():
+        for trainPts in self.train.getPos():
+            for trainPts2 in self.train2.getPos():
                 clashSensor = agent.AgentTarget(self, -1, trainPts2, 'T')
                 if clashSensor.checkNear(trainPts[0], trainPts[1], 10):
                     return True
@@ -358,7 +411,7 @@ class PanelMap(wx.Panel):
         # Set the detect sensor status related to PLC status
         self.updateTrainPos()
         if not self.train2Lock and not self.trainClash:
-            self.railWay2.updateTrainPos()
+            self.train2.updateTrainPos()
 
         sensorid = self.checkSensor()
         # Check whether 2 train clashed.
@@ -409,11 +462,11 @@ class PanelMap(wx.Panel):
 
 
         # make the count in side the range. 
-        self.gateCount = min(15, max(0, self.gateCount))
+        #self.gateCount = min(15, max(0, self.gateCount))
 
         # Check whether train in side the station.
         #head = self.trainPts[0]
-        train = self.railWay.getPos()
+        train = self.train.getPos()
         head = train[0]
         if head[0] == self.right and head[1] == self.stationRg[0] and self.dockCount == 0: 
             print("Train has got to the station.wait for 10s for people get in.")
@@ -434,7 +487,7 @@ class PanelMap(wx.Panel):
     def updateTrainPos(self):
         """ update the train position."""
         if self.dockCount != 0: return
-        self.railWay.updateTrainPos()
+        self.train.updateTrainPos()
         
         
     #-----------------------------------------------------------------------------
