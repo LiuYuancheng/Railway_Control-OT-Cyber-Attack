@@ -121,7 +121,7 @@ class AgentTrain(AgentTarget):
         AgentTarget.__init__(self, parent, idx, pos, gv.RAYWAY_TYPE)
         self.railwayPts = railwayPts
         # Init the train head and tail points
-        self.pos = [[pos[0]+ 10*i, pos[1]] for i in range(6)]
+        self.pos = [[pos[0]+ 10*i, pos[1]] for i in range(5)]
         # The train next distination index for each train body.
         self.trainDistList = [0]*len(self.pos)
         self.trainSpeed = 10    # train speed: pixel/periodic loop

@@ -15,7 +15,7 @@ import os
 dirpath = os.getcwd()
 print("Current working directory is : %s" %dirpath)
 
-APP_NAME = 'RailWay PLC Control Hub'
+APP_NAME = 'RailWay PLC Control Hub V1.0'
 
 #------<CONSTANTS>-------------------------------------------------------------
 

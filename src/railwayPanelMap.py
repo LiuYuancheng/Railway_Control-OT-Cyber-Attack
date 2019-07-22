@@ -44,6 +44,7 @@ class PanelMap(wx.Panel):
                         (140, 370), (300,370), (460, 370), 
                         (500, 330), (500, 210), (500, 90),(460, 50)]
         headPosA = [320, 50]
+
         self.trackB = [ (300, 30), (140, 30), 
                         (80, 90), (80, 150), (80,210), (80,330), 
                         (140, 390), (300, 390), (460,390), 
@@ -51,18 +52,18 @@ class PanelMap(wx.Panel):
 
         headPosB = [320, 30]
 
-        self.fockA = [(100, 210), (100, 330)]
-        self.fockB = [(80,210), (80,330)]
+        self.forkA = [(100, 150), (100, 210)]
+        self.forkAOn = False
+        self.forkB = [(80, 150), (80,210)]
+        self.forkBOn = False
 
-
-
-        self.train = agent.AgentTrain(self, -1, headPosA, self.trackA)
-        gv.iRailWay = self.train
+        self.trainA = agent.AgentTrain(self, -1, headPosA, self.trackA)
+        gv.iRailWay = self.trainA
 
 
         headPos = [130, 390]  # train station start point(train head)
         self.trainPts = [[headPos[0]-10*(i), headPos[1] ] for i in range(4)]
-        self.train2 = agent.AgentTrain(self, -1, headPosB, self.trackB)
+        self.trainB = agent.AgentTrain(self, -1, headPosB, self.trackB)
 
         # set the sensor position.
         # Id of the sensor which detected the train passing.
@@ -85,7 +86,7 @@ class PanelMap(wx.Panel):
         self.forkSt = False # Railway fork control.
         self.fordWide = 4
 
-        self.train2Lock = False   
+        self.trainBLock = False   
         self.trainClash = False
 
 
@@ -95,6 +96,8 @@ class PanelMap(wx.Panel):
         self.gate2 = agent.AgentGate(self, -1, (300, 395), True, True )
         self.gate3 = agent.AgentGate(self, -1, (145, 346), True, False )
         self.gate4 = agent.AgentGate(self, -1, (165, 330), False, True )
+
+        self.SetDoubleBuffered(True)
 
     #-----------------------------------------------------------------------------
     def addSensors(self):
@@ -187,47 +190,15 @@ class PanelMap(wx.Panel):
         dc = wx.PaintDC(self)
         dc.DrawBitmap(self.bitmap, 1, 1)
         self.dcDefPen = dc.GetPen()
-        # Draw the railway. 
-        dc.SetPen(wx.Pen('WHITE', width=4, style=wx.PENSTYLE_SOLID))
-        for i in range(len(self.trackA)-1):
-            fromPt, toPt = self.trackA[i], self.trackA[i+1]
-            dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
-        fromPt, toPt = self.trackA[0], self.trackA[-1]
-        dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
-
-        for i in range(len(self.trackB)-1):
-            fromPt, toPt = self.trackB[i], self.trackB[i+1]
-            dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
-        fromPt, toPt = self.trackB[0], self.trackB[-1]
-        dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
-        # Draw the railway fork.
-
-
-
-
-
-        dc.SetPen(self.dcDefPen)
-        # Draw the train1 on the map.
-        trainColor = 'RED' if self.tranState == -1 else '#CE8349'
-        dc.SetBrush(wx.Brush(trainColor))
-        for point in self.train.getPos():
-            dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)
-        # Draw the train2 on the map.
-        trainColor = 'RED' if (self.train2Lock or self.trainClash) else '#FFC000'
-        dc.SetBrush(wx.Brush(trainColor))
-
-        
-        for i, point in enumerate(self.train2.getPos()):
-            dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)
-            if self.trainClash and i ==1:
-                dc.DrawBitmap(self.clashbitmap, point[0]-15, point[1]-15)
-
+        self._drawRailWay(dc)
+        self._drawTrains(dc)
         # High light the sensor which detected the train.
+        dc.SetFont(wx.Font(7, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
         dc.SetBrush(wx.Brush('GRAY'))
         for sensor in self.sensorList:
             sensorPos = sensor.pos
             dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
-
+            dc.DrawText("s"+str(sensor.sensorID), sensorPos[0]+3, sensorPos[1]+3)
         penColor = 'GREEN' if self.toggle else 'RED'
         dc.SetBrush(wx.Brush(penColor))
         if self.sensorid >= 0:
@@ -248,6 +219,47 @@ class PanelMap(wx.Panel):
         
         # Update the display flash toggle flag. 
         self.toggle = not self.toggle
+
+
+    def _drawRailWay(self, dc):
+        # Draw the railway. 
+        dc.SetPen(wx.Pen('WHITE', width=4, style=wx.PENSTYLE_SOLID))
+        for i in range(len(self.trackA)-1):
+            fromPt, toPt = self.trackA[i], self.trackA[i+1]
+            dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
+        fromPt, toPt = self.trackA[0], self.trackA[-1]
+        dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
+
+        for i in range(len(self.trackB)-1):
+            fromPt, toPt = self.trackB[i], self.trackB[i+1]
+            dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
+        fromPt, toPt = self.trackB[0], self.trackB[-1]
+        dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
+        # Draw the railway fork.
+        dc.SetPen(wx.Pen('GREEN', width=4, style=wx.PENSTYLE_SOLID))
+        dc.DrawLine(self.forkA[0][0], self.forkA[0][1], self.forkA[1][0], self.forkA[1][1])
+        dc.DrawLine(self.forkB[0][0], self.forkB[0][1], self.forkB[1][0], self.forkB[1][1])
+
+        dc.SetPen(wx.Pen('RED', width=4, style=wx.PENSTYLE_SOLID))
+        dc.DrawLine(self.forkA[0][0], self.forkA[0][1], self.forkB[1][0], self.forkB[1][1])
+        dc.DrawLine(self.forkB[0][0], self.forkB[0][1], self.forkA[1][0], self.forkA[1][1])
+
+
+    def _drawTrains(self, dc):
+        dc.SetPen(self.dcDefPen)
+        # Draw the train1 on the map.
+        trainColor = 'RED' if self.tranState == -1 else '#CE8349'
+        dc.SetBrush(wx.Brush(trainColor))
+        for point in self.trainA.getPos():
+            dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)
+        # Draw the train2 on the map.
+        trainColor = 'RED' if (self.trainBLock or self.trainClash) else '#FFC000'
+        dc.SetBrush(wx.Brush(trainColor))
+        for i, point in enumerate(self.trainB.getPos()):
+            dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)
+            if self.trainClash and i ==1:
+                dc.DrawBitmap(self.clashbitmap, point[0]-15, point[1]-15)
+
 
     #-----------------------------------------------------------------------------
     def DrawAttackPt(self, dc):
@@ -383,15 +395,15 @@ class PanelMap(wx.Panel):
    #-----------------------------------------------------------------------------
     def checkSensor(self):
         """ Check which sensor has detected the train pass."""
-        for trainPts in self.train.getPos():
+        for trainPts in self.trainA.getPos():
             for sensor in self.sensorList:
                 if sensor.checkNear(trainPts[0], trainPts[1], 10):
                     return sensor.sensorID # return the sensor index
         return -1 # return -1 if there is no sensor detected. 
 
     def checkClash(self):
-        for trainPts in self.train.getPos():
-            for trainPts2 in self.train2.getPos():
+        for trainPts in self.trainA.getPos():
+            for trainPts2 in self.trainB.getPos():
                 clashSensor = agent.AgentTarget(self, -1, trainPts2, 'T')
                 if clashSensor.checkNear(trainPts[0], trainPts[1], 10):
                     return True
@@ -410,8 +422,8 @@ class PanelMap(wx.Panel):
         """ periodicly call back to do needed calcualtion/panel update"""
         # Set the detect sensor status related to PLC status
         self.updateTrainPos()
-        if not self.train2Lock and not self.trainClash:
-            self.train2.updateTrainPos()
+        if not self.trainBLock and not self.trainClash:
+            self.trainB.updateTrainPos()
 
         sensorid = self.checkSensor()
         # Check whether 2 train clashed.
@@ -432,11 +444,11 @@ class PanelMap(wx.Panel):
                 self.sensorList[self.sensorid].setSensorState(0)
             self.sensorid = sensorid
         # Start to close the gate.
-        if self.sensorid == 0 and self.hakedSensorID != 0 : 
+        if self.sensorid == 6 and self.hakedSensorID != 0 : 
             self.gate1.moveDoor(openFg=False)
             #self.gateCount -= 3
             self.gate2.moveDoor(openFg=False)
-        elif self.sensorid == 1:
+        elif self.sensorid == 8:
             self.gate1.moveDoor(openFg=True)
             #self.gateCount += 3
             self.gate2.moveDoor(openFg=True)
@@ -466,15 +478,6 @@ class PanelMap(wx.Panel):
 
         # Check whether train in side the station.
         #head = self.trainPts[0]
-        train = self.train.getPos()
-        head = train[0]
-        if head[0] == self.right and head[1] == self.stationRg[0] and self.dockCount == 0: 
-            print("Train has got to the station.wait for 10s for people get in.")
-            self.dockCount = 20
-        if self.dockCount > 0:
-            self.dockCount-=1
-        else:
-            self.timeCount-=1
         # Update the panel.
         self.updateDisplay()
 
@@ -487,8 +490,7 @@ class PanelMap(wx.Panel):
     def updateTrainPos(self):
         """ update the train position."""
         if self.dockCount != 0: return
-        self.train.updateTrainPos()
-        
+        self.trainA.updateTrainPos()
         
     #-----------------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):
