@@ -49,14 +49,14 @@ class PanelMap(wx.Panel):
 
         #railWayPoints = [(550, 20), (20, 20), (20, 330),
         #                 (130, 330), (180, 390), (500, 390), (550, 330)]
-        self.railWay = agent.AgentRailWay(self, -1, headPos, railWayPoints)
+        self.railWay = agent.AgentTrain(self, -1, headPos, railWayPoints)
         gv.iRailWay = self.railWay
 
 
         headPos = [130, 390]  # train station start point(train head)
         self.trainPts = [[headPos[0]-10*(i), headPos[1] ] for i in range(4)]
 
-        self.railWay2 = agent.AgentRailWay(self, -1, headPos, [(130, 390), (550,390)])
+        self.railWay2 = agent.AgentTrain(self, -1, headPos, [(130, 390), (550,390)])
         self.railWay2.pos = self.trainPts
 
         # set the sensor position.

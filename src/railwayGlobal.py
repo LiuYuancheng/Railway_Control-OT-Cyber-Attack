@@ -18,6 +18,14 @@ print("Current working directory is : %s" %dirpath)
 APP_NAME = 'RailWay PLC Control Hub'
 
 #------<CONSTANTS>-------------------------------------------------------------
+
+# Agent type 
+RAYWAY_TYPE = 'RW'
+SENSOR_TYPE = 'SS'
+GATE_TYPE = 'GT'
+ATTPT_TYPE = 'AP'
+
+
 BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg1.png"])
 WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
 HTPNG_PATH = "".join([dirpath, "\\img\\hitPPl.png"])
