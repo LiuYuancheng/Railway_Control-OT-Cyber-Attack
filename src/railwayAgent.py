@@ -70,7 +70,6 @@ class AgentPLC(object):
         except:
             print("AgentPLC:    The sensor with %s is not hooked to this PLC" %str(sensorID))
 
-
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class AgentTarget(object):
@@ -112,7 +111,6 @@ class AgentAttackPt(AgentTarget):
     def clear(self):
         self.attFlag = False 
 
-
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class AgentTrain(AgentTarget):
@@ -133,6 +131,15 @@ class AgentTrain(AgentTarget):
         self.railwayPts = self.railwayPts[::-1]
         self.trainDistList = self.trainDistList[::-1]
 
+    def checkNear(self, posX, posY, threshold):
+        """ Check whether a point is near the selected point with the 
+            input threshold value (unit: pixel).
+        """
+        for pos in self.pos:
+            dist = math.sqrt((pos[0] - posX)**2 + (pos[1] - posY)**2)
+            if  dist <= threshold: return True
+        return False
+
     def setTrainSpeed(self, speed):
         self.trainSpeed = speed
 
@@ -145,85 +152,58 @@ class AgentTrain(AgentTarget):
             # The next railway point idx train going to approch.
             nextPtIdx = self.trainDistList[i]
             nextPt = self.railwayPts[nextPtIdx]
-
             dist = math.sqrt((trainPt[0] - nextPt[0])**2 + (trainPt[1] - nextPt[1])**2)
             if dist < self.trainSpeed:
+                trainPt[0] = nextPt[0]
+                trainPt[1] = nextPt[1]
                 # Update the next train distination if the train already get its next dist.
                 nextPtIdx = self.trainDistList[i] = (nextPtIdx + 1) % len(self.railwayPts)
                 nextPt = self.railwayPts[nextPtIdx]
-                dist = math.sqrt((trainPt[0] - nextPt[0])**2 + (trainPt[1] - nextPt[1])**2)
+            else:
+                scale = float(self.trainSpeed)/float(dist)
+                trainPt[0] += int((nextPt[0]-trainPt[0])*scale)
+                trainPt[1] += int((nextPt[1]-trainPt[1])*scale) 
 
-            scale = float(self.trainSpeed)/float(dist)
-
-            x = int((nextPt[0]-trainPt[0])*scale)
-            y = int((nextPt[1]-trainPt[1])*scale)
-            trainPt[0] += x 
-            trainPt[1] += y 
-            continue
-
-            # move the train toward to the point.
-            x, y = 0, 0
-            if nextPt[0] > trainPt[0]:
-                x = self.trainSpeed
-            elif nextPt[0] < trainPt[0]:
-                x = -self.trainSpeed
-
-            if nextPt[1] > trainPt[1]:
-                y = self.trainSpeed
-            elif nextPt[1] < trainPt[1]:
-                y = -self.trainSpeed
-                
-            trainPt[0] += x 
-            trainPt[1] += y 
-
-    def checkNear(self, posX, posY, threshold):
-        """ Check whether a point is near the selected point with the 
-            input threshold value (unit: pixel).
-        """
-        for pos in self.pos:
-            dist = math.sqrt((pos[0] - posX)**2 + (pos[1] - posY)**2)
-            if  dist <= threshold: return True
-        return False
-
-
-class AgentGate(AgentTarget):
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class AgentGate(AgentTarget): 
     def __init__(self, parent, idx, pos, direc, opened):
         AgentTarget.__init__(self, parent, idx, pos, gv.GATE_TYPE)
-        self.direcH = direc
+        self.direcH = direc # True - Horizontal, False - Vertical.
+        self.gateCount = 12 if opened else 0
         self.doorPts = []
-        self.gateCount = 15 if opened else 0
         self.getGatePts()
 
     def getGatePts(self):
-        # Horizontal gate
+        """ Return the current door gate position on the map.  
+            Position list: [lift_iside, right_inside, left_outside, right_outside]
+        """
         x, y = self.pos[0], self.pos[1]
         if self.direcH:
-            self.doorPts = [(x-self.gateCount, y), (x+self.gateCount, y), (x-self.gateCount-20, y), (x+self.gateCount+20, y)]
+            self.doorPts = [(x-self.gateCount, y), 
+                            (x+self.gateCount, y), 
+                            (x-self.gateCount-15, y), 
+                            (x+self.gateCount+15, y)] 
         else:
-            self.doorPts = [(x, y-self.gateCount), (x, y+self.gateCount), (x, y-self.gateCount-20), (x, y+self.gateCount+20)]
+            self.doorPts = [(x, y-self.gateCount),
+                            (x, y+self.gateCount),
+                            (x, y-self.gateCount-15),
+                            (x, y+self.gateCount+15)]
         return self.doorPts
 
     def moveDoor(self, openFg=None):
-        """ return:
-            0 - mid.
-            1 - total open position
-            2 - total closed position
+        """ Move the door to the input state. return True if can move 
+            return false if the door has got the limitation position.
         """
-        if openFg is None: return
-        
-        if openFg:
-            if self.gateCount == 15:
-                return 1
+        if openFg is None:
+            return False
+        elif openFg:
+            if self.gateCount == 12: return False
             self.gateCount += 3
-            return 0 
         else:
-            if self.gateCount == 0:
-                return 2
+            if self.gateCount == 0: return False
             self.gateCount -= 3
-            return 0 
-
-
-
+        return True
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -234,7 +214,6 @@ class AgentSensor(AgentTarget):
         # sensor unique ID -1 for auto set.
         self.sensorID = gv.iSensorCount if idx < gv.iSensorCount else idx 
         gv.iSensorCount += 1 
-        self.lineIdx = lineIdx
         self.plc = plc # The PLC sensor hooked to. 
         self.actFlag = 0 # sensor active flag.
 
