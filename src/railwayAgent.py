@@ -233,3 +233,21 @@ class AgentSensor(AgentTarget):
         if not self.plc is None: 
             self.plc.updateInput(self.sensorID, self.actFlag)
 
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class AgentSignal(AgentTarget):
+    """ Object hook to control signal."""
+    def __init__(self, parent, idx, pos, onBitMap=None, offBitMap=None):
+        AgentTarget.__init__(self, parent, idx, pos, gv.SIGNAL_TYPE)
+        self.state = False
+        self.onBitMap = onBitMap
+        self.offBitMap = offBitMap
+        self.onFlashBM = None 
+        self.offFlashBM = None 
+
+    def setState(self, onFlag):
+        self.state = onFlag
+
+    def getState(self):
+        bitmap = self.onBitMap if self.state else self.offBitMap
+        return (self.state, bitmap)

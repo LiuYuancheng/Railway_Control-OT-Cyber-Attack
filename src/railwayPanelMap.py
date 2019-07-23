@@ -30,8 +30,6 @@ class PanelMap(wx.Panel):
         self.hitbitmap = wx.Bitmap(gv.HTPNG_PATH)
         self.passbitmap = wx.Bitmap(gv.LPJPG_PATH)
         self.stopbitmap = wx.Bitmap(gv.LSJPG_PATH)
-        self.forkStbitmap = wx.Bitmap(gv.FSJPG_PATH)
-        self.forkRtbitmap = wx.Bitmap(gv.FRJPG_PATH)
         self.clashbitmap = wx.Bitmap(gv.CLPNG_PATH)
 
         #self.leftTimge = wx.Image(png)
@@ -53,9 +51,16 @@ class PanelMap(wx.Panel):
         headPosB = [320, 30]
 
         self.forkA = [(100, 150), (100, 210)]
-        self.forkAOn = False
+        self.forkAOn = True
         self.forkB = [(80, 150), (80,210)]
-        self.forkBOn = False
+        self.forkBOn = True
+
+        self.forkASignal = agent.AgentSignal(self, -1, (55, 150), onBitMap=wx.Bitmap(gv.FSPNG_PATH), offBitMap=wx.Bitmap(gv.FBPNG_PATH))
+        self.forkASignal.setState(True)
+        self.forkBSignal = agent.AgentSignal(self, -1, (110, 150), onBitMap=wx.Bitmap(gv.FSPNG_PATH), offBitMap=wx.Bitmap(gv.FAPNG_PATH))
+        self.forkBSignal.setState(True)
+
+
 
         self.trainA = agent.AgentTrain(self, -1, headPosA, self.trackA)
         gv.iRailWay = self.trainA
@@ -210,16 +215,32 @@ class PanelMap(wx.Panel):
         self.DrawAttackPt(dc)
         self.DrawGate(dc)
         self.DrawStation(dc)
-
-        if self.toggle:
-            if self.forkSt: 
-                dc.DrawBitmap(self.forkStbitmap, 105, 321)
-            else:
-                dc.DrawBitmap(self.forkRtbitmap, 105, 321)
+        self._drawSignal(dc)
+        #if self.toggle:
+        #    if self.forkSt: 
+        #        dc.DrawBitmap(self.forkStbitmap, 105, 321)
+        #    else:
+        #        dc.DrawBitmap(self.forkRtbitmap, 105, 321)
         
         # Update the display flash toggle flag. 
         self.toggle = not self.toggle
 
+    def _drawSignal(self, dc):
+        """ draw the signals on the map.
+        """
+        dc.SetBrush(wx.Brush(wx.Colour('LIGHT GRAY')))
+        state, bitmap = self.forkASignal.getState()
+        pos = self.forkASignal.getPos()
+        dc.DrawRectangle(pos[0]-2, pos[1]-2, 22, 22)
+        if bitmap and self.toggle:
+            dc.DrawBitmap(bitmap, pos[0], pos[1])
+
+        state, bitmap = self.forkBSignal.getState()
+        pos = self.forkBSignal.getPos()
+        dc.DrawRectangle(pos[0]-2, pos[1]-2, 22, 22)
+        if bitmap and self.toggle:
+            dc.DrawBitmap(bitmap, pos[0], pos[1])
+        
 
     def _drawRailWay(self, dc):
         # Draw the railway. 
@@ -235,15 +256,31 @@ class PanelMap(wx.Panel):
             dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
         fromPt, toPt = self.trackB[0], self.trackB[-1]
         dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
-        # Draw the railway fork.
+        
+        # Draw the railway fork block part.
+        dc.SetPen(wx.Pen('WHITE', width=4, style=wx.PENSTYLE_SOLID))
+        if self.forkAOn:
+            dc.DrawLine(self.forkA[0][0], self.forkA[0][1], self.forkB[1][0], self.forkB[1][1])
+        else:
+            dc.DrawLine(self.forkA[0][0], self.forkA[0][1], self.forkA[1][0], self.forkA[1][1])
+        
+        if self.forkBOn:
+            dc.DrawLine(self.forkB[0][0], self.forkB[0][1], self.forkA[1][0], self.forkA[1][1])
+        else:
+            dc.DrawLine(self.forkB[0][0], self.forkB[0][1], self.forkB[1][0], self.forkB[1][1])
+
+        # Draw the railway fork open part.
         dc.SetPen(wx.Pen('GREEN', width=4, style=wx.PENSTYLE_SOLID))
-        dc.DrawLine(self.forkA[0][0], self.forkA[0][1], self.forkA[1][0], self.forkA[1][1])
-        dc.DrawLine(self.forkB[0][0], self.forkB[0][1], self.forkB[1][0], self.forkB[1][1])
-
-        dc.SetPen(wx.Pen('RED', width=4, style=wx.PENSTYLE_SOLID))
-        dc.DrawLine(self.forkA[0][0], self.forkA[0][1], self.forkB[1][0], self.forkB[1][1])
-        dc.DrawLine(self.forkB[0][0], self.forkB[0][1], self.forkA[1][0], self.forkA[1][1])
-
+        if self.forkAOn:
+            dc.DrawLine(self.forkA[0][0], self.forkA[0][1], self.forkA[1][0], self.forkA[1][1])
+        else:
+            dc.DrawLine(self.forkA[0][0], self.forkA[0][1], self.forkB[1][0], self.forkB[1][1])
+        
+        if self.forkBOn:
+            dc.DrawLine(self.forkB[0][0], self.forkB[0][1], self.forkB[1][0], self.forkB[1][1])
+        else:
+            dc.DrawLine(self.forkB[0][0], self.forkB[0][1], self.forkA[1][0], self.forkA[1][1])
+        
 
     def _drawTrains(self, dc):
         dc.SetPen(self.dcDefPen)

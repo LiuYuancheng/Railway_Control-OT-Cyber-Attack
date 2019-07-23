@@ -24,7 +24,7 @@ RAYWAY_TYPE = 'RW'
 SENSOR_TYPE = 'SS'
 GATE_TYPE = 'GT'
 ATTPT_TYPE = 'AP'
-
+SIGNAL_TYPE = 'SL'
 
 BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg1.png"])
 WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
@@ -33,9 +33,14 @@ LTPNG_PATH = "".join([dirpath, "\\img\\left.png"])
 EMGST_PATH = "".join([dirpath, "\\img\\emg.png"])
 RECOV_PATH = "".join([dirpath, "\\img\\rec.png"])
 LPJPG_PATH = "".join([dirpath, "\\img\\Ppass.jpg"])   # light for people pass 
-LSJPG_PATH = "".join([dirpath, "\\img\\Pstop.jpg"]) 
-FSJPG_PATH = "".join([dirpath, "\\img\\forkSt.png"]) 
-FRJPG_PATH = "".join([dirpath, "\\img\\forkRt.png"]) 
+LSJPG_PATH = "".join([dirpath, "\\img\\Pstop.jpg"])
+
+FSPNG_PATH = "".join([dirpath, "\\img\\forkOnS18.png"])
+FAPNG_PATH = "".join([dirpath, "\\img\\forkAoffS18.png"])
+FBPNG_PATH = "".join([dirpath, "\\img\\forkBoffS18.png"])
+
+FRJPG_PATH = "".join([dirpath, "\\img\\forkAoffS18.png"]) 
+
 CLPNG_PATH = "".join([dirpath, "\\img\\clash.png"]) 
 
 # PLC basic config: (type, IP address, port, input_#, output_#)
