@@ -221,6 +221,44 @@ class PanelPLC(wx.Panel):
         else:
             gv.iMapPanel.lightOn = 0
 
+class PanelSysCtrl(wx.Panel):
+    """ Train contorl panel"""
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+        self.SetBackgroundColour(wx.Colour(200, 200, 200))
+        self.powerLabel = (
+            "S100 - Powerplant Lights", 
+            "S101 - Airport Lights",
+            "S102 - Industrial Lightbox",
+            "S200 - Station Lights",
+            "S201 - Level Crossing",
+            "S202 - Residential Lightbox",
+            "S300 - Turnout Toggle",
+            "S301 - Track A Fork Power",
+            "S302 - Track B Fork Power",
+            "S303 - City LightBox")
+        
+        self.powerBtList = []
+        hsizer = self.buidUISizer()
+        self.SetSizer(hsizer)
+
+    def buidUISizer(self):
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        vsizer = wx.BoxSizer(wx.VERTICAL)
+        vsizer.Add(wx.StaticText(self, label="System Control"), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
+                                     style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        vsizer.AddSpacer(10)                       
+        for labelStr in self.powerLabel:
+            vsizer.AddSpacer(5)
+            pwtBt = wx.CheckBox(self, -1, labelStr)
+            pwtBt.SetValue(True)
+            vsizer.Add(pwtBt, flag=flagsR, border=2)
+        
+        vsizer.AddSpacer(10)
+
+        return vsizer
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -247,7 +285,7 @@ class PanelTrainCtrl(wx.Panel):
         vsizer = wx.BoxSizer(wx.VERTICAL)
         vsizer.Add(wx.StaticText(self, label="Train Control"), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(165, -1),
+        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
                                      style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
         # Row idx = 0: train state control.
@@ -279,6 +317,10 @@ class PanelTrainCtrl(wx.Panel):
                                      style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
 
+        self.simuCb2 = wx.CheckBox(self, -1 ,'Train Active')
+        vsizer.Add(self.simuCb2, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+
         # Row idx = 2: Train direction contorl
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         hbox2.Add(wx.StaticText(self, label="Direction :"), flag=flagsR, border=2)
@@ -308,22 +350,33 @@ class PanelTrainCtrl(wx.Panel):
         vsizer.Add(hbox4, flag=flagsR, border=2)
 
 
+        
+
         # Row idx = 5: Station wait time contorl
         hbox5 = wx.BoxSizer(wx.HORIZONTAL)
-        bmp = wx.Bitmap(gv.EMGST_PATH, wx.BITMAP_TYPE_ANY)
-        self.stopbtn1 = wx.BitmapButton(self, id = wx.ID_ANY, bitmap = bmp,
-         size = (bmp.GetWidth()+10, bmp.GetHeight()+10))
-
-        self.stopbtn1.Bind(wx.EVT_BUTTON, self.emgStop)
+        hbox5.AddSpacer(5)
+        bmp0 = wx.Bitmap(gv.LDSET_PATH, wx.BITMAP_TYPE_ANY)
+        self.loadbtn1 = wx.BitmapButton(self, id = wx.ID_ANY, bitmap = bmp0,
+         size = (bmp0.GetWidth()+10, bmp0.GetHeight()+10))
+        self.loadbtn1.Bind(wx.EVT_BUTTON, self.emgStop)
+        hbox5.Add(self.loadbtn1, flag=flagsR, border=2)
         
-        hbox5.Add(self.stopbtn1, flag=flagsR, border=2)
-        hbox5.AddSpacer(10)
+        hbox5.AddSpacer(5)
         bmp1 = wx.Bitmap(gv.RECOV_PATH, wx.BITMAP_TYPE_ANY)
         self.recbtn1 = wx.BitmapButton(self, id = wx.ID_ANY, bitmap = bmp1,
          size = (bmp1.GetWidth()+10, bmp1.GetHeight()+10))
         self.recbtn1.Bind(wx.EVT_BUTTON, self.emgRec)
-
         hbox5.Add(self.recbtn1, flag=flagsR, border=2)
+        hbox5.AddSpacer(5)
+        bmp = wx.Bitmap(gv.EMGST_PATH, wx.BITMAP_TYPE_ANY)
+        self.stopbtn1 = wx.BitmapButton(self, id = wx.ID_ANY, bitmap = bmp,
+         size = (bmp.GetWidth()+10, bmp.GetHeight()+10))
+        self.stopbtn1.Bind(wx.EVT_BUTTON, self.emgStop)
+        hbox5.Add(self.stopbtn1, flag=flagsR, border=2)
+
+        hbox5.AddSpacer(5)
+
+        
         vsizer.Add(hbox5, flag=flagsR, border=2)
         
 

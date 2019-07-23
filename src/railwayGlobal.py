@@ -30,8 +30,11 @@ BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg1.png"])
 WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
 HTPNG_PATH = "".join([dirpath, "\\img\\hitPPl.png"])
 LTPNG_PATH = "".join([dirpath, "\\img\\left.png"])
-EMGST_PATH = "".join([dirpath, "\\img\\emg.png"])
-RECOV_PATH = "".join([dirpath, "\\img\\rec.png"])
+
+
+LDSET_PATH = "".join([dirpath, "\\img\\loadSet32.png"])    
+EMGST_PATH = "".join([dirpath, "\\img\\emgStop32.png"])
+RECOV_PATH = "".join([dirpath, "\\img\\reset32.png"])
 
 
 

@@ -37,6 +37,45 @@ class railWayHubFrame(wx.Frame):
         vsizer = wx.BoxSizer(wx.VERTICAL)
         # Row idx = 0 : Set all hte information and feed in a wx NoteBook
         nb = wx.Notebook(self)
+
+        #sysBgPanel = wx.Panel(nb, size=(600,250))
+        #hbox0 = wx.BoxSizer(wx.HORIZONTAL)
+        #hbox0.AddSpacer(10)
+        #self.sysCtrlPanel = rwp.PanelSysCtrl(sysBgPanel)
+        #hbox0.Add(self.sysCtrlPanel, flag=flagsR, border=2)
+        #hbox0.AddSpacer(10)
+        
+        #gv.iTrainPanel = self.trainACtPanel = rwp.PanelTrainCtrl(sysBgPanel)
+        #hbox0.Add(self.trainACtPanel, flag=flagsR, border=2)
+        #hbox0.AddSpacer(10)
+
+        #self.trainBCtPanel = rwp.PanelTrainCtrl(sysBgPanel)
+        #hbox0.Add(self.trainBCtPanel, flag=flagsR, border=2)
+        #hbox0.AddSpacer(10)
+
+        #sysBgPanel.SetSizer(hbox0)
+        #nb.AddPage(sysBgPanel, "SystemCtrl")
+        sysBgPanel = wx.Panel(nb)
+        hbox3  = wx.BoxSizer(wx.HORIZONTAL)
+        hbox3.AddSpacer(10)
+        self.setPanel0 = rwp.PanelSysCtrl(sysBgPanel)
+        hbox3.Add(self.setPanel0, flag=flagsR, border=2)
+        hbox3.AddSpacer(10)
+        self.trainACtPanel = rwp.PanelTrainCtrl(sysBgPanel)
+        hbox3.Add(self.trainACtPanel, flag=flagsR, border=2)
+        hbox3.AddSpacer(10)
+        self.trainBCtPanel = rwp.PanelTrainCtrl(sysBgPanel)
+        hbox3.Add(self.trainBCtPanel, flag=flagsR, border=2)
+
+
+
+        hbox3.AddSpacer(10)
+        sysBgPanel.SetSizer(hbox3)
+        nb.AddPage(sysBgPanel, "System")
+
+
+
+
         # Set the PLC contorl panel
         plcBgPanel = wx.Panel(nb, size=(600,250))
         hbox  = wx.BoxSizer(wx.HORIZONTAL)
@@ -60,18 +99,16 @@ class railWayHubFrame(wx.Frame):
 
         hbox2  = wx.BoxSizer(wx.HORIZONTAL)
         setBgPanel = wx.Panel(nb)
-        
         gv.iTrainPanel = self.setPanel = rwp.PanelTrainCtrl(setBgPanel)
         hbox2.Add(self.setPanel, flag=flagsR, border=2)
         hbox2.AddSpacer(10)
-
         self.simuPanel = rwp.PanelSimuCtrl(setBgPanel)
         gv.iAttackCtrlPanel = self.simuPanel
         hbox2.Add(self.simuPanel, flag=flagsR, border=2)
         hbox2.AddSpacer(10)
         setBgPanel.SetSizer(hbox2)
-
         nb.AddPage(setBgPanel, "Setting")
+
 
         vsizer.Add(nb, flag=flagsR, border=2)
         # Row idx = 1 : set the train map panel
