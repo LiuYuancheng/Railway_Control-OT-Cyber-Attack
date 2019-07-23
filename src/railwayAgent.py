@@ -170,7 +170,7 @@ class AgentGate(AgentTarget):
     def __init__(self, parent, idx, pos, direc, opened):
         AgentTarget.__init__(self, parent, idx, pos, gv.GATE_TYPE)
         self.direcH = direc # True - Horizontal, False - Vertical.
-        self.gateCount = 12 if opened else 0
+        self.gateCount = 15 if opened else 0
         self.doorPts = []
         self.getGatePts()
 
@@ -182,13 +182,13 @@ class AgentGate(AgentTarget):
         if self.direcH:
             self.doorPts = [(x-self.gateCount, y), 
                             (x+self.gateCount, y), 
-                            (x-self.gateCount-15, y), 
-                            (x+self.gateCount+15, y)] 
+                            (x-self.gateCount-18, y), 
+                            (x+self.gateCount+18, y)] 
         else:
             self.doorPts = [(x, y-self.gateCount),
                             (x, y+self.gateCount),
-                            (x, y-self.gateCount-15),
-                            (x, y+self.gateCount+15)]
+                            (x, y-self.gateCount-18),
+                            (x, y+self.gateCount+18)]
         return self.doorPts
 
     def moveDoor(self, openFg=None):
@@ -242,8 +242,6 @@ class AgentSignal(AgentTarget):
         self.state = False
         self.onBitMap = onBitMap
         self.offBitMap = offBitMap
-        self.onFlashBM = None 
-        self.offFlashBM = None 
 
     def setState(self, onFlag):
         self.state = onFlag

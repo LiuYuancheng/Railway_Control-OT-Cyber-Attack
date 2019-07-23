@@ -98,18 +98,43 @@ class PanelMap(wx.Panel):
         self.dcDefPen = None
         # define the gates
         self.gate1 = agent.AgentGate(self, -1, (300, 365), True, True )
-        self.gate1PSignal = agent.AgentSignal(self, -1, (270, 350), onBitMap=wx.Bitmap(gv.PPPNG_PATH), offBitMap=wx.Bitmap(gv.PSPNG_PATH))
-        self.forkASignal.setState(True)
-        self.gate1CSignal = agent.AgentSignal(self, -1, (330, 350), onBitMap=wx.Bitmap(gv.CPPNG_PATH), offBitMap=wx.Bitmap(gv.CSPNG_PATH))
-        self.forkASignal.setState(True)
 
+        self.gate1PSignal = agent.AgentSignal( self, -1, (270, 350), 
+            onBitMap=wx.Bitmap(gv.PPPNG_PATH), 
+            offBitMap=wx.Bitmap(gv.PSPNG_PATH))
+        self.gate1PSignal.setState(True)
 
+        self.gate1CSignal = agent.AgentSignal( self, -1, (330, 350), 
+            onBitMap=wx.Bitmap(gv.CPPNG_PATH), 
+            offBitMap=wx.Bitmap(gv.CSPNG_PATH))
+        self.gate1CSignal.setState(True)
 
-        self.gate2 = agent.AgentGate(self, -1, (300, 395), True, True )
-        
+        self.gate2 = agent.AgentGate(self, -1, (300, 395), True, True)
+
+        self.gate2PSignal = agent.AgentSignal(self, -1, (330, 410),
+            onBitMap=wx.Bitmap(gv.PPPNG_PATH), 
+            offBitMap=wx.Bitmap(gv.PSPNG_PATH))
+        self.gate2PSignal.setState(True)
+
+        self.gate2CSignal = agent.AgentSignal(self, -1, (270, 410),
+            onBitMap=wx.Bitmap(gv.CPPNG_PATH),
+            offBitMap=wx.Bitmap(gv.CSPNG_PATH))
+        self.gate2CSignal.setState(True)
         
         self.gate3 = agent.AgentGate(self, -1, (145, 346), True, False )
         self.gate4 = agent.AgentGate(self, -1, (165, 330), False, True )
+        
+        self.stationASignal = agent.AgentSignal(self, -1, (470, 240),
+            onBitMap=wx.Bitmap(gv.SOPNG_PATH),
+            offBitMap=wx.Bitmap(gv.SFPNG_PATH))
+        self.stationASignal.setState(False)
+
+        self.stationBSignal = agent.AgentSignal(self, -1, (553, 240),
+            onBitMap=wx.Bitmap(gv.SOPNG_PATH),
+            offBitMap=wx.Bitmap(gv.SFPNG_PATH))
+        self.stationBSignal.setState(False)
+
+
 
         self.SetDoubleBuffered(True)
 
@@ -221,7 +246,7 @@ class PanelMap(wx.Panel):
             dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
         # draw all the sensors: 
 
-        self.DrawAttackPt(dc)
+        #self.DrawAttackPt(dc)
         self.DrawGate(dc)
         self.DrawStation(dc)
         self._drawSignal(dc)
@@ -249,7 +274,48 @@ class PanelMap(wx.Panel):
         dc.DrawRectangle(pos[0]-2, pos[1]-2, 22, 22)
         if bitmap and self.toggle:
             dc.DrawBitmap(bitmap, pos[0], pos[1])
+
+        _, bitmap = self.gate1PSignal.getState()
+        pos = self.gate1PSignal.getPos()
+        dc.DrawRectangle(pos[0]-12, pos[1]-12, 22, 22)
+        if bitmap:
+            dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
+
+        _, bitmap = self.gate1CSignal.getState()
+        pos = self.gate1CSignal.getPos()
+        dc.DrawRectangle(pos[0]-12, pos[1]-12, 22, 22)
+        if bitmap and self.toggle:
+            dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
         
+
+        _, bitmap = self.gate2PSignal.getState()
+        pos = self.gate2PSignal.getPos()
+        dc.DrawRectangle(pos[0]-12, pos[1]-12, 22, 22)
+        if bitmap:
+            dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
+
+        _, bitmap = self.gate2CSignal.getState()
+        pos = self.gate2CSignal.getPos()
+        dc.DrawRectangle(pos[0]-12, pos[1]-12, 22, 22)
+        if bitmap and not self.toggle:
+            dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
+
+        _, bitmap = self.stationASignal.getState()
+        pos = self.stationASignal.getPos()
+        dc.DrawRectangle(pos[0]-12, pos[1]-12, 22, 22)
+        if bitmap :
+            dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
+
+
+        _, bitmap = self.stationBSignal.getState()
+        pos = self.stationBSignal.getPos()
+        dc.DrawRectangle(pos[0]-12, pos[1]-12, 22, 22)
+        if bitmap:
+            dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
+
+
+
+
 
     def _drawRailWay(self, dc):
         # Draw the railway. 
@@ -329,18 +395,18 @@ class PanelMap(wx.Panel):
     def DrawGate(self, dc):
         """ Draw the pedestrians walking gate for passing the railway."""
         # Draw the bridge(left and right)
-        if self.gate1.gateCount == 15 :
-            dc.SetPen(wx.Pen('BLACK', width=1, style=wx.PENSTYLE_DOT))
-            dc.SetBrush(wx.Brush(wx.Colour('Black')))
-            dc.DrawRectangle(250, 9, 30, 30)
-            dc.DrawBitmap(self.passbitmap, 280, 50)
-        else:
-            dc.DrawBitmap(self.stopbitmap, 280, 50)
+        #if self.gate1.gateCount == 15 :
+        #    dc.SetPen(wx.Pen('BLACK', width=1, style=wx.PENSTYLE_DOT))
+        #    dc.SetBrush(wx.Brush(wx.Colour('Black')))
+        #    dc.DrawRectangle(250, 9, 30, 30)
+        #    dc.DrawBitmap(self.passbitmap, 280, 50)
+        #else:
+        #    dc.DrawBitmap(self.stopbitmap, 280, 50)
 
-        if self.lightOn == 1:
-            dc.DrawBitmap(self.passbitmap, 280, 50)
-        elif self.lightOn == 2:
-            dc.DrawBitmap(self.stopbitmap, 280, 50)
+        #if self.lightOn == 1:
+        #    dc.DrawBitmap(self.passbitmap, 280, 50)
+        #elif self.lightOn == 2:
+        #    dc.DrawBitmap(self.stopbitmap, 280, 50)
 
         dc.SetPen(wx.Pen('GREEN', width=1, style=wx.PENSTYLE_SOLID))
         dc.DrawLine(294, 80, 294, 110)
@@ -362,6 +428,7 @@ class PanelMap(wx.Panel):
         dc.DrawLine(li[0], li[1], lo[0], lo[1])
         dc.DrawLine(ri[0], ri[1], ro[0], ro[1])
 
+        return
         penColor = 'RED' if self.forkSt else 'GREEN'
         dc.SetPen(wx.Pen(penColor, width=2, style=wx.PENSTYLE_SOLID))
         [li,ri,lo,ro] = self.gate3.getGatePts()
@@ -492,12 +559,22 @@ class PanelMap(wx.Panel):
         # Start to close the gate.
         if self.sensorid == 6 and self.hakedSensorID != 0 : 
             self.gate1.moveDoor(openFg=False)
+            self.gate1PSignal.setState(False)
+            self.gate1CSignal.setState(False)
             #self.gateCount -= 3
             self.gate2.moveDoor(openFg=False)
+            self.gate2PSignal.setState(False)
+            self.gate2CSignal.setState(False)
+
         elif self.sensorid == 8:
             self.gate1.moveDoor(openFg=True)
+            self.gate1PSignal.setState(True)
+            self.gate1CSignal.setState(True)
             #self.gateCount += 3
             self.gate2.moveDoor(openFg=True)
+            self.gate2PSignal.setState(True)
+            self.gate2CSignal.setState(True)
+
         
         if self.forkSt:
             self.gate3.moveDoor(openFg=False)
@@ -513,6 +590,13 @@ class PanelMap(wx.Panel):
         if  self.hakedSensorID == 0 and sensorid == -1:
             if gv.iDetailPanel:
                 gv.iDetailPanel.updateState(origalV=0)
+
+        if self.sensorid == 10 or self.sensorid == 23:
+            self.dockCount = 10
+
+        if self.dockCount > 0:
+            self.dockCount -= 1
+
 
         self.updateTrainState(self.sensorid)
         if self.gateDanger and self.sensorid == 1:

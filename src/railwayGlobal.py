@@ -43,12 +43,16 @@ LSJPG_PATH = "".join([dirpath, "\\img\\Pstop.jpg"])
 PPPNG_PATH = "".join([dirpath, "\\img\\passS18.png"])   # light for people pass 
 PSPNG_PATH = "".join([dirpath, "\\img\\stopS18.png"])
 
-CPPNG_PATH = "".join([dirpath, "\\img\\gateCarS18.png"])
-CSPNG_PATH = "".join([dirpath, "\\img\\gateCarP18.png"])
+CPPNG_PATH = "".join([dirpath, "\\img\\gateCarP18.png"])
+CSPNG_PATH = "".join([dirpath, "\\img\\gateCarS18.png"])
 
 FSPNG_PATH = "".join([dirpath, "\\img\\forkOnS18.png"])
 FAPNG_PATH = "".join([dirpath, "\\img\\forkAoffS18.png"])
 FBPNG_PATH = "".join([dirpath, "\\img\\forkBoffS18.png"])
+
+SOPNG_PATH = "".join([dirpath, "\\img\\stationOn18.png"])
+SFPNG_PATH = "".join([dirpath, "\\img\\stationOff18.png"])
+
 
 FRJPG_PATH = "".join([dirpath, "\\img\\forkAoffS18.png"]) 
 
