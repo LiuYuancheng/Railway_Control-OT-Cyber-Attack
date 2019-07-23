@@ -32,8 +32,19 @@ HTPNG_PATH = "".join([dirpath, "\\img\\hitPPl.png"])
 LTPNG_PATH = "".join([dirpath, "\\img\\left.png"])
 EMGST_PATH = "".join([dirpath, "\\img\\emg.png"])
 RECOV_PATH = "".join([dirpath, "\\img\\rec.png"])
+
+
+
 LPJPG_PATH = "".join([dirpath, "\\img\\Ppass.jpg"])   # light for people pass 
 LSJPG_PATH = "".join([dirpath, "\\img\\Pstop.jpg"])
+
+
+
+PPPNG_PATH = "".join([dirpath, "\\img\\passS18.png"])   # light for people pass 
+PSPNG_PATH = "".join([dirpath, "\\img\\stopS18.png"])
+
+CPPNG_PATH = "".join([dirpath, "\\img\\gateCarS18.png"])
+CSPNG_PATH = "".join([dirpath, "\\img\\gateCarP18.png"])
 
 FSPNG_PATH = "".join([dirpath, "\\img\\forkOnS18.png"])
 FAPNG_PATH = "".join([dirpath, "\\img\\forkAoffS18.png"])

@@ -98,7 +98,16 @@ class PanelMap(wx.Panel):
         self.dcDefPen = None
         # define the gates
         self.gate1 = agent.AgentGate(self, -1, (300, 365), True, True )
+        self.gate1PSignal = agent.AgentSignal(self, -1, (270, 350), onBitMap=wx.Bitmap(gv.PPPNG_PATH), offBitMap=wx.Bitmap(gv.PSPNG_PATH))
+        self.forkASignal.setState(True)
+        self.gate1CSignal = agent.AgentSignal(self, -1, (330, 350), onBitMap=wx.Bitmap(gv.CPPNG_PATH), offBitMap=wx.Bitmap(gv.CSPNG_PATH))
+        self.forkASignal.setState(True)
+
+
+
         self.gate2 = agent.AgentGate(self, -1, (300, 395), True, True )
+        
+        
         self.gate3 = agent.AgentGate(self, -1, (145, 346), True, False )
         self.gate4 = agent.AgentGate(self, -1, (165, 330), False, True )
 
@@ -229,13 +238,13 @@ class PanelMap(wx.Panel):
         """ draw the signals on the map.
         """
         dc.SetBrush(wx.Brush(wx.Colour('LIGHT GRAY')))
-        state, bitmap = self.forkASignal.getState()
+        _, bitmap = self.forkASignal.getState()
         pos = self.forkASignal.getPos()
         dc.DrawRectangle(pos[0]-2, pos[1]-2, 22, 22)
         if bitmap and self.toggle:
             dc.DrawBitmap(bitmap, pos[0], pos[1])
 
-        state, bitmap = self.forkBSignal.getState()
+        _, bitmap = self.forkBSignal.getState()
         pos = self.forkBSignal.getPos()
         dc.DrawRectangle(pos[0]-2, pos[1]-2, 22, 22)
         if bitmap and self.toggle:
