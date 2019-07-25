@@ -24,7 +24,11 @@ class MapMgr(object):
         """ Init all the element on the map. All the parameters are public to other 
             module.
         """ 
-        self.signalDict = {} # name follow the 
+        self.signalDict = {} # name follow the
+        self.dockCount = []
+
+
+
         # Add the inside railway and the train (A).
         self.trackA = [(300, 50), (140, 50),
                        (100, 90), (100, 150), (100, 210), (100, 330),
@@ -52,6 +56,8 @@ class MapMgr(object):
             [(60, 150)], gv.FSPNG_PATH, gv.FBPNG_PATH, self.forkB.getState(), True)
 
 
+        self.gateLockA = False
+        self.gateLockB = False
         # Add the inside gate (A).
         self.gate1 = agent.AgentGate(self, -1, (300, 365), True, True)
         
@@ -69,7 +75,7 @@ class MapMgr(object):
             [(330, 408)], gv.PPPNG_PATH, gv.PSPNG_PATH, True, False)
         
         self.signalDict['Gate2Car'] = self.createSignals(
-            [(270, 408)], gv.CPPNG_PATH, gv.CPPNG_PATH, True, True)
+            [(270, 408)], gv.CPPNG_PATH, gv.CSPNG_PATH, True, True)
 
         # Add the station A signal light. 
 
@@ -97,6 +103,42 @@ class MapMgr(object):
         self.signalDict['S101 - Airport Lights'] = self.createSignals(
             [(565, 110)], gv.APOPNG_PATH, gv.APFPNG_PATH, True, False)
 
+        self.sensorList = []
+        self.rwAsensorId = self.rwBsensorId = -1
+        # define all the sensors.
+        self.addSensors()
+
+    def addSensors(self):
+        """ added the train detection sensors in the sensor List 
+        """
+        # Add the rail way sensors.
+        for item in self.trackA:
+            sensor = agent.AgentSensor(self, -1, item)
+            self.sensorList.append(sensor)
+
+        for item in self.trackB:
+            sensor = agent.AgentSensor(self, -1, item)
+            self.sensorList.append(sensor)
+
+
+    #-----------------------------------------------------------------------------
+    def checkSensor(self):
+        """ Check which sensor has detected the train pass."""
+        sensorIDfb = [-1, -1] # Feed back sensor ID.
+
+        for sensor in self.sensorList:
+            if sensorIDfb[0] < 0:
+                for trainPts in self.trainA.getPos():
+                    if sensor.checkNear(trainPts[0], trainPts[1], 10):
+                        sensorIDfb[0] = sensor.sensorID
+                        break
+            if sensorIDfb[1] < 0:
+                for trainPts in self.trainB.getPos():
+                    if sensor.checkNear(trainPts[0], trainPts[1], 10):
+                        sensorIDfb[1] = sensor.sensorID
+                        break
+
+        return sensorIDfb # return [-1, -1] if there is no sensor detected. 
 
     def createSignals(self, posList, onImgPath, offImgPath, state, flash):
         """ Create a signal object list. 
@@ -113,10 +155,73 @@ class MapMgr(object):
 
     def setSignalPwr(self, sKey, sValue):
         value = True if sValue else False
-        for signalObj in self.signalDict[sKey]:
-            signalObj.setState(value)
+        if sKey in self.signalDict.keys():
+            for signalObj in self.signalDict[sKey]:
+                # Set the signal statues.
+                signalObj.setState(value)
 
+    def setCompState(self, sKey, sValue):
+        value = True if sValue else False
+        if sKey == 'S301 - Track A Fork Power':
+            self.forkA.forkOn = value
+        elif sKey == 'S302 - Track B Fork Power':
+            self.forkB.forkOn = value
+
+
+    def changeGateState(self, openFlag):
+        self.gate1.moveDoor(openFg=openFlag)
+        gate1Psignal = self.signalDict['Gate1Ppl'][0]
+        gate1Psignal.setState(openFlag)
+        gate1Csignal = self.signalDict['Gate1Car'][0]
+        gate1Csignal.setState(openFlag)
+
+        self.gate2.moveDoor(openFg=openFlag)
+        gate2Psignal = self.signalDict['Gate2Ppl'][0]
+        gate2Psignal.setState(openFlag)
+        gate2Csignal = self.signalDict['Gate2Car'][0]
+        gate2Csignal.setState(openFlag)
+
+
+    def periodic(self , now):
+        self.trainA.updateTrainPos()
+        self.trainB.updateTrainPos()
+        [crtAsensorId, crtBsensorId] = self.checkSensor()
+        if self.rwAsensorId != crtAsensorId:
+            if self.rwAsensorId > 0 and crtAsensorId < 0:
+                self.sensorList[self.rwAsensorId].setSensorState(0)
+            self.rwAsensorId = crtAsensorId
+            if self.rwAsensorId == 10:
+                self.trainA.setDockCount(2)
+
+        if self.rwAsensorId == 6:
+            self.gateLockA = True
+            self.changeGateState(False)
+        elif self.rwAsensorId == 8:
+            self.gateLockA = False
+            if not (self.gateLockA or self.gateLockB):
+                self.changeGateState(True)
+
+
+
+        if self.rwBsensorId != crtBsensorId:
+            if self.rwBsensorId > 0 and crtBsensorId < 0:
+                self.sensorList[self.rwBsensorId].setSensorState(0)
+            self.rwBsensorId = crtBsensorId
+            if self.rwBsensorId == 23:
+                self.trainB.setDockCount(2)
+
+        if crtBsensorId>0:
+            print(crtBsensorId)
+
+        if self.rwBsensorId == 19: #?
+            self.gateLockB = True
+            self.changeGateState(False)
+        elif self.rwBsensorId == 21:#?
+            self.gateLockB = False
+            if not (self.gateLockA or self.gateLockB):
+                self.changeGateState(True)
         
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelMap(wx.Panel):
@@ -157,8 +262,6 @@ class PanelMap(wx.Panel):
         self.selectedPts = None
         self.sensorid = -1
         self.msgPop = True
-        self.sensorList = []
-        self.addSensors()
         self.infoWindow = None
         self.gateDanger = False
         self.hakedSensorID = -2 # The hacked sensorID
@@ -194,35 +297,6 @@ class PanelMap(wx.Panel):
 
         self.SetDoubleBuffered(True)
 
-    #-----------------------------------------------------------------------------
-    def addSensors(self):
-        """ added the train detection sensors in the sensor List 
-        """
-        # Add the rail way sensors.
-
-        
-        for item in self.mapMgr.trackA:
-            sensor = agent.AgentSensor(self, -1, item)
-            self.sensorList.append(sensor)
-
-        for item in self.mapMgr.trackB:
-            sensor = agent.AgentSensor(self, -1, item)
-            self.sensorList.append(sensor)
-
-
-        # Add the station sensors.
-        #stSensorList = [(550, 130, 3)]
-        #for item in stSensorList:
-        #    sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
-        #    self.sensorList.append(sensor)
-        # Add the train turn sensors.
-        #conerSenList = [(550, 20, 3), (20, 20, 0), (20, 330, 1), (550, 330, 2)]
-        #for item in conerSenList:
-        #    sensor = agent.AgentSensor(self, -1, (item[:2]), item[-1])
-        #    self.sensorList.append(sensor)
-
-        #gateDetector = agent.AgentSensor(self, -1, (290, 20), 0)
-        #self.sensorList.append(gateDetector)
 
     def onClick(self, event):
         x1, y1 = event.GetPosition()
@@ -290,14 +364,14 @@ class PanelMap(wx.Panel):
         # High light the sensor which detected the train.
         dc.SetFont(wx.Font(7, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
         dc.SetBrush(wx.Brush('GRAY'))
-        for sensor in self.sensorList:
+        for sensor in self.mapMgr.sensorList:
             sensorPos = sensor.pos
             dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
             dc.DrawText("s"+str(sensor.sensorID), sensorPos[0]+3, sensorPos[1]+3)
         penColor = 'GREEN' if self.toggle else 'RED'
         dc.SetBrush(wx.Brush(penColor))
         if self.sensorid >= 0:
-            sensor = self.sensorList[self.sensorid]
+            sensor = self.mapMgr.sensorList[self.sensorid]
             sensorPos = sensor.pos
             dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
         # draw all the sensors: 
@@ -329,61 +403,6 @@ class PanelMap(wx.Panel):
                 if bitmap and ((not flash) or self.toggle):
                     dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
         return
-
-        #--------------------
-
-        dc.DrawRectangle(pos[0]-2, pos[1]-2, 22, 22)
-        if bitmap and self.toggle:
-            dc.DrawBitmap(bitmap, pos[0], pos[1])
-
-        _, bitmap = self.mapMgr.forkBSignal.getState()
-        pos = self.mapMgr.forkBSignal.getPos()
-        dc.DrawRectangle(pos[0]-2, pos[1]-2, 22, 22)
-        if bitmap and self.toggle:
-            dc.DrawBitmap(bitmap, pos[0], pos[1])
-
-        _, bitmap = self.powerPlant.getState()
-        pos = self.powerPlant.getPos()
-        size = self.powerPlant.getSize()
-        dc.DrawRectangle(pos[0]-3-size[0]//2, pos[1]-3-size[1]//2, size[0]+6, size[1]+6)
-        if bitmap:
-            dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
-        
-
-        for industBox in self.industAreList:
-            _, bitmap = industBox.getState()
-            pos = industBox.getPos()
-            size = industBox.getSize()
-            dc.DrawRectangle(pos[0]-3-size[0]//2, pos[1]-3-size[1]//2, size[0]+6, size[1]+6)
-            if bitmap:
-                dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
-
-
-        for cityBox in self.cityAreList:
-            _, bitmap = cityBox.getState()
-            pos = cityBox.getPos()
-            size = cityBox.getSize()
-            dc.DrawRectangle(pos[0]-3-size[0]//2, pos[1]-3-size[1]//2, size[0]+6, size[1]+6)
-            if bitmap:
-                dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
-
-        _, bitmap = self.airPort.getState()
-        pos = self.airPort.getPos()
-        size = self.airPort.getSize()
-        dc.DrawRectangle(pos[0]-3-size[0]//2, pos[1]-3-size[1]//2, size[0]+6, size[1]+6)
-        if bitmap:
-            dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
-
-
-        
-        for resiBox in self.resdAreList:
-            _, bitmap = resiBox.getState()
-            pos = resiBox.getPos()
-            size = resiBox.getSize()
-            dc.DrawRectangle(pos[0]-3-size[0]//2, pos[1]-3-size[1]//2, size[0]+6, size[1]+6)
-            if bitmap:
-                dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
-
 
     def _drawRailWay(self, dc):
         # Draw the railway. 
@@ -559,14 +578,7 @@ class PanelMap(wx.Panel):
             dc.DrawBitmap(img, 564, 145)
             self.timeCount = 166
 
-   #-----------------------------------------------------------------------------
-    def checkSensor(self):
-        """ Check which sensor has detected the train pass."""
-        for trainPts in self.mapMgr.trainA.getPos():
-            for sensor in self.sensorList:
-                if sensor.checkNear(trainPts[0], trainPts[1], 10):
-                    return sensor.sensorID # return the sensor index
-        return -1 # return -1 if there is no sensor detected. 
+
 
     def checkClash(self):
         for trainPts in self.mapMgr.trainA.getPos():
@@ -588,11 +600,10 @@ class PanelMap(wx.Panel):
     def periodic(self , now):
         """ periodicly call back to do needed calcualtion/panel update"""
         # Set the detect sensor status related to PLC status
-        self.updateTrainPos()
-        if not self.trainBLock and not self.trainClash:
-            self.mapMgr.trainB.updateTrainPos()
 
-        sensorid = self.checkSensor()
+        self.mapMgr.periodic(now)
+
+        
         # Check whether 2 train clashed.
         if not self.forkSt: 
             self.trainClash = self.checkClash()
@@ -601,75 +612,34 @@ class PanelMap(wx.Panel):
                 wx.MessageBox('Train Accident Happened!', 'Caution!', wx.OK | wx.ICON_ERROR)
                 gv.iEmgStop = False
 
-        if self.sensorid != sensorid:
-            [idx, state] =[self.sensorid, 0] if self.sensorid >= 0 and sensorid <= 0 else [sensorid, 1]
-            # get related plc Idx 
-            plcidx = idx//8 
-            if gv.iPlcPanelList[plcidx]: gv.iPlcPanelList[plcidx].updateInput(idx%8, state)
+        #if self.sensorid != sensorid:
+        #    [idx, state] =[self.sensorid, 0] if self.sensorid >= 0 and sensorid <= 0 else [sensorid, 1]
+        #    # get related plc Idx 
+        #    plcidx = idx//8 
+        #    if gv.iPlcPanelList[plcidx]: gv.iPlcPanelList[plcidx].updateInput(idx%8, state)
 
-            if self.sensorid > 0:
-                self.sensorList[self.sensorid].setSensorState(0)
-            self.sensorid = sensorid
-        # Start to close the gate.
-        if self.sensorid == 6 and self.hakedSensorID != 0 : 
-            self.mapMgr.gate1.moveDoor(openFg=False)
-            gate1Psignal = self.mapMgr.signalDict['Gate1Ppl'][0]
-            gate1Psignal.setState(False)
-
-            gate1Csignal = self.mapMgr.signalDict['Gate1Car'][0]
-            gate1Csignal.setState(False)
+            #if self.sensorid > 0:
+            #    self.mapMgr.sensorList[self.sensorid].setSensorState(0)
+            #self.sensorid = sensorid
 
 
 
-            #self.gateCount -= 3
-            self.mapMgr.gate2.moveDoor(openFg=False)
+
+        #if self.sensorid == 0:
+        #    if gv.iDetailPanel:
+        #        gv.iDetailPanel.updateState(origalV=1)
+        #if  self.hakedSensorID == 0 and sensorid == -1:
+        #    if gv.iDetailPanel:
+        #        gv.iDetailPanel.updateState(origalV=0)
+
+
             
-            gate2Psignal = self.mapMgr.signalDict['Gate2Ppl'][0]
-            gate2Psignal.setState(False)
-
-            gate2Csignal = self.mapMgr.signalDict['Gate2Car'][0]
-            gate2Csignal.setState(False)
-
-        elif self.sensorid == 8:
-            self.mapMgr.gate1.moveDoor(openFg=True)
-            gate1Psignal = self.mapMgr.signalDict['Gate1Ppl'][0]
-            gate1Psignal.setState(True)
-
-            gate1Csignal = self.mapMgr.signalDict['Gate1Car'][0]
-            gate1Csignal.setState(True)
 
 
 
-
-            #self.gateCount += 3
-            self.mapMgr.gate2.moveDoor(openFg=True)
-            gate2Psignal = self.mapMgr.signalDict['Gate2Ppl'][0]
-            gate2Psignal.setState(False)
-
-            gate2Csignal = self.mapMgr.signalDict['Gate2Car'][0]
-            gate2Csignal.setState(False)
-
-        
-
-
-
-        if self.sensorid == 0:
-            if gv.iDetailPanel:
-                gv.iDetailPanel.updateState(origalV=1)
-        if  self.hakedSensorID == 0 and sensorid == -1:
-            if gv.iDetailPanel:
-                gv.iDetailPanel.updateState(origalV=0)
-
-        if self.sensorid == 10 or self.sensorid == 23:
-            self.dockCount = 10
-
-        if self.dockCount > 0:
-            self.dockCount -= 1
-
-
-        self.updateTrainState(self.sensorid)
-        if self.gateDanger and self.sensorid == 1:
-            self.gateDanger = False
+        #self.updateTrainState(self.sensorid)
+        #if self.gateDanger and self.sensorid == 1:
+        #    self.gateDanger = False
 
 
         # make the count in side the range. 
@@ -686,11 +656,7 @@ class PanelMap(wx.Panel):
         x, y = event.GetPosition()
         pass
     
-    def updateTrainPos(self):
-        """ update the train position."""
-        if self.dockCount != 0: return
-        self.mapMgr.trainA.updateTrainPos()
-        
+               
     #-----------------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):
         """ Set/Update the display: if called as updateDisplay() the function will 

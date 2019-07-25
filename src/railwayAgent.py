@@ -125,6 +125,7 @@ class AgentTrain(AgentTarget):
         # The train next distination index for each train body.
         self.trainDistList = [0]*len(self.pos)
         self.trainSpeed = 10    # train speed: pixel/periodic loop
+        self.dockCount = 0 
 
     def changedir(self):
         """ Change the train running direction."""
@@ -140,6 +141,9 @@ class AgentTrain(AgentTarget):
             if  dist <= threshold: return True
         return False
 
+    def setDockCount(self, count):
+        self.dockCount = count
+
     def setTrainSpeed(self, speed):
         self.trainSpeed = speed
 
@@ -148,21 +152,24 @@ class AgentTrain(AgentTarget):
 
     def updateTrainPos(self):
         """ Update the current train position on the map."""
-        for i, trainPt in enumerate(self.pos):
-            # The next railway point idx train going to approch.
-            nextPtIdx = self.trainDistList[i]
-            nextPt = self.railwayPts[nextPtIdx]
-            dist = math.sqrt((trainPt[0] - nextPt[0])**2 + (trainPt[1] - nextPt[1])**2)
-            if dist < self.trainSpeed:
-                trainPt[0] = nextPt[0]
-                trainPt[1] = nextPt[1]
-                # Update the next train distination if the train already get its next dist.
-                nextPtIdx = self.trainDistList[i] = (nextPtIdx + 1) % len(self.railwayPts)
+        if self.dockCount == 0:
+            for i, trainPt in enumerate(self.pos):
+                # The next railway point idx train going to approch.
+                nextPtIdx = self.trainDistList[i]
                 nextPt = self.railwayPts[nextPtIdx]
-            else:
-                scale = float(self.trainSpeed)/float(dist)
-                trainPt[0] += int((nextPt[0]-trainPt[0])*scale)
-                trainPt[1] += int((nextPt[1]-trainPt[1])*scale) 
+                dist = math.sqrt((trainPt[0] - nextPt[0])**2 + (trainPt[1] - nextPt[1])**2)
+                if dist < self.trainSpeed:
+                    trainPt[0] = nextPt[0]
+                    trainPt[1] = nextPt[1]
+                    # Update the next train distination if the train already get its next dist.
+                    nextPtIdx = self.trainDistList[i] = (nextPtIdx + 1) % len(self.railwayPts)
+                    nextPt = self.railwayPts[nextPtIdx]
+                else:
+                    scale = float(self.trainSpeed)/float(dist)
+                    trainPt[0] += int((nextPt[0]-trainPt[0])*scale)
+                    trainPt[1] += int((nextPt[1]-trainPt[1])*scale)
+        else:
+            self.dockCount -= 1
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

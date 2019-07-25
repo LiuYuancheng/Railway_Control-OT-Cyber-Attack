@@ -262,6 +262,11 @@ class PanelSysCtrl(wx.Panel):
     def onChecked(self, event):
         cb = event.GetEventObject()
         gv.iMapMgr.setSignalPwr(cb.GetLabel(), cb.GetValue())
+        # 
+        gv.iMapMgr.setCompState(cb.GetLabel(), cb.GetValue())
+        
+
+
         
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
