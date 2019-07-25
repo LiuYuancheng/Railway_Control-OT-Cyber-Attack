@@ -171,6 +171,17 @@ class PanelMap(wx.Panel):
             self.cityAreList.append(cityAreBox)
 
 
+        # City 
+        self.resdAreList = []
+        posList = [(300+100, 210-32), (300+100, 210+32), (550, 380)]
+        
+        for pos in posList:
+            resideAreBox =  agent.AgentSignal(self, -1, pos,
+                onBitMap=wx.Bitmap(gv.RDOPNG_PATH),
+                offBitMap=wx.Bitmap(gv.RDFPNG_PATH))
+            resideAreBox.setState(True)
+            self.resdAreList.append(resideAreBox)
+
 
         self.airPort = agent.AgentSignal(self, -1, (565, 110),
             onBitMap=wx.Bitmap(gv.APOPNG_PATH),
@@ -388,6 +399,14 @@ class PanelMap(wx.Panel):
             dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
 
 
+        
+        for resiBox in self.resdAreList:
+            _, bitmap = resiBox.getState()
+            pos = resiBox.getPos()
+            size = resiBox.getSize()
+            dc.DrawRectangle(pos[0]-3-size[0]//2, pos[1]-3-size[1]//2, size[0]+6, size[1]+6)
+            if bitmap:
+                dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
 
 
     def _drawRailWay(self, dc):

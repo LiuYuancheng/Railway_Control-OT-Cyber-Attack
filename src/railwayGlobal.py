@@ -69,6 +69,8 @@ INFPNG_PATH = "".join([dirpath, "\\img\\industrOff.png"])
 CTOPNG_PATH = "".join([dirpath, "\\img\\cityOn.png"])
 CTFPNG_PATH = "".join([dirpath, "\\img\\cityOff.png"])
 
+RDOPNG_PATH = "".join([dirpath, "\\img\\residentialOn.png"])
+RDFPNG_PATH = "".join([dirpath, "\\img\\residentialOff.png"])
 
 APOPNG_PATH = "".join([dirpath, "\\img\\AirportOn.png"])
 APFPNG_PATH = "".join([dirpath, "\\img\\AirportOff.png"])
