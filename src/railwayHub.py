@@ -29,7 +29,7 @@ class railWayHubFrame(wx.Frame):
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
         wx.Frame.__init__(self, parent, id, title, size=(620, 740))
-
+        self.SetIcon(wx.Icon(gv.TTICO_PATH))
         gv.iMainFrame = self
 
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
@@ -61,10 +61,11 @@ class railWayHubFrame(wx.Frame):
         self.setPanel0 = rwp.PanelSysCtrl(sysBgPanel)
         hbox3.Add(self.setPanel0, flag=flagsR, border=2)
         hbox3.AddSpacer(10)
-        self.trainACtPanel = rwp.PanelTrainCtrl(sysBgPanel)
+        self.trainACtPanel = rwp.PanelTrainCtrl(sysBgPanel, 'TrainA')
         hbox3.Add(self.trainACtPanel, flag=flagsR, border=2)
+        gv.iTrainPanel = self.trainACtPanel
         hbox3.AddSpacer(10)
-        self.trainBCtPanel = rwp.PanelTrainCtrl(sysBgPanel)
+        self.trainBCtPanel = rwp.PanelTrainCtrl(sysBgPanel, 'TrainB')
         hbox3.Add(self.trainBCtPanel, flag=flagsR, border=2)
 
 
@@ -99,8 +100,8 @@ class railWayHubFrame(wx.Frame):
 
         hbox2  = wx.BoxSizer(wx.HORIZONTAL)
         setBgPanel = wx.Panel(nb)
-        gv.iTrainPanel = self.setPanel = rwp.PanelTrainCtrl(setBgPanel)
-        hbox2.Add(self.setPanel, flag=flagsR, border=2)
+        #gv.iTrainPanel = self.setPanel = rwp.PanelTrainCtrl(setBgPanel)
+        #hbox2.Add(self.setPanel, flag=flagsR, border=2)
         hbox2.AddSpacer(10)
         self.simuPanel = rwp.PanelSimuCtrl(setBgPanel)
         gv.iAttackCtrlPanel = self.simuPanel
@@ -123,6 +124,7 @@ class railWayHubFrame(wx.Frame):
         self.timer.Start(PERIODIC)  # every 500 ms
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.Refresh(False)
 
     #-----------------------------------------------------------------------------
     def periodic(self, event):

@@ -249,7 +249,7 @@ class PanelSysCtrl(wx.Panel):
         vsizer.AddSpacer(5)
         vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
                                      style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
-        vsizer.AddSpacer(10)                       
+        vsizer.AddSpacer(5)                       
         for labelStr in self.powerLabel:
             vsizer.AddSpacer(5)
             pwtBt = wx.CheckBox(self, -1, labelStr)
@@ -264,10 +264,10 @@ class PanelSysCtrl(wx.Panel):
 #-----------------------------------------------------------------------------
 class PanelTrainCtrl(wx.Panel):
     """ Train contorl panel"""
-    def __init__(self, parent):
+    def __init__(self, parent, trainName):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
-        
+        self.tName = trainName
         self.statDict = {
             '0': ('Running',    'GREEN',    80),
             '1': ('ShowDown',   'YELLOW',   40),
@@ -283,7 +283,7 @@ class PanelTrainCtrl(wx.Panel):
     def buidUISizer(self):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
-        vsizer.Add(wx.StaticText(self, label="Train Control"), flag=flagsR, border=2)
+        vsizer.Add(wx.StaticText(self, label= self.tName+" Control"), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
         vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
                                      style=wx.LI_HORIZONTAL), flag=flagsR, border=2)

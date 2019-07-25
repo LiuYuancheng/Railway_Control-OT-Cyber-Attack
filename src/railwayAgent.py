@@ -242,6 +242,10 @@ class AgentSignal(AgentTarget):
         self.state = False
         self.onBitMap = onBitMap
         self.offBitMap = offBitMap
+        self.size = self.onBitMap.GetSize() if self.onBitMap else (0,0)
+
+    def getSize(self):
+        return self.size
 
     def setState(self, onFlag):
         self.state = onFlag

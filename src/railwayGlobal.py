@@ -26,6 +26,9 @@ GATE_TYPE = 'GT'
 ATTPT_TYPE = 'AP'
 SIGNAL_TYPE = 'SL'
 
+TTICO_PATH = "".join([dirpath, "\\img\\title.ico"])
+
+
 BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg1.png"])
 WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
 HTPNG_PATH = "".join([dirpath, "\\img\\hitPPl.png"])
@@ -56,6 +59,19 @@ FBPNG_PATH = "".join([dirpath, "\\img\\forkBoffS18.png"])
 SOPNG_PATH = "".join([dirpath, "\\img\\stationOn18.png"])
 SFPNG_PATH = "".join([dirpath, "\\img\\stationOff18.png"])
 
+
+POPNG_PATH = "".join([dirpath, "\\img\\powerPlantOn.png"])
+PFPNG_PATH = "".join([dirpath, "\\img\\powerPlantOff.png"])
+
+INOPNG_PATH = "".join([dirpath, "\\img\\industrOn.png"])
+INFPNG_PATH = "".join([dirpath, "\\img\\industrOff.png"])
+
+CTOPNG_PATH = "".join([dirpath, "\\img\\cityOn.png"])
+CTFPNG_PATH = "".join([dirpath, "\\img\\cityOff.png"])
+
+
+APOPNG_PATH = "".join([dirpath, "\\img\\AirportOn.png"])
+APFPNG_PATH = "".join([dirpath, "\\img\\AirportOff.png"])
 
 FRJPG_PATH = "".join([dirpath, "\\img\\forkAoffS18.png"]) 
 

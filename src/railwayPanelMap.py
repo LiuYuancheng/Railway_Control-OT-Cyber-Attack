@@ -17,6 +17,16 @@ import railwayGlobal as gv
 import railwayPanel as rwp
 import railwayAgent as agent
 
+
+
+class MapMgr(object):
+    """ Map Manager to init an calculate differet element in the map.
+    """
+    def __init__(self, parent):
+        pass
+
+
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelMap(wx.Panel):
@@ -133,8 +143,39 @@ class PanelMap(wx.Panel):
             onBitMap=wx.Bitmap(gv.SOPNG_PATH),
             offBitMap=wx.Bitmap(gv.SFPNG_PATH))
         self.stationBSignal.setState(False)
+        
+        # define the environment items.
+        # power plant
+        self.powerPlant = agent.AgentSignal(self, -1, (210, 130),
+            onBitMap=wx.Bitmap(gv.POPNG_PATH),
+            offBitMap=wx.Bitmap(gv.PFPNG_PATH))
+        self.powerPlant.setState(True)
+        # industryArea 
+        self.industAreList = []
+        posList = [(35, 250), (35,315), (35, 380)]
+        for pos in posList:
+            industAreBox =  agent.AgentSignal(self, -1, pos,
+                onBitMap=wx.Bitmap(gv.INOPNG_PATH),
+                offBitMap=wx.Bitmap(gv.INFPNG_PATH))
+            industAreBox.setState(True)
+            self.industAreList.append(industAreBox)
+        # City 
+        self.cityAreList = []
+        posList = [(300+32, 210-32), (300+32, 210+32), (300-32, 210+32)]
+        
+        for pos in posList:
+            cityAreBox =  agent.AgentSignal(self, -1, pos,
+                onBitMap=wx.Bitmap(gv.CTOPNG_PATH),
+                offBitMap=wx.Bitmap(gv.CTFPNG_PATH))
+            cityAreBox.setState(True)
+            self.cityAreList.append(cityAreBox)
 
 
+
+        self.airPort = agent.AgentSignal(self, -1, (565, 110),
+            onBitMap=wx.Bitmap(gv.APOPNG_PATH),
+            offBitMap=wx.Bitmap(gv.APFPNG_PATH))
+        self.airPort.setState(True)
 
         self.SetDoubleBuffered(True)
 
@@ -313,6 +354,38 @@ class PanelMap(wx.Panel):
         if bitmap:
             dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
 
+
+        _, bitmap = self.powerPlant.getState()
+        pos = self.powerPlant.getPos()
+        size = self.powerPlant.getSize()
+        dc.DrawRectangle(pos[0]-3-size[0]//2, pos[1]-3-size[1]//2, size[0]+6, size[1]+6)
+        if bitmap:
+            dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
+        
+
+        for industBox in self.industAreList:
+            _, bitmap = industBox.getState()
+            pos = industBox.getPos()
+            size = industBox.getSize()
+            dc.DrawRectangle(pos[0]-3-size[0]//2, pos[1]-3-size[1]//2, size[0]+6, size[1]+6)
+            if bitmap:
+                dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
+
+
+        for cityBox in self.cityAreList:
+            _, bitmap = cityBox.getState()
+            pos = cityBox.getPos()
+            size = cityBox.getSize()
+            dc.DrawRectangle(pos[0]-3-size[0]//2, pos[1]-3-size[1]//2, size[0]+6, size[1]+6)
+            if bitmap:
+                dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
+
+        _, bitmap = self.airPort.getState()
+        pos = self.airPort.getPos()
+        size = self.airPort.getSize()
+        dc.DrawRectangle(pos[0]-3-size[0]//2, pos[1]-3-size[1]//2, size[0]+6, size[1]+6)
+        if bitmap:
+            dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
 
 
 
