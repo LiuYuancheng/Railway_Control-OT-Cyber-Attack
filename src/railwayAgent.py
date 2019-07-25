@@ -240,6 +240,7 @@ class AgentSignal(AgentTarget):
     def __init__(self, parent, idx, pos, onBitMap=None, offBitMap=None):
         AgentTarget.__init__(self, parent, idx, pos, gv.SIGNAL_TYPE)
         self.state = False
+        self.flashOn = False
         self.onBitMap = onBitMap
         self.offBitMap = offBitMap
         self.size = self.onBitMap.GetSize() if self.onBitMap else (0,0)
@@ -247,12 +248,15 @@ class AgentSignal(AgentTarget):
     def getSize(self):
         return self.size
 
+    def setFlash(self, flashOn):
+        self.flashOn = flashOn
+
     def setState(self, onFlag):
         self.state = onFlag
 
     def getState(self):
         bitmap = self.onBitMap if self.state else self.offBitMap
-        return (self.state, bitmap)
+        return (self.state, self.flashOn, bitmap)
 
 
 #-----------------------------------------------------------------------------

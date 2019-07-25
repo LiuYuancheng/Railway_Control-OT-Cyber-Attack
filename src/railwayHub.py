@@ -68,8 +68,6 @@ class railWayHubFrame(wx.Frame):
         self.trainBCtPanel = rwp.PanelTrainCtrl(sysBgPanel, 'TrainB')
         hbox3.Add(self.trainBCtPanel, flag=flagsR, border=2)
 
-
-
         hbox3.AddSpacer(10)
         sysBgPanel.SetSizer(hbox3)
         nb.AddPage(sysBgPanel, "System")

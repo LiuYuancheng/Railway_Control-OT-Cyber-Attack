@@ -17,37 +17,106 @@ import railwayGlobal as gv
 import railwayPanel as rwp
 import railwayAgent as agent
 
-
-
 class MapMgr(object):
     """ Map Manager to init an calculate differet element in the map.
     """
     def __init__(self, parent):
         """ Init all the element on the map. All the parameters are public to other 
             module.
-        """
+        """ 
+        self.signalDict = {} # name follow the 
         # Add the inside railway and the train (A).
-        self.trackA = [ (300, 50), (140,50), 
-                (100, 90), (100, 150), (100, 210), (100, 330), 
-                (140, 370), (300,370), (460, 370), 
-                (500, 330), (500, 210), (500, 90),(460, 50)]
+        self.trackA = [(300, 50), (140, 50),
+                       (100, 90), (100, 150), (100, 210), (100, 330),
+                       (140, 370), (300, 370), (460, 370),
+                       (500, 330), (500, 210), (500, 90), (460, 50)]
         headPosA = [320, 50]
         self.trainA = agent.AgentTrain(self, -1, headPosA, self.trackA)
         # Add the outside railway and the train (B).
-        self.trackB = [ (300, 30), (140, 30), 
-                (80, 90), (80, 150), (80,210), (80,330), 
-                (140, 390), (300, 390), (460,390), 
-                (520, 330), (520, 210), (520, 90), (460, 30)]
+        self.trackB = [(300, 30), (140, 30),
+                       (80, 90), (80, 150), (80, 210), (80, 330),
+                       (140, 390), (300, 390), (460, 390),
+                       (520, 330), (520, 210), (520, 90), (460, 30)]
         headPosB = [320, 30]
         self.trainB = agent.AgentTrain(self, -1, headPosB, self.trackB)
-        # Add the inside railway fork. 
+        # Add the inside railway fork (A). 
         forkAPts = [(100, 150), (100, 210), (80,210)]
         self.forkA = agent.AgentFork(self, -1, forkAPts, True)
+        self.signalDict['S301 - Track A Fork Power'] = self.createSignals(
+            [(120, 150)], gv.FSPNG_PATH, gv.FAPNG_PATH, self.forkA.getState(), True)
+        
+        # Add the outside railway fork (B).
         forkBPts = [(80, 150), (80,210), (100, 210)]
         self.forkB = agent.AgentFork(self, -1, forkBPts, True)
+        self.signalDict['S302 - Track B Fork Power'] = self.createSignals(
+            [(60, 150)], gv.FSPNG_PATH, gv.FBPNG_PATH, self.forkB.getState(), True)
 
 
+        # Add the inside gate (A).
+        self.gate1 = agent.AgentGate(self, -1, (300, 365), True, True)
+        
+        self.signalDict['Gate1Ppl'] = self.createSignals(
+            [(270, 350)], gv.PPPNG_PATH, gv.PSPNG_PATH, True, False)
+        
+        self.signalDict['Gate1Car'] = self.createSignals(
+            [(330, 350)], gv.CPPNG_PATH, gv.CSPNG_PATH, True, True)
+        
+        # Add the inside gate (B).
+        
+        self.gate2 = agent.AgentGate(self, -1, (300, 395), True, True)
 
+        self.signalDict['Gate2Ppl'] = self.createSignals(
+            [(330, 408)], gv.PPPNG_PATH, gv.PSPNG_PATH, True, False)
+        
+        self.signalDict['Gate2Car'] = self.createSignals(
+            [(270, 408)], gv.CPPNG_PATH, gv.CPPNG_PATH, True, True)
+
+        # Add the station A signal light. 
+
+        self.signalDict['StationA signal'] = self.createSignals(
+            [(465, 240)], gv.SOPNG_PATH, gv.SFPNG_PATH, False, False)        
+        
+        self.signalDict['StationB signal'] = self.createSignals(
+            [(555, 240)], gv.SOPNG_PATH, gv.SFPNG_PATH, False, False)        
+   
+
+        # Define the environment items.
+        # Power Plant
+        self.signalDict['S100 - Powerplant Lights'] = self.createSignals(
+            [(210, 130)], gv.POPNG_PATH, gv.PFPNG_PATH, True, False)
+        # Industrial Area
+        self.signalDict['S102 - Industrial Lightbox'] = self.createSignals(
+            [(35, 250), (35, 315), (35, 380)], gv.INOPNG_PATH, gv.INFPNG_PATH, True, False)
+        # City Area
+        self.signalDict['S303 - City LightBox'] = self.createSignals(
+            [(300+32, 210-32), (300+32, 210+32), (300-32, 210+32)], gv.CTOPNG_PATH, gv.CTFPNG_PATH, True, False)
+        # Residential Area
+        self.signalDict['S202 - Residential Lightbox'] = self.createSignals(
+            [(300+100, 210-32), (300+100, 210+32), (550, 380)], gv.RDOPNG_PATH, gv.RDFPNG_PATH, True, False)
+        # Airport Area
+        self.signalDict['S101 - Airport Lights'] = self.createSignals(
+            [(565, 110)], gv.APOPNG_PATH, gv.APFPNG_PATH, True, False)
+
+
+    def createSignals(self, posList, onImgPath, offImgPath, state, flash):
+        """ Create a signal object list. 
+        """
+        signalObjList = []
+        for pos in posList:
+            signalObj =  agent.AgentSignal(self, -1, pos,
+                            onBitMap=wx.Bitmap(onImgPath),
+                            offBitMap=wx.Bitmap(offImgPath))
+            signalObj.setState(state)
+            if flash: signalObj.setFlash(flash)
+            signalObjList.append(signalObj)
+        return signalObjList
+
+    def setSignalPwr(self, sKey, sValue):
+        value = True if sValue else False
+        for signalObj in self.signalDict[sKey]:
+            signalObj.setState(value)
+
+        
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelMap(wx.Panel):
@@ -65,26 +134,14 @@ class PanelMap(wx.Panel):
 
 
         self.mapMgr = MapMgr(self)
+        gv.iMapMgr = self.mapMgr
         #self.leftTimge = wx.Image(png)
         self.toggle = False     # Display flash toggle flag.
         # gate contorl parameters.(The 0-total close, 15-total open)
 
-        # Set the railway track A and B
-
         
 
 
-
-        
-
-
-        self.forkB = [(80, 150), (80,210)]
-        self.forkBOn = True
-
-        self.forkASignal = agent.AgentSignal(self, -1, (55, 150), onBitMap=wx.Bitmap(gv.FSPNG_PATH), offBitMap=wx.Bitmap(gv.FBPNG_PATH))
-        self.forkASignal.setState(True)
-        self.forkBSignal = agent.AgentSignal(self, -1, (110, 150), onBitMap=wx.Bitmap(gv.FSPNG_PATH), offBitMap=wx.Bitmap(gv.FAPNG_PATH))
-        self.forkBSignal.setState(True)
 
 
 
@@ -118,87 +175,22 @@ class PanelMap(wx.Panel):
 
 
         self.dcDefPen = None
+
         # define the gates
-        self.gate1 = agent.AgentGate(self, -1, (300, 365), True, True )
 
-        self.gate1PSignal = agent.AgentSignal( self, -1, (270, 350), 
-            onBitMap=wx.Bitmap(gv.PPPNG_PATH), 
-            offBitMap=wx.Bitmap(gv.PSPNG_PATH))
-        self.gate1PSignal.setState(True)
 
-        self.gate1CSignal = agent.AgentSignal( self, -1, (330, 350), 
-            onBitMap=wx.Bitmap(gv.CPPNG_PATH), 
-            offBitMap=wx.Bitmap(gv.CSPNG_PATH))
-        self.gate1CSignal.setState(True)
 
-        self.gate2 = agent.AgentGate(self, -1, (300, 395), True, True)
 
-        self.gate2PSignal = agent.AgentSignal(self, -1, (330, 410),
-            onBitMap=wx.Bitmap(gv.PPPNG_PATH), 
-            offBitMap=wx.Bitmap(gv.PSPNG_PATH))
-        self.gate2PSignal.setState(True)
-
-        self.gate2CSignal = agent.AgentSignal(self, -1, (270, 410),
-            onBitMap=wx.Bitmap(gv.CPPNG_PATH),
-            offBitMap=wx.Bitmap(gv.CSPNG_PATH))
-        self.gate2CSignal.setState(True)
         
-        self.gate3 = agent.AgentGate(self, -1, (145, 346), True, False )
-        self.gate4 = agent.AgentGate(self, -1, (165, 330), False, True )
+
+
+
+
+
+
         
-        self.stationASignal = agent.AgentSignal(self, -1, (470, 240),
-            onBitMap=wx.Bitmap(gv.SOPNG_PATH),
-            offBitMap=wx.Bitmap(gv.SFPNG_PATH))
-        self.stationASignal.setState(False)
-
-        self.stationBSignal = agent.AgentSignal(self, -1, (553, 240),
-            onBitMap=wx.Bitmap(gv.SOPNG_PATH),
-            offBitMap=wx.Bitmap(gv.SFPNG_PATH))
-        self.stationBSignal.setState(False)
-        
-        # define the environment items.
-        # power plant
-        self.powerPlant = agent.AgentSignal(self, -1, (210, 130),
-            onBitMap=wx.Bitmap(gv.POPNG_PATH),
-            offBitMap=wx.Bitmap(gv.PFPNG_PATH))
-        self.powerPlant.setState(True)
-        # industryArea 
-        self.industAreList = []
-        posList = [(35, 250), (35,315), (35, 380)]
-        for pos in posList:
-            industAreBox =  agent.AgentSignal(self, -1, pos,
-                onBitMap=wx.Bitmap(gv.INOPNG_PATH),
-                offBitMap=wx.Bitmap(gv.INFPNG_PATH))
-            industAreBox.setState(True)
-            self.industAreList.append(industAreBox)
-        # City 
-        self.cityAreList = []
-        posList = [(300+32, 210-32), (300+32, 210+32), (300-32, 210+32)]
-        
-        for pos in posList:
-            cityAreBox =  agent.AgentSignal(self, -1, pos,
-                onBitMap=wx.Bitmap(gv.CTOPNG_PATH),
-                offBitMap=wx.Bitmap(gv.CTFPNG_PATH))
-            cityAreBox.setState(True)
-            self.cityAreList.append(cityAreBox)
 
 
-        # City 
-        self.resdAreList = []
-        posList = [(300+100, 210-32), (300+100, 210+32), (550, 380)]
-        
-        for pos in posList:
-            resideAreBox =  agent.AgentSignal(self, -1, pos,
-                onBitMap=wx.Bitmap(gv.RDOPNG_PATH),
-                offBitMap=wx.Bitmap(gv.RDFPNG_PATH))
-            resideAreBox.setState(True)
-            self.resdAreList.append(resideAreBox)
-
-
-        self.airPort = agent.AgentSignal(self, -1, (565, 110),
-            onBitMap=wx.Bitmap(gv.APOPNG_PATH),
-            offBitMap=wx.Bitmap(gv.APFPNG_PATH))
-        self.airPort.setState(True)
 
         self.SetDoubleBuffered(True)
 
@@ -327,56 +319,28 @@ class PanelMap(wx.Panel):
         """ draw the signals on the map.
         """
         dc.SetBrush(wx.Brush(wx.Colour('LIGHT GRAY')))
-        _, bitmap = self.forkASignal.getState()
-        pos = self.forkASignal.getPos()
+        for signalObjs in self.mapMgr.signalDict.values():
+            for signalObj in signalObjs:
+                _, flash, bitmap = signalObj.getState()
+                pos = signalObj.getPos()
+                size = signalObj.getSize()
+                dc.DrawRectangle(pos[0]-3-size[0]//2,
+                                 pos[1]-3-size[1]//2, size[0]+6, size[1]+6)
+                if bitmap and ((not flash) or self.toggle):
+                    dc.DrawBitmap(bitmap, pos[0]-size[0]//2, pos[1]-size[1]//2)
+        return
+
+        #--------------------
+
         dc.DrawRectangle(pos[0]-2, pos[1]-2, 22, 22)
         if bitmap and self.toggle:
             dc.DrawBitmap(bitmap, pos[0], pos[1])
 
-        _, bitmap = self.forkBSignal.getState()
-        pos = self.forkBSignal.getPos()
+        _, bitmap = self.mapMgr.forkBSignal.getState()
+        pos = self.mapMgr.forkBSignal.getPos()
         dc.DrawRectangle(pos[0]-2, pos[1]-2, 22, 22)
         if bitmap and self.toggle:
             dc.DrawBitmap(bitmap, pos[0], pos[1])
-
-        _, bitmap = self.gate1PSignal.getState()
-        pos = self.gate1PSignal.getPos()
-        dc.DrawRectangle(pos[0]-12, pos[1]-12, 22, 22)
-        if bitmap:
-            dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
-
-        _, bitmap = self.gate1CSignal.getState()
-        pos = self.gate1CSignal.getPos()
-        dc.DrawRectangle(pos[0]-12, pos[1]-12, 22, 22)
-        if bitmap and self.toggle:
-            dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
-        
-
-        _, bitmap = self.gate2PSignal.getState()
-        pos = self.gate2PSignal.getPos()
-        dc.DrawRectangle(pos[0]-12, pos[1]-12, 22, 22)
-        if bitmap:
-            dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
-
-        _, bitmap = self.gate2CSignal.getState()
-        pos = self.gate2CSignal.getPos()
-        dc.DrawRectangle(pos[0]-12, pos[1]-12, 22, 22)
-        if bitmap and not self.toggle:
-            dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
-
-        _, bitmap = self.stationASignal.getState()
-        pos = self.stationASignal.getPos()
-        dc.DrawRectangle(pos[0]-12, pos[1]-12, 22, 22)
-        if bitmap :
-            dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
-
-
-        _, bitmap = self.stationBSignal.getState()
-        pos = self.stationBSignal.getPos()
-        dc.DrawRectangle(pos[0]-12, pos[1]-12, 22, 22)
-        if bitmap:
-            dc.DrawBitmap(bitmap, pos[0]-10, pos[1]-10)
-
 
         _, bitmap = self.powerPlant.getState()
         pos = self.powerPlant.getPos()
@@ -506,7 +470,7 @@ class PanelMap(wx.Panel):
         dc.SetPen(wx.Pen('GREEN', width=1, style=wx.PENSTYLE_SOLID))
         dc.DrawLine(294, 80, 294, 110)
 
-        penColor = 'RED' if self.gate1.gateCount == 0 else 'GREEN'
+        penColor = 'RED' if self.mapMgr.gate1.gateCount == 0 else 'GREEN'
         dc.SetPen(wx.Pen(penColor, width=1, style=wx.PENSTYLE_DOT))
         dc.DrawLine(285, 340, 285, 420)
         dc.DrawLine(315, 340, 315, 420)
@@ -515,20 +479,15 @@ class PanelMap(wx.Panel):
 
         # Draw the pedestrians block door
         dc.SetPen(wx.Pen(penColor, width=2, style=wx.PENSTYLE_SOLID))
-        [li,ri,lo,ro] = self.gate1.getGatePts()
+        [li,ri,lo,ro] = self.mapMgr.gate1.getGatePts()
         dc.DrawLine(li[0], li[1], lo[0], lo[1])
         dc.DrawLine(ri[0], ri[1], ro[0], ro[1])
         
-        [li,ri,lo,ro] = self.gate2.getGatePts()
+        [li,ri,lo,ro] = self.mapMgr.gate2.getGatePts()
         dc.DrawLine(li[0], li[1], lo[0], lo[1])
         dc.DrawLine(ri[0], ri[1], ro[0], ro[1])
 
         return
-        penColor = 'RED' if self.forkSt else 'GREEN'
-        dc.SetPen(wx.Pen(penColor, width=2, style=wx.PENSTYLE_SOLID))
-        [li,ri,lo,ro] = self.gate3.getGatePts()
-        dc.DrawLine(li[0], li[1], lo[0], lo[1])
-        dc.DrawLine(ri[0], ri[1], ro[0], ro[1])
 
         penColor = 'RED' if not self.forkSt else 'GREEN'
         dc.SetPen(wx.Pen(penColor, width=2, style=wx.PENSTYLE_SOLID))
@@ -542,7 +501,7 @@ class PanelMap(wx.Panel):
         #dc.DrawLine(265-self.gateCount, 37, 265-self.gateCount-15, 37)
         # Draw the pedestrians signal.
         #print(self.sensorid)
-        if self.toggle and self.gate1.gateCount == 15:
+        if self.toggle and self.mapMgr.gate1.gateCount == 15:
             if self.sensorid == 11 or self.gateDanger:
                 dc.DrawBitmap(self.hitbitmap, 250, 7)
                 if not self.gateDanger: 
@@ -625,13 +584,6 @@ class PanelMap(wx.Panel):
         """ return the current train position."""
         return self.trainPts
 
-    def setSignalPwr(idx, val):
-        pass
-
-
-
-
-
     #-----------------------------------------------------------------------------
     def periodic(self , now):
         """ periodicly call back to do needed calcualtion/panel update"""
@@ -660,30 +612,45 @@ class PanelMap(wx.Panel):
             self.sensorid = sensorid
         # Start to close the gate.
         if self.sensorid == 6 and self.hakedSensorID != 0 : 
-            self.gate1.moveDoor(openFg=False)
-            self.gate1PSignal.setState(False)
-            self.gate1CSignal.setState(False)
+            self.mapMgr.gate1.moveDoor(openFg=False)
+            gate1Psignal = self.mapMgr.signalDict['Gate1Ppl'][0]
+            gate1Psignal.setState(False)
+
+            gate1Csignal = self.mapMgr.signalDict['Gate1Car'][0]
+            gate1Csignal.setState(False)
+
+
+
             #self.gateCount -= 3
-            self.gate2.moveDoor(openFg=False)
-            self.gate2PSignal.setState(False)
-            self.gate2CSignal.setState(False)
+            self.mapMgr.gate2.moveDoor(openFg=False)
+            
+            gate2Psignal = self.mapMgr.signalDict['Gate2Ppl'][0]
+            gate2Psignal.setState(False)
+
+            gate2Csignal = self.mapMgr.signalDict['Gate2Car'][0]
+            gate2Csignal.setState(False)
 
         elif self.sensorid == 8:
-            self.gate1.moveDoor(openFg=True)
-            self.gate1PSignal.setState(True)
-            self.gate1CSignal.setState(True)
+            self.mapMgr.gate1.moveDoor(openFg=True)
+            gate1Psignal = self.mapMgr.signalDict['Gate1Ppl'][0]
+            gate1Psignal.setState(True)
+
+            gate1Csignal = self.mapMgr.signalDict['Gate1Car'][0]
+            gate1Csignal.setState(True)
+
+
+
+
             #self.gateCount += 3
-            self.gate2.moveDoor(openFg=True)
-            self.gate2PSignal.setState(True)
-            self.gate2CSignal.setState(True)
+            self.mapMgr.gate2.moveDoor(openFg=True)
+            gate2Psignal = self.mapMgr.signalDict['Gate2Ppl'][0]
+            gate2Psignal.setState(False)
+
+            gate2Csignal = self.mapMgr.signalDict['Gate2Car'][0]
+            gate2Csignal.setState(False)
 
         
-        if self.forkSt:
-            self.gate3.moveDoor(openFg=False)
-            self.gate4.moveDoor(openFg=True)
-        else:
-            self.gate3.moveDoor(openFg=True)
-            self.gate4.moveDoor(openFg=False)
+
 
 
         if self.sensorid == 0:

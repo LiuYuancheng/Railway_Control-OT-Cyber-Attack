@@ -261,8 +261,7 @@ class PanelSysCtrl(wx.Panel):
 
     def onChecked(self, event):
         cb = event.GetEventObject()
-        index = self.powerLabel.index(cb.GetLabel())
-        gv.iMapPanel.setSignalPwr(index, cb.GetValue())
+        gv.iMapMgr.setSignalPwr(cb.GetLabel(), cb.GetValue())
         
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
