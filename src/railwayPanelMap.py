@@ -23,7 +23,28 @@ class MapMgr(object):
     """ Map Manager to init an calculate differet element in the map.
     """
     def __init__(self, parent):
-        pass
+        """ Init all the element on the map. All the parameters are public to other 
+            module.
+        """
+        # Add the inside railway and the train (A).
+        self.trackA = [ (300, 50), (140,50), 
+                (100, 90), (100, 150), (100, 210), (100, 330), 
+                (140, 370), (300,370), (460, 370), 
+                (500, 330), (500, 210), (500, 90),(460, 50)]
+        headPosA = [320, 50]
+        self.trainA = agent.AgentTrain(self, -1, headPosA, self.trackA)
+        # Add the outside railway and the train (B).
+        self.trackB = [ (300, 30), (140, 30), 
+                (80, 90), (80, 150), (80,210), (80,330), 
+                (140, 390), (300, 390), (460,390), 
+                (520, 330), (520, 210), (520, 90), (460, 30)]
+        headPosB = [320, 30]
+        self.trainB = agent.AgentTrain(self, -1, headPosB, self.trackB)
+        # Add the inside railway fork. 
+        forkAPts = [(100, 150), (100, 210), (80,210)]
+        self.forkA = agent.AgentFork(self, -1, forkAPts, True)
+        forkBPts = [(80, 150), (80,210), (100, 210)]
+        self.forkB = agent.AgentFork(self, -1, forkBPts, True)
 
 
 
@@ -42,26 +63,21 @@ class PanelMap(wx.Panel):
         self.stopbitmap = wx.Bitmap(gv.LSJPG_PATH)
         self.clashbitmap = wx.Bitmap(gv.CLPNG_PATH)
 
+
+        self.mapMgr = MapMgr(self)
         #self.leftTimge = wx.Image(png)
         self.toggle = False     # Display flash toggle flag.
         # gate contorl parameters.(The 0-total close, 15-total open)
 
         # Set the railway track A and B
-        self.trackA = [ (300, 50), (140,50), 
-                        (100, 90), (100, 150), (100, 210), (100, 330), 
-                        (140, 370), (300,370), (460, 370), 
-                        (500, 330), (500, 210), (500, 90),(460, 50)]
-        headPosA = [320, 50]
 
-        self.trackB = [ (300, 30), (140, 30), 
-                        (80, 90), (80, 150), (80,210), (80,330), 
-                        (140, 390), (300, 390), (460,390), 
-                        (520, 330), (520, 210), (520, 90), (460, 30)]
+        
 
-        headPosB = [320, 30]
 
-        self.forkA = [(100, 150), (100, 210)]
-        self.forkAOn = True
+
+        
+
+
         self.forkB = [(80, 150), (80,210)]
         self.forkBOn = True
 
@@ -72,13 +88,9 @@ class PanelMap(wx.Panel):
 
 
 
-        self.trainA = agent.AgentTrain(self, -1, headPosA, self.trackA)
-        gv.iRailWay = self.trainA
+        #self.trainA = agent.AgentTrain(self, -1, headPosA, self.trackA)
+        gv.iRailWay = self.mapMgr.trainA
 
-
-        headPos = [130, 390]  # train station start point(train head)
-        self.trainPts = [[headPos[0]-10*(i), headPos[1] ] for i in range(4)]
-        self.trainB = agent.AgentTrain(self, -1, headPosB, self.trackB)
 
         # set the sensor position.
         # Id of the sensor which detected the train passing.
@@ -197,11 +209,11 @@ class PanelMap(wx.Panel):
         # Add the rail way sensors.
 
         
-        for item in self.trackA:
+        for item in self.mapMgr.trackA:
             sensor = agent.AgentSensor(self, -1, item)
             self.sensorList.append(sensor)
 
-        for item in self.trackB:
+        for item in self.mapMgr.trackB:
             sensor = agent.AgentSensor(self, -1, item)
             self.sensorList.append(sensor)
 
@@ -412,54 +424,45 @@ class PanelMap(wx.Panel):
     def _drawRailWay(self, dc):
         # Draw the railway. 
         dc.SetPen(wx.Pen('WHITE', width=4, style=wx.PENSTYLE_SOLID))
-        for i in range(len(self.trackA)-1):
-            fromPt, toPt = self.trackA[i], self.trackA[i+1]
+        for i in range(len(self.mapMgr.trackA)-1):
+            fromPt, toPt = self.mapMgr.trackA[i], self.mapMgr.trackA[i+1]
             dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
-        fromPt, toPt = self.trackA[0], self.trackA[-1]
+        fromPt, toPt = self.mapMgr.trackA[0], self.mapMgr.trackA[-1]
         dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
 
-        for i in range(len(self.trackB)-1):
-            fromPt, toPt = self.trackB[i], self.trackB[i+1]
+        for i in range(len(self.mapMgr.trackB)-1):
+            fromPt, toPt = self.mapMgr.trackB[i], self.mapMgr.trackB[i+1]
             dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
-        fromPt, toPt = self.trackB[0], self.trackB[-1]
+        fromPt, toPt = self.mapMgr.trackB[0], self.mapMgr.trackB[-1]
         dc.DrawLine(fromPt[0], fromPt[1],toPt[0], toPt[1])
         
         # Draw the railway fork block part.
         dc.SetPen(wx.Pen('WHITE', width=4, style=wx.PENSTYLE_SOLID))
-        if self.forkAOn:
-            dc.DrawLine(self.forkA[0][0], self.forkA[0][1], self.forkB[1][0], self.forkB[1][1])
-        else:
-            dc.DrawLine(self.forkA[0][0], self.forkA[0][1], self.forkA[1][0], self.forkA[1][1])
+        [pt1, _, pt3] = self.mapMgr.forkA.getPos() 
+        dc.DrawLine(pt1[0], pt1[1], pt3[0], pt3[1])
         
-        if self.forkBOn:
-            dc.DrawLine(self.forkB[0][0], self.forkB[0][1], self.forkA[1][0], self.forkA[1][1])
-        else:
-            dc.DrawLine(self.forkB[0][0], self.forkB[0][1], self.forkB[1][0], self.forkB[1][1])
+        [pt1, _, pt3] = self.mapMgr.forkB.getPos() 
+        dc.DrawLine(pt1[0], pt1[1], pt3[0], pt3[1])
 
         # Draw the railway fork open part.
         dc.SetPen(wx.Pen('GREEN', width=4, style=wx.PENSTYLE_SOLID))
-        if self.forkAOn:
-            dc.DrawLine(self.forkA[0][0], self.forkA[0][1], self.forkA[1][0], self.forkA[1][1])
-        else:
-            dc.DrawLine(self.forkA[0][0], self.forkA[0][1], self.forkB[1][0], self.forkB[1][1])
-        
-        if self.forkBOn:
-            dc.DrawLine(self.forkB[0][0], self.forkB[0][1], self.forkB[1][0], self.forkB[1][1])
-        else:
-            dc.DrawLine(self.forkB[0][0], self.forkB[0][1], self.forkA[1][0], self.forkA[1][1])
-        
+        pt = self.mapMgr.forkA.getForkPts()
+        dc.DrawLine(pt[0], pt[1], pt[2], pt[3])
+
+        pt = self.mapMgr.forkB.getForkPts()
+        dc.DrawLine(pt[0], pt[1], pt[2], pt[3])
 
     def _drawTrains(self, dc):
         dc.SetPen(self.dcDefPen)
         # Draw the train1 on the map.
         trainColor = 'RED' if self.tranState == -1 else '#CE8349'
         dc.SetBrush(wx.Brush(trainColor))
-        for point in self.trainA.getPos():
+        for point in self.mapMgr.trainA.getPos():
             dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)
         # Draw the train2 on the map.
         trainColor = 'RED' if (self.trainBLock or self.trainClash) else '#FFC000'
         dc.SetBrush(wx.Brush(trainColor))
-        for i, point in enumerate(self.trainB.getPos()):
+        for i, point in enumerate(self.mapMgr.trainB.getPos()):
             dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)
             if self.trainClash and i ==1:
                 dc.DrawBitmap(self.clashbitmap, point[0]-15, point[1]-15)
@@ -600,15 +603,15 @@ class PanelMap(wx.Panel):
    #-----------------------------------------------------------------------------
     def checkSensor(self):
         """ Check which sensor has detected the train pass."""
-        for trainPts in self.trainA.getPos():
+        for trainPts in self.mapMgr.trainA.getPos():
             for sensor in self.sensorList:
                 if sensor.checkNear(trainPts[0], trainPts[1], 10):
                     return sensor.sensorID # return the sensor index
         return -1 # return -1 if there is no sensor detected. 
 
     def checkClash(self):
-        for trainPts in self.trainA.getPos():
-            for trainPts2 in self.trainB.getPos():
+        for trainPts in self.mapMgr.trainA.getPos():
+            for trainPts2 in self.mapMgr.trainB.getPos():
                 clashSensor = agent.AgentTarget(self, -1, trainPts2, 'T')
                 if clashSensor.checkNear(trainPts[0], trainPts[1], 10):
                     return True
@@ -622,13 +625,20 @@ class PanelMap(wx.Panel):
         """ return the current train position."""
         return self.trainPts
 
+    def setSignalPwr(idx, val):
+        pass
+
+
+
+
+
     #-----------------------------------------------------------------------------
     def periodic(self , now):
         """ periodicly call back to do needed calcualtion/panel update"""
         # Set the detect sensor status related to PLC status
         self.updateTrainPos()
         if not self.trainBLock and not self.trainClash:
-            self.trainB.updateTrainPos()
+            self.mapMgr.trainB.updateTrainPos()
 
         sensorid = self.checkSensor()
         # Check whether 2 train clashed.
@@ -712,7 +722,7 @@ class PanelMap(wx.Panel):
     def updateTrainPos(self):
         """ update the train position."""
         if self.dockCount != 0: return
-        self.trainA.updateTrainPos()
+        self.mapMgr.trainA.updateTrainPos()
         
     #-----------------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):

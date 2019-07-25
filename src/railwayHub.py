@@ -74,9 +74,6 @@ class railWayHubFrame(wx.Frame):
         sysBgPanel.SetSizer(hbox3)
         nb.AddPage(sysBgPanel, "System")
 
-
-
-
         # Set the PLC contorl panel
         plcBgPanel = wx.Panel(nb, size=(600,250))
         hbox  = wx.BoxSizer(wx.HORIZONTAL)

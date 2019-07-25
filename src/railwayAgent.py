@@ -253,3 +253,22 @@ class AgentSignal(AgentTarget):
     def getState(self):
         bitmap = self.onBitMap if self.state else self.offBitMap
         return (self.state, bitmap)
+
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class AgentFork(AgentTarget):
+    """ Object hook to control signal."""
+    def __init__(self, parent, idx, pos, onFlag):
+        AgentTarget.__init__(self, parent, idx, pos, gv.FORK_TYPE)
+        self.forkOn = onFlag
+        self.startPt = pos[0]
+        self.endOnPt = pos[1]
+        self.endOffPt = pos[2]
+
+    def getForkPts(self):
+        pts = self.endOnPt if self.forkOn else self.endOffPt
+        return self.startPt + pts
+
+    def getState(self):
+        return self.forkOn

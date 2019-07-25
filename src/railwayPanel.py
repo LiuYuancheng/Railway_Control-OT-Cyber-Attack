@@ -237,15 +237,14 @@ class PanelSysCtrl(wx.Panel):
             "S301 - Track A Fork Power",
             "S302 - Track B Fork Power",
             "S303 - City LightBox")
-        
-        self.powerBtList = []
+        self.powerCBList = []
         hsizer = self.buidUISizer()
         self.SetSizer(hsizer)
 
     def buidUISizer(self):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
-        vsizer.Add(wx.StaticText(self, label="System Control"), flag=flagsR, border=2)
+        vsizer.Add(wx.StaticText(self, label="System Power Control"), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
         vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
                                      style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
@@ -253,13 +252,18 @@ class PanelSysCtrl(wx.Panel):
         for labelStr in self.powerLabel:
             vsizer.AddSpacer(5)
             pwtBt = wx.CheckBox(self, -1, labelStr)
+            pwtBt.Bind(wx.EVT_CHECKBOX,self.onChecked) 
             pwtBt.SetValue(True)
             vsizer.Add(pwtBt, flag=flagsR, border=2)
-        
+            self.powerCBList.append(pwtBt)
         vsizer.AddSpacer(10)
-
         return vsizer
 
+    def onChecked(self, event):
+        cb = event.GetEventObject()
+        index = self.powerLabel.index(cb.GetLabel())
+        gv.iMapPanel.setSignalPwr(index, cb.GetValue())
+        
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelTrainCtrl(wx.Panel):

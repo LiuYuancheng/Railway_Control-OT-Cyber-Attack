@@ -25,6 +25,7 @@ SENSOR_TYPE = 'SS'
 GATE_TYPE = 'GT'
 ATTPT_TYPE = 'AP'
 SIGNAL_TYPE = 'SL'
+FORK_TYPE = 'FK'
 
 TTICO_PATH = "".join([dirpath, "\\img\\title.ico"])
 
