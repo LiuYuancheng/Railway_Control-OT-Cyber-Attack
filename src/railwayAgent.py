@@ -150,6 +150,7 @@ class AgentTrain(AgentTarget):
     def setRailWayPts(self, railwayPts):
         self.railwayPts = railwayPts
 
+
     def updateTrainPos(self):
         """ Update the current train position on the map."""
         if self.dockCount == 0:
@@ -232,7 +233,7 @@ class AgentSensor(AgentTarget):
             self.feedBackPLC()
 
     #-----------------------------------------------------------------------------
-    def  (self):
+    def getSensorState(self):
         return self.actFlag
 
     #-----------------------------------------------------------------------------

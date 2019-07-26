@@ -103,7 +103,10 @@ iRailWay = None
 iPlcPanelList = []  # Plc panel list. 
 iMapMgr = None
 iMapPanel = None    # History chart panel.
-iTrainPanel = None  # Train control panel. 
+iTrainAPanel = None # Train A control panel. 
+iTrainBPanel = None # Train B control panel.
+iDataPanel = None   # display panel
+
 iMainFrame = None   # Main frame. 
 iSensorCount = 0    # number of sensors. 
 iEmgStop = False    # emergency stop 
