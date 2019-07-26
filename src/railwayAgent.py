@@ -126,6 +126,7 @@ class AgentTrain(AgentTarget):
         self.trainDistList = [0]*len(self.pos)
         self.trainSpeed = 10    # train speed: pixel/periodic loop
         self.dockCount = 0
+        self.emgStop = False
         
     def changedir(self):
         """ Change the train running direction."""
@@ -153,9 +154,12 @@ class AgentTrain(AgentTarget):
     def setRailWayPts(self, railwayPts):
         self.railwayPts = railwayPts
 
+    def setEmgStop(self, emgStop):
+        self.emgStop = emgStop
+
     def updateTrainPos(self):
         """ Update the current train position on the map."""
-        
+        if self.emgStop: return
         if self.dockCount == 0:
             for i, trainPt in enumerate(self.pos):
                 # The next railway point idx train going to approch.

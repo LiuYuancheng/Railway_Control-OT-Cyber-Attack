@@ -323,7 +323,11 @@ class MapMgr(object):
             self.gate1.moveDoor(openFg= not(self.gateLockA or self.gateLockB))
             self.gateAct = self.gate2.moveDoor(openFg= not(self.gateLockA or self.gateLockB))
 
-
+    def setEmgStop(self, trainName, state):
+        if trainName == 'TrainA':
+            self.trainA.setEmgStop(state)
+        elif trainName == 'TrainB':
+            self.trainB.setEmgStop(state)
 
 
 #-----------------------------------------------------------------------------
@@ -552,12 +556,12 @@ class PanelMap(wx.Panel):
     def _drawTrains(self, dc):
         dc.SetPen(self.dcDefPen)
         # Draw the train1 on the map.
-        trainColor = 'RED' if self.tranState == -1 else '#CE8349'
+        trainColor = 'RED' if self.mapMgr.trainA.emgStop else '#CE8349'
         dc.SetBrush(wx.Brush(trainColor))
         for point in self.mapMgr.trainA.getPos():
             dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)
         # Draw the train2 on the map.
-        trainColor = 'RED' if (self.trainBLock or self.trainClash) else '#FFC000'
+        trainColor = 'RED' if self.mapMgr.trainB.emgStop else '#FFC000'
         dc.SetBrush(wx.Brush(trainColor))
         for i, point in enumerate(self.mapMgr.trainB.getPos()):
             dc.DrawRectangle(point[0]-5, point[1]-5, 10, 10)

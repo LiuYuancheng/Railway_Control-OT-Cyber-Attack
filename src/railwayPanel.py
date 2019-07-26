@@ -391,18 +391,15 @@ class PanelTrainCtrl(wx.Panel):
         return vsizer
 
     def emgStop(self, event):
-        gv.iEmgStop = True
-        if gv.iMapPanel:
-            gv.iMapPanel.tranState = -1
-            gv.iMapPanel.updateDisplay()
 
-        self.setState(5)
+        if gv.iMapMgr:
+            gv.iMapMgr.setEmgStop(self.tName, True)
+            self.setState(5, 0)
 
     def emgRec(self, event):
-        gv.iEmgStop = False
-        if gv.iMapPanel:
-            gv.iMapPanel.tranState = 0
-            gv.iMapPanel.updateDisplay()
+           if gv.iMapMgr:
+            gv.iMapMgr.setEmgStop(self.tName, False)
+            self.setState(0, 0)
 
     def setState(self, idx, rwIdx): 
         """ Set the train running state. """
