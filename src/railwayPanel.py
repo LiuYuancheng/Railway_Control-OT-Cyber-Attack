@@ -279,7 +279,7 @@ class PanelTrainCtrl(wx.Panel):
         self.tName = trainName
         self.statDict = {
             '0': ('Running',    'GREEN',    80),
-            '1': ('ShowDown',   'YELLOW',   40),
+            '1': ('SlowDown',   'YELLOW',   40),
             '2': ('Accelerate', '#03AC15',  90),
             '3': ('Turning',    '#93CB8B',  60),
             '4': ('Waiting',    'ORANGE',   0),
@@ -287,7 +287,7 @@ class PanelTrainCtrl(wx.Panel):
         }
         hsizer = self.buidUISizer()
         self.SetSizer(hsizer)
-        self.setState(0)
+        self.setState(0, 0)
     
     def buidUISizer(self):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
@@ -404,14 +404,16 @@ class PanelTrainCtrl(wx.Panel):
             gv.iMapPanel.tranState = 0
             gv.iMapPanel.updateDisplay()
 
-    def setState(self, idx): 
+    def setState(self, idx, rwIdx): 
         """ Set the train running state. """
         state = self.statDict[str(idx)]
         self.statLb.SetLabel(str(state[0]).center(16))
         self.statLb.SetBackgroundColour(wx.Colour(state[1]))
-        self.statLb.Refresh()
+        railWay = "[ Track A ]" if rwIdx == 0 else "[ Track B ]"
+        self.rwLabel.SetLabel("RailWay Pos: " + railWay)
         self.speedLb.SetLabel("[ %dkm/h ]" %state[2])
-        self.speedDisplay.SetValue(state[2]//10) 
+        self.speedDisplay.SetValue(state[2]//10)
+        self.Refresh(False)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

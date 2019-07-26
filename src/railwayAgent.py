@@ -141,6 +141,9 @@ class AgentTrain(AgentTarget):
             if  dist <= threshold: return True
         return False
 
+    def getDockCount(self):
+        return self.dockCount
+
     def setDockCount(self, count):
         self.dockCount = count
 
@@ -149,7 +152,6 @@ class AgentTrain(AgentTarget):
 
     def setRailWayPts(self, railwayPts):
         self.railwayPts = railwayPts
-
 
     def updateTrainPos(self):
         """ Update the current train position on the map."""

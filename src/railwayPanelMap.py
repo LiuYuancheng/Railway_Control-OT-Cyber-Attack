@@ -246,13 +246,13 @@ class MapMgr(object):
                     self.trainA.setRailWayPts(self.trackA)
                     self.trainA.id = 0
 
+            self.updatePnlADisplay(0, crtAsensorId)
+
     def setTBact(self, crtBsensorId):
-        
         if self.rwBsensorId != crtBsensorId:
             if self.rwBsensorId >= 0 and crtBsensorId < 0:
                 self.sensorList[self.rwBsensorId].setSensorState(0)
             self.rwBsensorId = crtBsensorId
-
             #rwId = self.trainA.getID()
             if self.trainB.getID() == 0:
                 if self.rwBsensorId == 10:
@@ -284,6 +284,25 @@ class MapMgr(object):
                 elif self.rwBsensorId == 4:
                     self.trainB.setRailWayPts(self.trackA)
                     self.trainB.id = 0
+            
+            self.updatePnlADisplay(1, crtBsensorId)
+    
+    def updatePnlADisplay(self, trainID ,sensorId):
+        if sensorId < 0: return 
+        dispalyPnl = gv.iTrainAPanel if trainID == 0 else gv.iTrainBPanel
+        state= 0 # state idx refer to <PanelTrainCtrl:self.statDict >
+        if sensorId in (10, 23):
+            state = 4
+        elif sensorId in (3, 16, 6, 19, 9, 22):
+            state = 1
+        elif sensorId in (4, 17, 0, 13):
+            state = 2
+        elif sensorId in (1, 14, 5, 18, 8, 21, 11, 24):
+            state = 3
+        elif sensorId in (12, 25, 2, 15, 7, 20):
+            state = 0 
+        rwIdx = 0 if sensorId <13 else 1
+        dispalyPnl.setState(state, rwIdx)
 
     def periodic(self , now):
         self.trainA.updateTrainPos()
@@ -291,6 +310,14 @@ class MapMgr(object):
         [crtAsensorId, crtBsensorId] = self.checkSensor()
         self.setTAact(crtAsensorId)
         self.setTBact(crtBsensorId)
+        
+        # update if the train left station
+        if self.trainA.getDockCount() == 1:
+            gv.iTrainAPanel.setState(0, self.trainA.getID())
+        
+        if self.trainB.getDockCount() == 1:
+            gv.iTrainBPanel.setState(0, self.trainB.getID())
+
         # Update the gate action.
         if self.gateAct:
             self.gate1.moveDoor(openFg= not(self.gateLockA or self.gateLockB))
