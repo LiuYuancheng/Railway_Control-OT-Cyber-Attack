@@ -83,7 +83,7 @@ class MapMgr(object):
             [(465, 240)], gv.SOPNG_PATH, gv.SFPNG_PATH, False, False)        
         
         self.signalDict['StationB signal'] = self.createSignals(
-            [(555, 240)], gv.SOPNG_PATH, gv.SFPNG_PATH, False, False)        
+            [(550, 240)], gv.SOPNG_PATH, gv.SFPNG_PATH, False, False)        
    
         self.signalDict['S200 - Station Lights'] = self.createSignals(
             [(485, 210)], gv.STONPNG_PATH, gv.STOFPNG_PATH, True, False) 
@@ -377,7 +377,7 @@ class PanelMap(wx.Panel):
         #self.DrawStation(dc)
         dc.SetPen(self.dcDefPen)
         dc.SetBrush(wx.Brush(wx.Colour('GRAY')))
-        dc.DrawRectangle(525, 160, 12, 100)
+        dc.DrawRectangle(525, 155, 9, 110)
         self._drawSignal(dc)
         #if self.toggle:
         #    if self.forkSt: 

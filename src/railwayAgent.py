@@ -125,8 +125,8 @@ class AgentTrain(AgentTarget):
         # The train next distination index for each train body.
         self.trainDistList = [0]*len(self.pos)
         self.trainSpeed = 10    # train speed: pixel/periodic loop
-        self.dockCount = 0 
-
+        self.dockCount = 0
+        
     def changedir(self):
         """ Change the train running direction."""
         self.railwayPts = self.railwayPts[::-1]
@@ -232,7 +232,7 @@ class AgentSensor(AgentTarget):
             self.feedBackPLC()
 
     #-----------------------------------------------------------------------------
-    def getSensorState(self):
+    def  (self):
         return self.actFlag
 
     #-----------------------------------------------------------------------------

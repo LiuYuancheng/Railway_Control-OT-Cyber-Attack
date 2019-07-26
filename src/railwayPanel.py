@@ -221,6 +221,8 @@ class PanelPLC(wx.Panel):
         else:
             gv.iMapPanel.lightOn = 0
 
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 class PanelSysCtrl(wx.Panel):
     """ Train contorl panel"""
     def __init__(self, parent):
@@ -259,14 +261,13 @@ class PanelSysCtrl(wx.Panel):
         vsizer.AddSpacer(10)
         return vsizer
 
+#-----------------------------------------------------------------------------
     def onChecked(self, event):
         cb = event.GetEventObject()
+        # Set the signal state. 
         gv.iMapMgr.setSignalPwr(cb.GetLabel(), cb.GetValue())
-        # 
+        # Set he map component state.
         gv.iMapMgr.setCompState(cb.GetLabel(), cb.GetValue())
-        
-
-
         
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -291,7 +292,10 @@ class PanelTrainCtrl(wx.Panel):
     def buidUISizer(self):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
-        vsizer.Add(wx.StaticText(self, label= self.tName+" Control"), flag=flagsR, border=2)
+        self.ctrlAct = wx.CheckBox(self, -1 , self.tName+" Control")
+        self.ctrlAct.SetValue(True)
+        vsizer.Add(self.ctrlAct, flag=flagsR, border=2)
+
         vsizer.AddSpacer(5)
         vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
                                      style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
@@ -307,6 +311,11 @@ class PanelTrainCtrl(wx.Panel):
         hbox0.Add(self.statLb, flag=flagsR, border=2)
         vsizer.Add(hbox0, flag=flagsR, border=2)
         vsizer.AddSpacer(5)
+
+        self.rwLabel = wx.StaticText(self, label="RailWay Pos: "+self.tName[-1])
+        vsizer.Add(self.rwLabel, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+
         # Row idx = 1: Train speed contorl
         
         vsizer.Add(wx.StaticText(self, label="Train Speed:"), flag=flagsR, border=2)
@@ -319,14 +328,8 @@ class PanelTrainCtrl(wx.Panel):
         vsizer.Add(hbox1, flag=flagsR, border=2)
         vsizer.AddSpacer(5)
 
-
-        vsizer.AddSpacer(5)
-        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(165, -1),
+        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
                                      style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-
-        self.simuCb2 = wx.CheckBox(self, -1 ,'Train Active')
-        vsizer.Add(self.simuCb2, flag=flagsR, border=2)
         vsizer.AddSpacer(5)
 
         # Row idx = 2: Train direction contorl
@@ -356,9 +359,6 @@ class PanelTrainCtrl(wx.Panel):
         self.wTimeCtrl = wx.SpinCtrl(self, -1, '10', size = (50, -1), min=1, max=20)
         hbox4.Add(self.wTimeCtrl, flag=flagsR, border=2)
         vsizer.Add(hbox4, flag=flagsR, border=2)
-
-
-        
 
         # Row idx = 5: Station wait time contorl
         hbox5 = wx.BoxSizer(wx.HORIZONTAL)
