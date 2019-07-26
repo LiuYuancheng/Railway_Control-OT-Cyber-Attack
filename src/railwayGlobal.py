@@ -76,6 +76,16 @@ RDFPNG_PATH = "".join([dirpath, "\\img\\residentialOff.png"])
 APOPNG_PATH = "".join([dirpath, "\\img\\AirportOn.png"])
 APFPNG_PATH = "".join([dirpath, "\\img\\AirportOff.png"])
 
+
+STONPNG_PATH = "".join([dirpath, "\\img\\stationOn.png"])
+STOFPNG_PATH = "".join([dirpath, "\\img\\stationOff.png"])
+
+
+
+
+
+
+
 FRJPG_PATH = "".join([dirpath, "\\img\\forkAoffS18.png"]) 
 
 CLPNG_PATH = "".join([dirpath, "\\img\\clash.png"]) 

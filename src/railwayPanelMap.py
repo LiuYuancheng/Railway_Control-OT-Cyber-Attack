@@ -85,6 +85,9 @@ class MapMgr(object):
         self.signalDict['StationB signal'] = self.createSignals(
             [(555, 240)], gv.SOPNG_PATH, gv.SFPNG_PATH, False, False)        
    
+        self.signalDict['S200 - Station Lights'] = self.createSignals(
+            [(485, 210)], gv.STONPNG_PATH, gv.STOFPNG_PATH, True, False) 
+
 
         # Define the environment items.
         # Power Plant
@@ -129,15 +132,16 @@ class MapMgr(object):
         for sensor in self.sensorList:
             if sensorIDfb[0] < 0:
                 for trainPts in self.trainA.getPos():
-                    if sensor.checkNear(trainPts[0], trainPts[1], 10):
+                    if sensor.checkNear(trainPts[0], trainPts[1], 1):
+                        sensor.setSensorState(1)
                         sensorIDfb[0] = sensor.sensorID
                         break
             if sensorIDfb[1] < 0:
                 for trainPts in self.trainB.getPos():
-                    if sensor.checkNear(trainPts[0], trainPts[1], 10):
+                    if sensor.checkNear(trainPts[0], trainPts[1], 1):
+                        sensor.setSensorState(1)
                         sensorIDfb[1] = sensor.sensorID
                         break
-
         return sensorIDfb # return [-1, -1] if there is no sensor detected. 
 
     def createSignals(self, posList, onImgPath, offImgPath, state, flash):
@@ -187,7 +191,7 @@ class MapMgr(object):
         self.trainB.updateTrainPos()
         [crtAsensorId, crtBsensorId] = self.checkSensor()
         if self.rwAsensorId != crtAsensorId:
-            if self.rwAsensorId > 0 and crtAsensorId < 0:
+            if self.rwAsensorId >= 0 and crtAsensorId < 0:
                 self.sensorList[self.rwAsensorId].setSensorState(0)
             self.rwAsensorId = crtAsensorId
             if self.rwAsensorId == 10:
@@ -204,7 +208,7 @@ class MapMgr(object):
 
 
         if self.rwBsensorId != crtBsensorId:
-            if self.rwBsensorId > 0 and crtBsensorId < 0:
+            if self.rwBsensorId >= 0 and crtBsensorId < 0:
                 self.sensorList[self.rwBsensorId].setSensorState(0)
             self.rwBsensorId = crtBsensorId
             if self.rwBsensorId == 23:
@@ -364,21 +368,16 @@ class PanelMap(wx.Panel):
         # High light the sensor which detected the train.
         dc.SetFont(wx.Font(7, wx.DEFAULT, wx.NORMAL, wx.NORMAL))
         dc.SetBrush(wx.Brush('GRAY'))
-        for sensor in self.mapMgr.sensorList:
-            sensorPos = sensor.pos
-            dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
-            dc.DrawText("s"+str(sensor.sensorID), sensorPos[0]+3, sensorPos[1]+3)
-        penColor = 'GREEN' if self.toggle else 'RED'
-        dc.SetBrush(wx.Brush(penColor))
-        if self.sensorid >= 0:
-            sensor = self.mapMgr.sensorList[self.sensorid]
-            sensorPos = sensor.pos
-            dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
+
+        self._drawSensors(dc)
         # draw all the sensors: 
 
         #self.DrawAttackPt(dc)
         self.DrawGate(dc)
-        self.DrawStation(dc)
+        #self.DrawStation(dc)
+        dc.SetPen(self.dcDefPen)
+        dc.SetBrush(wx.Brush(wx.Colour('GRAY')))
+        dc.DrawRectangle(525, 160, 12, 100)
         self._drawSignal(dc)
         #if self.toggle:
         #    if self.forkSt: 
@@ -389,9 +388,24 @@ class PanelMap(wx.Panel):
         # Update the display flash toggle flag. 
         self.toggle = not self.toggle
 
+    def _drawSensors(self, dc):
+        dc.SetBrush(wx.Brush('GRAY'))
+        for sensor in self.mapMgr.sensorList:
+            sensorPos = sensor.pos
+            dc.DrawText("s"+str(sensor.sensorID), sensorPos[0]+3, sensorPos[1]+3)
+            if sensor.getSensorState():
+                Color = 'YELLOW' if self.toggle else 'GREEN'
+                dc.SetBrush(wx.Brush(Color))
+                dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
+                dc.SetBrush(wx.Brush('GRAY'))
+            else:
+                dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
+
+
     def _drawSignal(self, dc):
         """ draw the signals on the map.
         """
+        dc.SetPen(self.dcDefPen)
         dc.SetBrush(wx.Brush(wx.Colour('LIGHT GRAY')))
         for signalObjs in self.mapMgr.signalDict.values():
             for signalObj in signalObjs:
@@ -542,7 +556,7 @@ class PanelMap(wx.Panel):
         
         dc.DrawRectangle(480, 200, 15, 60)
         dc.SetBrush(wx.Brush(wx.Colour('GRAY')))
-        dc.DrawRectangle(525, 200, 15, 60)
+        dc.DrawRectangle(525, 160, 12, 100)
         
         return
 
@@ -621,9 +635,6 @@ class PanelMap(wx.Panel):
             #if self.sensorid > 0:
             #    self.mapMgr.sensorList[self.sensorid].setSensorState(0)
             #self.sensorid = sensorid
-
-
-
 
         #if self.sensorid == 0:
         #    if gv.iDetailPanel:
