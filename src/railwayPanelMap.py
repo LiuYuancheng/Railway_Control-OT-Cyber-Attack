@@ -26,7 +26,7 @@ class MapMgr(object):
         """ 
         self.signalDict = {} # name follow the
         self.dockCount = []
-
+        self.gateAct = False
 
 
         # Add the inside railway and the train (A).
@@ -34,18 +34,32 @@ class MapMgr(object):
                        (100, 90), (100, 150), (100, 210), (100, 330),
                        (140, 370), (300, 370), (460, 370),
                        (500, 330), (500, 210), (500, 90), (460, 50)]
+
+        self.trackAB = [(300, 50), (140, 50),
+                (100, 90), (100, 150), (80, 210), (80, 330),
+                (140, 390), (300, 390), (460, 390),
+                (520, 330), (520, 210), (520, 90), (460, 30)]
+
+
         headPosA = [320, 50]
-        self.trainA = agent.AgentTrain(self, -1, headPosA, self.trackA)
+        self.trainA = agent.AgentTrain(self, 0, headPosA, self.trackA)
         # Add the outside railway and the train (B).
         self.trackB = [(300, 30), (140, 30),
                        (80, 90), (80, 150), (80, 210), (80, 330),
                        (140, 390), (300, 390), (460, 390),
                        (520, 330), (520, 210), (520, 90), (460, 30)]
+
+        self.trackBA = [(300, 50), (140, 50),
+                (80, 90), (80, 150),(100, 210), (100, 330),
+                (140, 370), (300, 370), (460, 370),
+                (500, 330), (500, 210), (500, 90), (460, 50)]
+
+
         headPosB = [320, 30]
-        self.trainB = agent.AgentTrain(self, -1, headPosB, self.trackB)
+        self.trainB = agent.AgentTrain(self, 1, headPosB, self.trackB)
         # Add the inside railway fork (A). 
         forkAPts = [(100, 150), (100, 210), (80,210)]
-        self.forkA = agent.AgentFork(self, -1, forkAPts, True)
+        self.forkA = agent.AgentFork(self, 2, forkAPts, True)
         self.signalDict['S301 - Track A Fork Power'] = self.createSignals(
             [(120, 150)], gv.FSPNG_PATH, gv.FAPNG_PATH, self.forkA.getState(), True)
         
@@ -110,6 +124,9 @@ class MapMgr(object):
         self.rwAsensorId = self.rwBsensorId = -1
         # define all the sensors.
         self.addSensors()
+
+
+
 
     def addSensors(self):
         """ added the train detection sensors in the sensor List 
@@ -185,46 +202,102 @@ class MapMgr(object):
         gate2Csignal = self.signalDict['Gate2Car'][0]
         gate2Csignal.setState(openFlag)
 
+        self.gateAct = True
+    
+
+    def setTAact(self, crtAsensorId):
+        """ Set the train A's action base on the sensor ID
+        """
+        if self.rwAsensorId != crtAsensorId:
+            # Clear the old sensor state if the train has passed it.
+            if self.rwAsensorId >= 0 and crtAsensorId < 0:
+                self.sensorList[self.rwAsensorId].setSensorState(0)
+            self.rwAsensorId = crtAsensorId
+            # Get the curret position(railway) the train stay on.
+            #rwId = self.trainA.getID()
+            if self.trainA.getID() == 0:
+                if self.rwAsensorId == 10:
+                    self.trainA.setDockCount(2)
+                elif self.rwAsensorId == 6:
+                    self.gateLockA = True
+                    self.changeGateState(False)
+                elif self.rwAsensorId == 8:
+                    self.gateLockA = False
+                    if not (self.gateLockA or self.gateLockB):
+                        self.changeGateState(True)
+                elif self.rwAsensorId == 3 and not self.forkA.forkOn:
+                    self.trainA.setRailWayPts(self.trackAB)
+                elif self.rwAsensorId == 17:
+                    self.trainA.setRailWayPts(self.trackB)
+                    self.trainA.id = 1
+            else:
+                if self.rwAsensorId == 23:
+                    self.trainA.setDockCount(2)
+                elif self.rwAsensorId == 19:
+                    self.gateLockA = True
+                    self.changeGateState(False)
+                elif self.rwAsensorId == 21:
+                    self.gateLockA = False
+                    if not (self.gateLockA or self.gateLockB):
+                        self.changeGateState(True)
+                elif self.rwAsensorId == 16 and not self.forkB.forkOn:
+                    self.trainA.setRailWayPts(self.trackBA)
+                elif self.rwAsensorId == 4:
+                    self.trainA.setRailWayPts(self.trackA)
+                    self.trainA.id = 0
+
+    def setTBact(self, crtBsensorId):
+        
+        if self.rwBsensorId != crtBsensorId:
+            if self.rwBsensorId >= 0 and crtBsensorId < 0:
+                self.sensorList[self.rwBsensorId].setSensorState(0)
+            self.rwBsensorId = crtBsensorId
+
+            #rwId = self.trainA.getID()
+            if self.trainB.getID() == 0:
+                if self.rwBsensorId == 10:
+                    self.trainB.setDockCount(2)
+                elif self.rwBsensorId == 6:
+                    self.gateLockB = True
+                    self.changeGateState(False)
+                elif self.rwBsensorId == 8:
+                    self.gateLockB = False
+                    if not (self.gateLockA or self.gateLockB):
+                        self.changeGateState(True)
+                elif self.rwBsensorId == 3 and not self.forkA.forkOn:
+                    self.trainB.setRailWayPts(self.trackAB)
+                elif self.rwBsensorId == 17:
+                    self.trainB.setRailWayPts(self.trackB)
+                    self.trainB.id = 1
+            else:
+                if self.rwBsensorId == 23:
+                    self.trainB.setDockCount(2)
+                elif self.rwBsensorId == 19:
+                    self.gateLockB = True
+                    self.changeGateState(False)
+                elif self.rwBsensorId == 21:
+                    self.gateLockB = False
+                    if not (self.gateLockA or self.gateLockB):
+                        self.changeGateState(True)
+                elif self.rwBsensorId == 16 and not self.forkB.forkOn:
+                    self.trainB.setRailWayPts(self.trackBA)
+                elif self.rwBsensorId == 4:
+                    self.trainB.setRailWayPts(self.trackA)
+                    self.trainB.id = 0
 
     def periodic(self , now):
         self.trainA.updateTrainPos()
         self.trainB.updateTrainPos()
         [crtAsensorId, crtBsensorId] = self.checkSensor()
-        if self.rwAsensorId != crtAsensorId:
-            if self.rwAsensorId >= 0 and crtAsensorId < 0:
-                self.sensorList[self.rwAsensorId].setSensorState(0)
-            self.rwAsensorId = crtAsensorId
-            if self.rwAsensorId == 10:
-                self.trainA.setDockCount(2)
-
-        if self.rwAsensorId == 6:
-            self.gateLockA = True
-            self.changeGateState(False)
-        elif self.rwAsensorId == 8:
-            self.gateLockA = False
-            if not (self.gateLockA or self.gateLockB):
-                self.changeGateState(True)
+        self.setTAact(crtAsensorId)
+        self.setTBact(crtBsensorId)
+        # Update the gate action.
+        if self.gateAct:
+            self.gate1.moveDoor(openFg= not(self.gateLockA or self.gateLockB))
+            self.gateAct = self.gate2.moveDoor(openFg= not(self.gateLockA or self.gateLockB))
 
 
 
-        if self.rwBsensorId != crtBsensorId:
-            if self.rwBsensorId >= 0 and crtBsensorId < 0:
-                self.sensorList[self.rwBsensorId].setSensorState(0)
-            self.rwBsensorId = crtBsensorId
-            if self.rwBsensorId == 23:
-                self.trainB.setDockCount(2)
-
-        if crtBsensorId>0:
-            print(crtBsensorId)
-
-        if self.rwBsensorId == 19: #?
-            self.gateLockB = True
-            self.changeGateState(False)
-        elif self.rwBsensorId == 21:#?
-            self.gateLockB = False
-            if not (self.gateLockA or self.gateLockB):
-                self.changeGateState(True)
-        
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

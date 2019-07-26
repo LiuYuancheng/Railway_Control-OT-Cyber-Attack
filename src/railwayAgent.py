@@ -153,6 +153,7 @@ class AgentTrain(AgentTarget):
 
     def updateTrainPos(self):
         """ Update the current train position on the map."""
+        
         if self.dockCount == 0:
             for i, trainPt in enumerate(self.pos):
                 # The next railway point idx train going to approch.
