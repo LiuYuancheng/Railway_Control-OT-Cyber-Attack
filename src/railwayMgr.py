@@ -311,11 +311,17 @@ class MapMgr(object):
         # update if the train left station
         if self.trainA.getDockCount() == 1:
             gv.iTrainAPanel.setState(0, self.trainA.getID())
-            gv.iMapMgr.setSignalPwr('StationA signal', 0)
+            if self.trainA.getID() == 0:
+                gv.iMapMgr.setSignalPwr('StationA signal', 0)
+            else:
+                gv.iMapMgr.setSignalPwr('StationB signal', 0)
 
         if self.trainB.getDockCount() == 1:
             gv.iTrainBPanel.setState(0, self.trainB.getID())
-            gv.iMapMgr.setSignalPwr('StationB signal', 0)
+            if self.trainB.getID() == 0:
+                gv.iMapMgr.setSignalPwr('StationA signal', 0)
+            else:
+                gv.iMapMgr.setSignalPwr('StationB signal', 0)
 
         # Update the gate action.
         if self.gateAct:
