@@ -76,21 +76,6 @@ class PanelMap(wx.Panel):
         self.dcDefPen = None
 
         # define the gates
-
-
-
-
-        
-
-
-
-
-
-
-        
-
-
-
         self.SetDoubleBuffered(True)
 
 
