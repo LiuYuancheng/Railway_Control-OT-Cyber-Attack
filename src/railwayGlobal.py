@@ -98,18 +98,23 @@ PLC_CFG = {
 
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
 # Set the global reference here.
-iRailWay = None
+iAgentMgr = None
+iAttackCtrlPanel = None 
+iDataPanel = None   # display panel
+iDetailPanel = None    
+iEmgStop = False    # emergency stop
+iMainFrame = None   # Main frame. 
+iMapMgr = None
+iMapPanel = None    # History chart panel.
 iPlcPanelList = []  # Plc panel list. 
 iPlcMgr = None
-iMapMgr = None
-iAgentMgr = None
-iMapPanel = None    # History chart panel.
+iRailWay = None
+iSensorCount = 0    # number of sensors. 
 iTrainAPanel = None # Train A control panel. 
 iTrainBPanel = None # Train B control panel.
-iDataPanel = None   # display panel
 
-iMainFrame = None   # Main frame. 
-iSensorCount = 0    # number of sensors. 
-iEmgStop = False    # emergency stop 
-iDetailPanel = None
-iAttackCtrlPanel = None 
+
+
+
+
+

@@ -15,6 +15,8 @@ import wx
 import railwayGlobal as gv  
 import railwayAgent as agent
 
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 class MapMgr(object):
     """ Map Manager to init an calculate differet element in the map.
     """
@@ -22,83 +24,70 @@ class MapMgr(object):
         """ Init all the element on the map. All the parameters are public to other 
             module.
         """ 
-        self.signalDict = {} # name follow the
+        self.signalDict = {} # name follow the <PanelSysCtrl.powerLabel>
         self.dockCount = []
         self.gateAct = False
-
-
         # Add the inside railway and the train (A).
         self.trackA = [(300, 50), (140, 50),
                        (100, 90), (100, 150), (100, 210), (100, 330),
                        (140, 370), (300, 370), (460, 370),
                        (500, 330), (500, 210), (500, 90), (460, 50)]
-
+        # railway from A -> B
         self.trackAB = [(300, 50), (140, 50),
                 (100, 90), (100, 150), (80, 210), (80, 330),
                 (140, 390), (300, 390), (460, 390),
                 (520, 330), (520, 210), (520, 90), (460, 30)]
-
-
         headPosA = [320, 50]
         self.trainA = agent.AgentTrain(self, 0, headPosA, self.trackA)
+
         # Add the outside railway and the train (B).
         self.trackB = [(300, 30), (140, 30),
                        (80, 90), (80, 150), (80, 210), (80, 330),
                        (140, 390), (300, 390), (460, 390),
                        (520, 330), (520, 210), (520, 90), (460, 30)]
-
+        # railway from B -> A
         self.trackBA = [(300, 50), (140, 50),
                 (80, 90), (80, 150),(100, 210), (100, 330),
                 (140, 370), (300, 370), (460, 370),
                 (500, 330), (500, 210), (500, 90), (460, 50)]
-
-
         headPosB = [320, 30]
         self.trainB = agent.AgentTrain(self, 1, headPosB, self.trackB)
+
         # Add the inside railway fork (A). 
         forkAPts = [(100, 150), (100, 210), (80,210)]
         self.forkA = agent.AgentFork(self, 2, forkAPts, True)
         self.signalDict['S301 - Track A Fork Power'] = self.createSignals(
             [(120, 150)], gv.FSPNG_PATH, gv.FAPNG_PATH, self.forkA.getState(), True)
-        
+        self.gateLockA = False
+
         # Add the outside railway fork (B).
         forkBPts = [(80, 150), (80,210), (100, 210)]
         self.forkB = agent.AgentFork(self, -1, forkBPts, True)
         self.signalDict['S302 - Track B Fork Power'] = self.createSignals(
             [(60, 150)], gv.FSPNG_PATH, gv.FBPNG_PATH, self.forkB.getState(), True)
-
-        self.gateLockA = False
         self.gateLockB = False
-        # Add the inside gate (A).
+
+        # Add the inside gate (A) with its signal lights.
         self.gate1 = agent.AgentGate(self, -1, (300, 365), True, True)
-        
         self.signalDict['Gate1Ppl'] = self.createSignals(
             [(270, 350)], gv.PPPNG_PATH, gv.PSPNG_PATH, True, False)
-        
         self.signalDict['Gate1Car'] = self.createSignals(
             [(330, 350)], gv.CPPNG_PATH, gv.CSPNG_PATH, True, True)
         
-        # Add the inside gate (B).
-        
+        # Add the inside gate (B) with its signal lights.
         self.gate2 = agent.AgentGate(self, -1, (300, 395), True, True)
-
         self.signalDict['Gate2Ppl'] = self.createSignals(
             [(330, 408)], gv.PPPNG_PATH, gv.PSPNG_PATH, True, False)
-        
         self.signalDict['Gate2Car'] = self.createSignals(
             [(270, 408)], gv.CPPNG_PATH, gv.CSPNG_PATH, True, True)
 
-        # Add the station A signal light. 
-
+        # Add the station and the signal light for railway A and B. 
         self.signalDict['StationA signal'] = self.createSignals(
             [(465, 240)], gv.SOPNG_PATH, gv.SFPNG_PATH, False, False)        
-        
         self.signalDict['StationB signal'] = self.createSignals(
             [(550, 240)], gv.SOPNG_PATH, gv.SFPNG_PATH, False, False)        
-   
         self.signalDict['S200 - Station Lights'] = self.createSignals(
             [(485, 210)], gv.STONPNG_PATH, gv.STOFPNG_PATH, True, False) 
-
 
         # Define the environment items.
         # Power Plant
@@ -117,31 +106,24 @@ class MapMgr(object):
         self.signalDict['S101 - Airport Lights'] = self.createSignals(
             [(565, 110)], gv.APOPNG_PATH, gv.APFPNG_PATH, True, False)
 
+        # define all the sensors.
         self.sensorList = []
         self.rwAsensorId = self.rwBsensorId = -1
-        # define all the sensors.
         self.addSensors()
 
-
+#-----------------------------------------------------------------------------
     def addSensors(self):
-        """ added the train detection sensors in the sensor List 
-        """
+        """ added the train detection sensors in the sensor List """
         # Add the rail way sensors.
-        for item in self.trackA:
-            sensor = agent.AgentSensor(self, -1, item)
+        for pos in self.trackA + self.trackB:
+            sensor = agent.AgentSensor(self, -1, pos)
             gv.iAgentMgr.hookSernsor(sensor.sensorID)
             self.sensorList.append(sensor)
 
-        for item in self.trackB:
-            sensor = agent.AgentSensor(self, -1, item)
-            gv.iAgentMgr.hookSernsor(sensor.sensorID)
-            self.sensorList.append(sensor)
-
-    #-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
     def checkSensor(self):
         """ Check which sensor has detected the train pass."""
         sensorIDfb = [-1, -1] # Feed back sensor ID.
-
         for sensor in self.sensorList:
             if sensorIDfb[0] < 0:
                 for trainPts in self.trainA.getPos():
@@ -157,6 +139,7 @@ class MapMgr(object):
                         break
         return sensorIDfb # return [-1, -1] if there is no sensor detected. 
 
+#-----------------------------------------------------------------------------
     def createSignals(self, posList, onImgPath, offImgPath, state, flash):
         """ Create a signal object list. 
         """
@@ -170,37 +153,45 @@ class MapMgr(object):
             signalObjList.append(signalObj)
         return signalObjList
 
+#-----------------------------------------------------------------------------
     def setSignalPwr(self, sKey, sValue):
+        """ Set the signal power on/off based on the signal's key
+        """ 
         value = True if sValue else False
         if sKey in self.signalDict.keys():
             for signalObj in self.signalDict[sKey]:
                 # Set the signal statues.
                 signalObj.setState(value)
 
+#-----------------------------------------------------------------------------
     def setCompState(self, sKey, sValue):
+        """ Set the signal componenets's state.
+        """
         value = True if sValue else False
         if sKey == 'S301 - Track A Fork Power':
             self.forkA.forkOn = value
         elif sKey == 'S302 - Track B Fork Power':
             self.forkB.forkOn = value
 
-
+#-----------------------------------------------------------------------------
     def changeGateState(self, openFlag):
+        """ Change the gate states"""
+        # track A gate:
         self.gate1.moveDoor(openFg=openFlag)
         gate1Psignal = self.signalDict['Gate1Ppl'][0]
         gate1Psignal.setState(openFlag)
         gate1Csignal = self.signalDict['Gate1Car'][0]
         gate1Csignal.setState(openFlag)
-
+        # track B gate:
         self.gate2.moveDoor(openFg=openFlag)
         gate2Psignal = self.signalDict['Gate2Ppl'][0]
         gate2Psignal.setState(openFlag)
         gate2Csignal = self.signalDict['Gate2Car'][0]
         gate2Csignal.setState(openFlag)
-
+        # Update the current gate action states.
         self.gateAct = True
     
-
+#-----------------------------------------------------------------------------
     def setTAact(self, crtAsensorId):
         """ Set the train A's action base on the sensor ID
         """
@@ -213,7 +204,8 @@ class MapMgr(object):
             #rwId = self.trainA.getID()
             if self.trainA.getID() == 0:
                 if self.rwAsensorId == 10:
-                    self.trainA.setDockCount(2)
+                    self.trainA.setDockCount(5)
+                    gv.iMapMgr.setSignalPwr('StationA signal', 1)
                 elif self.rwAsensorId == 6:
                     self.gateLockA = True
                     self.changeGateState(False)
@@ -228,7 +220,8 @@ class MapMgr(object):
                     self.trainA.id = 1
             else:
                 if self.rwAsensorId == 23:
-                    self.trainA.setDockCount(2)
+                    self.trainA.setDockCount(5)
+                    gv.iMapMgr.setSignalPwr('StationB signal', 1)
                 elif self.rwAsensorId == 19:
                     self.gateLockA = True
                     self.changeGateState(False)
@@ -244,6 +237,7 @@ class MapMgr(object):
 
             self.updatePnlADisplay(0, crtAsensorId)
 
+#-----------------------------------------------------------------------------
     def setTBact(self, crtBsensorId):
         if self.rwBsensorId != crtBsensorId:
             if self.rwBsensorId >= 0 and crtBsensorId < 0:
@@ -252,7 +246,8 @@ class MapMgr(object):
             #rwId = self.trainA.getID()
             if self.trainB.getID() == 0:
                 if self.rwBsensorId == 10:
-                    self.trainB.setDockCount(2)
+                    self.trainB.setDockCount(5)
+                    gv.iMapMgr.setSignalPwr('StationA signal', 1)
                 elif self.rwBsensorId == 6:
                     self.gateLockB = True
                     self.changeGateState(False)
@@ -267,7 +262,8 @@ class MapMgr(object):
                     self.trainB.id = 1
             else:
                 if self.rwBsensorId == 23:
-                    self.trainB.setDockCount(2)
+                    self.trainB.setDockCount(5)
+                    gv.iMapMgr.setSignalPwr('StationB signal', 1)
                 elif self.rwBsensorId == 19:
                     self.gateLockB = True
                     self.changeGateState(False)
@@ -282,7 +278,8 @@ class MapMgr(object):
                     self.trainB.id = 0
             
             self.updatePnlADisplay(1, crtBsensorId)
-    
+
+#-----------------------------------------------------------------------------
     def updatePnlADisplay(self, trainID ,sensorId):
         if sensorId < 0: return 
         dispalyPnl = gv.iTrainAPanel if trainID == 0 else gv.iTrainBPanel
@@ -300,6 +297,7 @@ class MapMgr(object):
         rwIdx = 0 if sensorId <13 else 1
         dispalyPnl.setState(state, rwIdx)
 
+#-----------------------------------------------------------------------------
     def periodic(self , now):
         self.trainA.updateTrainPos()
         self.trainB.updateTrainPos()
@@ -307,28 +305,31 @@ class MapMgr(object):
 
         self.updatePLCIn((crtAsensorId, crtBsensorId)) # need to run before setTACT/setBAct
 
-
         self.setTAact(crtAsensorId)
         self.setTBact(crtBsensorId)
         
         # update if the train left station
         if self.trainA.getDockCount() == 1:
             gv.iTrainAPanel.setState(0, self.trainA.getID())
-        
+            gv.iMapMgr.setSignalPwr('StationA signal', 0)
+
         if self.trainB.getDockCount() == 1:
             gv.iTrainBPanel.setState(0, self.trainB.getID())
+            gv.iMapMgr.setSignalPwr('StationB signal', 0)
 
         # Update the gate action.
         if self.gateAct:
             self.gate1.moveDoor(openFg= not(self.gateLockA or self.gateLockB))
             self.gateAct = self.gate2.moveDoor(openFg= not(self.gateLockA or self.gateLockB))
 
+#-----------------------------------------------------------------------------
     def setEmgStop(self, trainName, state):
         if trainName == 'TrainA':
             self.trainA.setEmgStop(state)
         elif trainName == 'TrainB':
             self.trainB.setEmgStop(state)
 
+#-----------------------------------------------------------------------------
     def updatePLCIn(self, idList):
         (crtAsensorId, crtBsensorId) = idList
         idList, stateList= [], []
@@ -352,8 +353,8 @@ class MapMgr(object):
             gv.iAgentMgr.updatePLC(idList, stateList)
 
 
-
-
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 class managerPLC(object):
     """ Object hook to control the PLC through the ModBus(TCPIP)."""
     def __init__(self, parent):
@@ -387,7 +388,7 @@ class managerPLC(object):
     def hookSernsor(self, sensorId):
         if sensorId <= 23:
             plcIdx, plcPos = sensorId//8, sensorId%8
-            print(plcIdx, plcPos)
+            #print(plcIdx, plcPos)
             self.plcAgentList[plcIdx].hookSensor(sensorId, plcPos)
 
 
