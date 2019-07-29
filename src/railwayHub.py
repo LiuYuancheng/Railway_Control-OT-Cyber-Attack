@@ -19,6 +19,8 @@ from datetime import datetime
 import railwayGlobal as gv 
 import railwayPanel as rwp
 import railwayPanelMap as rwpm 
+import railwayAgent as agent
+import railwayMgr as manager
 
 PERIODIC = 300
 
@@ -32,7 +34,7 @@ class railWayHubFrame(wx.Frame):
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetIcon(wx.Icon(gv.TTICO_PATH))
         gv.iMainFrame = self
-        
+        gv.iAgentMgr =  manager.managerPLC(self)
         # Init all the UI components: 
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
@@ -59,17 +61,12 @@ class railWayHubFrame(wx.Frame):
         plcBgPanel = wx.Panel(nb)
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
         hbox1.AddSpacer(10)
-        plc1Panel = rwp.PanelPLC(plcBgPanel, 'PLC0 [m221]', "192.168.0.101")
-        hbox1.Add(plc1Panel, flag=flagsR, border=2)
-        gv.iPlcPanelList.append(plc1Panel)
-        hbox1.AddSpacer(10)
-        plc2Panel = rwp.PanelPLC(plcBgPanel, 'PLC1 [m221]', "192.168.0.102")
-        hbox1.Add(plc2Panel, flag=flagsR, border=2)
-        gv.iPlcPanelList.append(plc2Panel)  
-        hbox1.AddSpacer(10)
-        plc3Panel = rwp.PanelPLC(plcBgPanel, 'PLC2 [S7-1200]', "192.168.0.103")
-        hbox1.Add(plc3Panel, flag=flagsR, border=2)
-        gv.iPlcPanelList.append(plc3Panel)
+        for i in range(3):
+            plcPanel = self.initPLC(i, plcBgPanel)
+            hbox1.Add(plcPanel, flag=flagsR, border=2)
+            gv.iPlcPanelList.append(plcPanel)
+            hbox1.AddSpacer(10)
+
         plcBgPanel.SetSizer(hbox1)
         nb.AddPage(plcBgPanel, "PLC Control")
         
@@ -104,6 +101,18 @@ class railWayHubFrame(wx.Frame):
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Refresh(False)
+
+
+#-----------------------------------------------------------------------------
+    def initPLC(self, idx, plcBgPanel):
+        """ Init the PLC agent to connect to the hardware and the PLC panel to display 
+            the PLC state.
+        """
+        (name, ip, port, _, _) = gv.PLC_CFG['PLC'+str(idx)]
+        plcAgent = agent.AgentPLC(self, idx, name, ip, port)
+        plcPanel = rwp.PanelPLC(plcBgPanel, 'PLC'+str(idx)+name, ip+':'+port)
+        gv.iAgentMgr.appendPLC(plcAgent, plcPanel)
+        return plcPanel
 
     #-----------------------------------------------------------------------------
     def periodic(self, event):

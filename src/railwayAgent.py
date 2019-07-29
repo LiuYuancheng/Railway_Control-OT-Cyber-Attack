@@ -34,11 +34,18 @@ class AgentPLC(object):
     #-----------------------------------------------------------------------------
     def hookSensor(self, sensorID, ioInPos):
         """ Hook sensor to the PLC."""
-        if self.devCount > 8 or ioInPos > 7: 
+        if self.devCount >= 8 or ioInPos > 7: 
             print("AgentPLC:    All the GPIO input has been hooked to sensor." ) 
-            return
+            return False
         self.devIDList[ioInPos] = sensorID
         self.devCount+=1
+        return True
+
+    def checkDev(self, idx):
+        if idx in self.devIDList:
+            return self.devIDList.index(idx)
+        else:
+            return -1
 
     #-----------------------------------------------------------------------------
     def getDevIds(self, sIdx, eIdx):
@@ -62,6 +69,7 @@ class AgentPLC(object):
         except:
             print("AgentPLC:    The sensor with %s is not hooked to this PLC" %str(sensorID))
 
+    #-----------------------------------------------------------------------------
     def setOutput(self, sensorID, state):
         """ Update the sensor input state."""
         try:

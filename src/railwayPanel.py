@@ -233,7 +233,7 @@ class PanelSysCtrl(wx.Panel):
             "S101 - Airport Lights",
             "S102 - Industrial Lightbox",
             "S200 - Station Lights",
-            "S201 - Level Crossing",
+            "S201 - Auto Level Crossing",
             "S202 - Residential Lightbox",
             "S300 - Turnout Toggle",
             "S301 - Track A Fork Power",
@@ -306,8 +306,6 @@ class PanelTrainCtrl(wx.Panel):
         hbox0.AddSpacer(5)
         self.statLb = wx.StaticText(self, label="run".center(16))
         #self.statLb.SetBackgroundColour(wx.Colour('GREEN'))
-        
-
         hbox0.Add(self.statLb, flag=flagsR, border=2)
         vsizer.Add(hbox0, flag=flagsR, border=2)
         vsizer.AddSpacer(5)

@@ -69,7 +69,6 @@ class MapMgr(object):
         self.signalDict['S302 - Track B Fork Power'] = self.createSignals(
             [(60, 150)], gv.FSPNG_PATH, gv.FBPNG_PATH, self.forkB.getState(), True)
 
-
         self.gateLockA = False
         self.gateLockB = False
         # Add the inside gate (A).
@@ -126,20 +125,19 @@ class MapMgr(object):
         self.addSensors()
 
 
-
-
     def addSensors(self):
         """ added the train detection sensors in the sensor List 
         """
         # Add the rail way sensors.
         for item in self.trackA:
             sensor = agent.AgentSensor(self, -1, item)
+            gv.iAgentMgr.hookSernsor(sensor.sensorID)
             self.sensorList.append(sensor)
 
         for item in self.trackB:
             sensor = agent.AgentSensor(self, -1, item)
+            gv.iAgentMgr.hookSernsor(sensor.sensorID)
             self.sensorList.append(sensor)
-
 
     #-----------------------------------------------------------------------------
     def checkSensor(self):
@@ -308,6 +306,10 @@ class MapMgr(object):
         self.trainA.updateTrainPos()
         self.trainB.updateTrainPos()
         [crtAsensorId, crtBsensorId] = self.checkSensor()
+
+        self.updatePLCIn((crtAsensorId, crtBsensorId)) # need to run before setTACT/setBAct
+
+
         self.setTAact(crtAsensorId)
         self.setTBact(crtBsensorId)
         
@@ -329,6 +331,27 @@ class MapMgr(object):
         elif trainName == 'TrainB':
             self.trainB.setEmgStop(state)
 
+    def updatePLCIn(self, idList):
+        (crtAsensorId, crtBsensorId) = idList
+        idList, stateList= [], []
+        if self.rwAsensorId != crtAsensorId:
+            if self.rwAsensorId >= 0 and crtAsensorId < 0:
+                idList.append(self.rwAsensorId)
+                stateList.append(0)
+            elif crtAsensorId >= 0 and self.rwAsensorId < 0:
+                idList.append(crtAsensorId)
+                stateList.append(1)
+
+        if self.rwBsensorId != crtBsensorId:
+            if self.rwBsensorId >= 0 and crtBsensorId < 0:
+                idList.append(self.rwBsensorId)
+                stateList.append(0)
+            elif crtBsensorId >= 0 and self.rwBsensorId < 0:
+                idList.append(crtBsensorId)
+                stateList.append(1)
+
+        if len(idList) >0:
+            gv.iAgentMgr.updatePLC(idList, stateList)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

@@ -101,7 +101,9 @@ PLC_CFG = {
 # Set the global reference here.
 iRailWay = None
 iPlcPanelList = []  # Plc panel list. 
+iPlcMgr = None
 iMapMgr = None
+iAgentMgr = None
 iMapPanel = None    # History chart panel.
 iTrainAPanel = None # Train A control panel. 
 iTrainBPanel = None # Train B control panel.
