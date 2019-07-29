@@ -22,71 +22,70 @@ APP_NAME = 'RailWay PLC Control Hub V1.0'
 # Agent type 
 RAYWAY_TYPE = 'RW'
 SENSOR_TYPE = 'SS'
-GATE_TYPE = 'GT'
-ATTPT_TYPE = 'AP'
+GATE_TYPE   = 'GT'
+ATTPT_TYPE  = 'AP'
 SIGNAL_TYPE = 'SL'
-FORK_TYPE = 'FK'
+FORK_TYPE   = 'FK'
 
+# Title icon path.
 TTICO_PATH = "".join([dirpath, "\\img\\title.ico"])
 
-
+# Map background path.
 BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg1.png"])
+
+
 WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
 HTPNG_PATH = "".join([dirpath, "\\img\\hitPPl.png"])
 LTPNG_PATH = "".join([dirpath, "\\img\\left.png"])
 
-
-LDSET_PATH = "".join([dirpath, "\\img\\loadSet32.png"])    
-EMGST_PATH = "".join([dirpath, "\\img\\emgStop32.png"])
-RECOV_PATH = "".join([dirpath, "\\img\\reset32.png"])
-
+# Train setting panel path:
+LDSET_PATH = "".join([dirpath, "\\img\\loadSet32.png"])     # load setting.    
+EMGST_PATH = "".join([dirpath, "\\img\\emgStop32.png"])     # emergency stop.
+RECOV_PATH = "".join([dirpath, "\\img\\reset32.png"])       # train station recover.
 
 
 LPJPG_PATH = "".join([dirpath, "\\img\\Ppass.jpg"])   # light for people pass 
 LSJPG_PATH = "".join([dirpath, "\\img\\Pstop.jpg"])
 
+# Cross signal: 
+PPPNG_PATH = "".join([dirpath, "\\img\\passS18.png"])       # signal for people pass 
+PSPNG_PATH = "".join([dirpath, "\\img\\stopS18.png"])       # signal for people stop 
+CPPNG_PATH = "".join([dirpath, "\\img\\gateCarP18.png"])    # signal for cars pass    
+CSPNG_PATH = "".join([dirpath, "\\img\\gateCarS18.png"])    # signal for cars stop.
 
+# Railway fork signal:
+FSPNG_PATH = "".join([dirpath, "\\img\\forkOnS18.png"])     # fork go straight signal. 
+FAPNG_PATH = "".join([dirpath, "\\img\\forkAoffS18.png"])   # railway A fork on signal.
+FBPNG_PATH = "".join([dirpath, "\\img\\forkBoffS18.png"])   # railway B fork on signal.
 
-PPPNG_PATH = "".join([dirpath, "\\img\\passS18.png"])   # light for people pass 
-PSPNG_PATH = "".join([dirpath, "\\img\\stopS18.png"])
+# Station signal light: 
+SOPNG_PATH = "".join([dirpath, "\\img\\stationOn18.png"])   # station signal on.
+SFPNG_PATH = "".join([dirpath, "\\img\\stationOff18.png"])  # station signal off.
 
-CPPNG_PATH = "".join([dirpath, "\\img\\gateCarP18.png"])
-CSPNG_PATH = "".join([dirpath, "\\img\\gateCarS18.png"])
+# Power plant light:
+POPNG_PATH = "".join([dirpath, "\\img\\powerPlantOn.png"])  # powerplant light on.
+PFPNG_PATH = "".join([dirpath, "\\img\\powerPlantOff.png"]) # powerplant light off.
 
-FSPNG_PATH = "".join([dirpath, "\\img\\forkOnS18.png"])
-FAPNG_PATH = "".join([dirpath, "\\img\\forkAoffS18.png"])
-FBPNG_PATH = "".join([dirpath, "\\img\\forkBoffS18.png"])
+# Industrial Area. 
+INOPNG_PATH = "".join([dirpath, "\\img\\industrOn.png"])    # industrial area light on.
+INFPNG_PATH = "".join([dirpath, "\\img\\industrOff.png"])   # industrial area light off.
 
-SOPNG_PATH = "".join([dirpath, "\\img\\stationOn18.png"])
-SFPNG_PATH = "".join([dirpath, "\\img\\stationOff18.png"])
+# City area light
+CTOPNG_PATH = "".join([dirpath, "\\img\\cityOn.png"])       # city area light on.
+CTFPNG_PATH = "".join([dirpath, "\\img\\cityOff.png"])      # city area light off.
 
+# Residential area light
+RDOPNG_PATH = "".join([dirpath, "\\img\\residentialOn.png"]) # Residential area light on.     
+RDFPNG_PATH = "".join([dirpath, "\\img\\residentialOff.png"])# Residential area light off.   
 
-POPNG_PATH = "".join([dirpath, "\\img\\powerPlantOn.png"])
-PFPNG_PATH = "".join([dirpath, "\\img\\powerPlantOff.png"])
+# AirPort area light
+APOPNG_PATH = "".join([dirpath, "\\img\\AirportOn.png"])    # AirPort area light on.     
+APFPNG_PATH = "".join([dirpath, "\\img\\AirportOff.png"])   # AirPort area light off.     
 
-INOPNG_PATH = "".join([dirpath, "\\img\\industrOn.png"])
-INFPNG_PATH = "".join([dirpath, "\\img\\industrOff.png"])
+# Station signal light: 
+STONPNG_PATH = "".join([dirpath, "\\img\\stationOn.png"])   # station light on.
+STOFPNG_PATH = "".join([dirpath, "\\img\\stationOff.png"])  # station light off.
 
-CTOPNG_PATH = "".join([dirpath, "\\img\\cityOn.png"])
-CTFPNG_PATH = "".join([dirpath, "\\img\\cityOff.png"])
-
-RDOPNG_PATH = "".join([dirpath, "\\img\\residentialOn.png"])
-RDFPNG_PATH = "".join([dirpath, "\\img\\residentialOff.png"])
-
-APOPNG_PATH = "".join([dirpath, "\\img\\AirportOn.png"])
-APFPNG_PATH = "".join([dirpath, "\\img\\AirportOff.png"])
-
-
-STONPNG_PATH = "".join([dirpath, "\\img\\stationOn.png"])
-STOFPNG_PATH = "".join([dirpath, "\\img\\stationOff.png"])
-
-
-
-
-
-
-
-FRJPG_PATH = "".join([dirpath, "\\img\\forkAoffS18.png"]) 
 
 CLPNG_PATH = "".join([dirpath, "\\img\\clash.png"]) 
 
