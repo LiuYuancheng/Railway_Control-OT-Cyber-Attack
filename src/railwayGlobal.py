@@ -99,9 +99,11 @@ PLC_CFG = {
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
 # Set the global reference here.
 iAgentMgr = None
-iAttackCtrlPanel = None 
+iAttackCtrlPanel = None
+iCtrlCount = 0      # device PLC control count.
 iDataPanel = None   # display panel
-iDetailPanel = None    
+iDetailPanel = None
+
 iEmgStop = False    # emergency stop
 iMainFrame = None   # Main frame. 
 iMapMgr = None

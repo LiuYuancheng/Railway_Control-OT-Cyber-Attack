@@ -118,7 +118,8 @@ class PanelPLC(wx.Panel):
         self.connected = {'0': 'Unconnected', '1': 'Connected'}
         self.gpioInList = [0]*8 # PLC GPIO input stuation list.
         self.gpioLbList = []    # input GPIO data lable display list.
-        self.gpioOuList = [False]*8  # PLC GPIO output situation list.
+        self.gpioOuList = [0]*8  # PLC GPIO output situation list.
+        self.gpioBtList = []
         mainUISizer = self.buidUISizer()
         self.SetSizer(mainUISizer)
         #self.Layout() # must call the layout if the panel size is set to fix.
@@ -157,6 +158,7 @@ class PanelPLC(wx.Panel):
             hsizer.AddSpacer(5)
             outputBt = wx.Button(self, label='OFF', size=(50, 17), name=self.plcName+':'+str(i))
             outputBt.Bind(wx.EVT_BUTTON, self.relayOn)
+            self.gpioBtList.append(outputBt)
             hsizer.Add(outputBt, flag=flagsR, border=2)
             mSizer.Add(hsizer, flag=flagsR, border=2)
             mSizer.AddSpacer(3)
@@ -175,6 +177,18 @@ class PanelPLC(wx.Panel):
             self.gpioLbList[idx].SetBackgroundColour(color)
             self.Refresh(False) # needed after the status update.
 
+    def updateOutput(self, idx, status):
+        if idx >= 8 or not status in [0,1]: 
+            print("PLC panel:   the output parameter is not valid") 
+            return
+        else:
+            self.gpioOuList[idx] = status
+            [lbtext, color] = ['ON', wx.Colour('Green')] if status else [
+            'OFF', wx.Colour(200, 200, 200)]
+            self.gpioBtList[idx].SetLabel(lbtext)
+            self.gpioBtList[idx].SetBackgroundColour(color)
+            self.Refresh(False) # needed after the status update.
+
     #-----------------------------------------------------------------------------
     def relayOn(self, event): 
         """ Turn on the related ralay based on the user's action and update the 
@@ -183,11 +197,15 @@ class PanelPLC(wx.Panel):
         obj = event.GetEventObject()
         print("PLC panel:   Button idx %s" % str(obj.GetName()))
         idx = int(obj.GetName().split(':')[-1])
-        self.gpioOuList[idx] = not self.gpioOuList[idx]
-        [lbtext, color] = ['ON', wx.Colour('Green')] if self.gpioOuList[idx] else [
-            'OFF', wx.Colour(200, 200, 200)]
-        obj.SetLabel(lbtext)
-        obj.SetBackgroundColour(color)
+        self.gpioOuList[idx] = 1 - self.gpioOuList[idx]
+        
+        
+        self.updateOutput(idx, self.gpioOuList[idx])
+        
+        #[lbtext, color] = ['ON', wx.Colour('Green')] if self.gpioOuList[idx] else [
+        #    'OFF', wx.Colour(200, 200, 200)]
+        #obj.SetLabel(lbtext)
+        #obj.SetBackgroundColour(color)
 
         if str(obj.GetName()) == 'PLC0 [m221]:0':
             if lbtext == 'ON':
@@ -267,7 +285,8 @@ class PanelSysCtrl(wx.Panel):
         # Set the signal state. 
         gv.iMapMgr.setSignalPwr(cb.GetLabel(), cb.GetValue())
         # Set he map component state.
-        gv.iMapMgr.setCompState(cb.GetLabel(), cb.GetValue())
+        #gv.iMapMgr.setCompState(cb.GetLabel(), cb.GetValue())
+
         
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

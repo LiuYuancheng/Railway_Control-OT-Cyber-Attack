@@ -38,13 +38,32 @@ class AgentPLC(object):
 
 #-----------------------------------------------------------------------------
     def hookSensor(self, sensorID, ioInPos):
-        """ Hook a sensor to the specilic plug position on the PLC."""
+        """ Hook a sensor to the specific input plug position on the PLC."""
         if self.devCount >= 8 or ioInPos > 7: 
             print("AgentPLC:    All the GPIO input has been hooked to sensor." ) 
             return False
         self.devIDList[ioInPos] = sensorID
         self.devCount+=1
         return True
+
+#-----------------------------------------------------------------------------
+    def hookCtrl(self, devId, ioOutPos):
+        """ Hook a output device on the specific output plug position on the PLC.
+        """
+        if self.ctrlCount >= 8 or ioOutPos > 7: 
+            print("AgentPLC:    All the GPIO output has beed used." ) 
+            return False
+        self.ctrlIDList[ioOutPos] = devId
+        self.ctrlCount+=1
+        return True
+
+#-----------------------------------------------------------------------------
+    def checkCtrl(self, idx):
+        """ Check whether the device is connection this PLC. reture the 
+            connect position if connected, else -1.
+        """
+        result = self.ctrlIDList.index(idx) if idx in self.ctrlIDList else -1
+        return result
 
 #-----------------------------------------------------------------------------
     def checkDev(self, idx):

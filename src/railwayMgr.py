@@ -55,18 +55,18 @@ class MapMgr(object):
 
         # Add the inside railway fork (A). 
         forkAPts = [(100, 150), (100, 210), (80,210)]
-        self.forkA = agent.AgentFork(self, 2, forkAPts, True)
+        self.forkA = agent.AgentFork(self, -1, forkAPts, True)
         self.signalDict['S301 - Track A Fork Power'] = self.createSignals(
             [(120, 150)], gv.FSPNG_PATH, gv.FAPNG_PATH, self.forkA.getState(), True)
         self.gateLockA = False
-
+        
         # Add the outside railway fork (B).
         forkBPts = [(80, 150), (80,210), (100, 210)]
         self.forkB = agent.AgentFork(self, -1, forkBPts, True)
         self.signalDict['S302 - Track B Fork Power'] = self.createSignals(
             [(60, 150)], gv.FSPNG_PATH, gv.FBPNG_PATH, self.forkB.getState(), True)
         self.gateLockB = False
-
+        
         # Add the inside gate (A) with its signal lights.
         self.gate1 = agent.AgentGate(self, -1, (300, 365), True, True)
         self.signalDict['Gate1Ppl'] = self.createSignals(
@@ -110,6 +110,20 @@ class MapMgr(object):
         self.sensorList = []
         self.rwAsensorId = self.rwBsensorId = -1
         self.addSensors()
+        self.hookPCLCtrl()
+
+
+    def hookPCLCtrl(self):
+        gv.iAgentMgr.hookCtrl(self.signalDict['S100 - Powerplant Lights'][0].getID(),  100)
+        gv.iAgentMgr.hookCtrl(self.signalDict['S101 - Airport Lights'][0].getID(),     101)
+        gv.iAgentMgr.hookCtrl(self.signalDict['S102 - Industrial Lightbox'][0].getID(),102)
+        gv.iAgentMgr.hookCtrl(self.signalDict['S200 - Station Lights'][0].getID(),     200)
+        #gv.iAgentMgr.hookCtrl(self.signalDict['S201 - Auto Level Crossing'][0].getID(),201)
+        gv.iAgentMgr.hookCtrl(self.signalDict['S202 - Residential Lightbox'][0].getID(),202)
+        #gv.iAgentMgr.hookCtrl(self.signalDict['S300 - Turnout Toggle'][0].getID(),     300)
+        gv.iAgentMgr.hookCtrl(self.signalDict['S301 - Track A Fork Power'][0].getID(), 301)
+        gv.iAgentMgr.hookCtrl(self.signalDict['S302 - Track B Fork Power'][0].getID(), 302)
+        gv.iAgentMgr.hookCtrl(self.signalDict['S303 - City LightBox'][0].getID(),      303)
 
 #-----------------------------------------------------------------------------
     def addSensors(self):
@@ -117,7 +131,7 @@ class MapMgr(object):
         # Add the rail way sensors.
         for pos in self.trackA + self.trackB:
             sensor = agent.AgentSensor(self, -1, pos)
-            gv.iAgentMgr.hookSernsor(sensor.sensorID)
+            gv.iAgentMgr.hookSensor(sensor.sensorID)
             self.sensorList.append(sensor)
 
 #-----------------------------------------------------------------------------
@@ -145,12 +159,13 @@ class MapMgr(object):
         """
         signalObjList = []
         for pos in posList:
-            signalObj =  agent.AgentSignal(self, -1, pos,
+            signalObj =  agent.AgentSignal(self, gv.iCtrlCount, pos,
                             onBitMap=wx.Bitmap(onImgPath),
                             offBitMap=wx.Bitmap(offImgPath))
             signalObj.setState(state)
             if flash: signalObj.setFlash(flash)
             signalObjList.append(signalObj)
+        gv.iCtrlCount += 1
         return signalObjList
 
 #-----------------------------------------------------------------------------
@@ -161,17 +176,27 @@ class MapMgr(object):
         if sKey in self.signalDict.keys():
             for signalObj in self.signalDict[sKey]:
                 # Set the signal statues.
+                ctrlid = self.signalDict['S100 - Powerplant Lights'][0].getID()
+                self.updatePLCout(ctrlid, value)
                 signalObj.setState(value)
 
-#-----------------------------------------------------------------------------
-    def setCompState(self, sKey, sValue):
-        """ Set the signal componenets's state.
-        """
-        value = True if sValue else False
+
+
+
+        
         if sKey == 'S301 - Track A Fork Power':
             self.forkA.forkOn = value
         elif sKey == 'S302 - Track B Fork Power':
             self.forkB.forkOn = value
+
+
+    def updatePLCout(self, ctrlid, value):
+        state = 1 if value else 0
+        gv.iAgentMgr.updatePLCout(ctrlid, state)
+        
+
+
+
 
 #-----------------------------------------------------------------------------
     def changeGateState(self, openFlag):
@@ -356,7 +381,7 @@ class MapMgr(object):
                 stateList.append(1)
 
         if len(idList) >0:
-            gv.iAgentMgr.updatePLC(idList, stateList)
+            gv.iAgentMgr.updatePLCIn(idList, stateList)
 
 
 #-----------------------------------------------------------------------------
@@ -373,7 +398,7 @@ class managerPLC(object):
         self.plcAgentList.append(plcAgent)
         self.plcPanelList.append(plcPanel)
 
-    def findDevPLC(self, devIdx):
+    def findInDevPLC(self, devIdx):
         """ Find the Agent PLC and the PLC display panel based on the device id.
         """
         for i, agent in enumerate(self.plcAgentList):
@@ -382,20 +407,42 @@ class managerPLC(object):
                 return (self.plcAgentList[i], self.plcPanelList[i], plcInterfaceID)
         return (None, None, -1)
 
-    def updatePLC(self, devIDList, stateList):
+    def findOutDevPLC(self, ctrlIdx):
+        """ Find the Agent PLC and the PLC display panel based on the device id.
+        """
+        for i, agent in enumerate(self.plcAgentList):
+            plcInterfaceID = agent.checkCtrl(ctrlIdx)
+            if  plcInterfaceID >=0 :
+                return (self.plcAgentList[i], self.plcPanelList[i], plcInterfaceID)
+        return (None, None, -1)
+
+    def updatePLCIn(self, devIDList, stateList):
         for i in range(len(devIDList)):
             devId, devS = devIDList[i], stateList[i]
-            (plcA, plcP, devP) = self.findDevPLC(devIDList[i])
+            (plcA, plcP, devP) = self.findInDevPLC(devIDList[i])
             if plcA:
                 plcA.setInput(devId, devS)
             if plcP:
                 plcP.updateInput(devP, devS)
     
-    def hookSernsor(self, sensorId):
+    def updatePLCout(self, devID, state):
+        (plcA, plcP, devP) = self.findOutDevPLC(devID)
+        if plcA:
+            plcA.setOutput(devID, state)
+        if plcP:
+            plcP.updateOutput(devP, state)
+            
+            
+    def hookSensor(self, sensorId):
         if sensorId <= 23:
             plcIdx, plcPos = sensorId//8, sensorId%8
             #print(plcIdx, plcPos)
             self.plcAgentList[plcIdx].hookSensor(sensorId, plcPos)
+
+    def hookCtrl(self, ctrlId, tagNum):
+        plcIdx,  plcPos = tagNum//100-1, tagNum%100
+        self.plcAgentList[plcIdx].hookCtrl(ctrlId, plcPos)
+
 
 
 

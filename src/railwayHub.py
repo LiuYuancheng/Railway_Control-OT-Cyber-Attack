@@ -102,7 +102,6 @@ class railWayHubFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Refresh(False)
 
-
 #-----------------------------------------------------------------------------
     def initPLC(self, idx, plcBgPanel):
         """ Init the PLC agent to connect to the hardware and the PLC panel to display 
