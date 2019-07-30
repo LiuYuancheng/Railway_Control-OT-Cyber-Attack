@@ -35,6 +35,7 @@ class railWayHubFrame(wx.Frame):
         self.SetIcon(wx.Icon(gv.TTICO_PATH))
         gv.iMainFrame = self
         gv.iAgentMgr =  manager.managerPLC(self)
+        
         # Init all the UI components: 
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)

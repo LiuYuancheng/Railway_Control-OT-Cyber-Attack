@@ -114,16 +114,39 @@ class MapMgr(object):
 
 
     def hookPCLCtrl(self):
-        gv.iAgentMgr.hookCtrl(self.signalDict['S100 - Powerplant Lights'][0].getID(),  100)
-        gv.iAgentMgr.hookCtrl(self.signalDict['S101 - Airport Lights'][0].getID(),     101)
-        gv.iAgentMgr.hookCtrl(self.signalDict['S102 - Industrial Lightbox'][0].getID(),102)
-        gv.iAgentMgr.hookCtrl(self.signalDict['S200 - Station Lights'][0].getID(),     200)
+        keyV = 'S100 - Powerplant Lights'
+        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 100)
+        self.setSignalPwr(keyV, 1)
+
+        keyV = 'S101 - Airport Lights'
+        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 101)
+        self.setSignalPwr(keyV, 1)
+
+        keyV = 'S102 - Industrial Lightbox'
+        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 102)
+        self.setSignalPwr(keyV, 1)
+
+        keyV = 'S200 - Station Lights'
+        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 200)
+        self.setSignalPwr(keyV, 1)
+
         #gv.iAgentMgr.hookCtrl(self.signalDict['S201 - Auto Level Crossing'][0].getID(),201)
-        gv.iAgentMgr.hookCtrl(self.signalDict['S202 - Residential Lightbox'][0].getID(),202)
+        keyV = 'S202 - Residential Lightbox'
+        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 202)
+        self.setSignalPwr(keyV, 1)
+
         #gv.iAgentMgr.hookCtrl(self.signalDict['S300 - Turnout Toggle'][0].getID(),     300)
-        gv.iAgentMgr.hookCtrl(self.signalDict['S301 - Track A Fork Power'][0].getID(), 301)
-        gv.iAgentMgr.hookCtrl(self.signalDict['S302 - Track B Fork Power'][0].getID(), 302)
-        gv.iAgentMgr.hookCtrl(self.signalDict['S303 - City LightBox'][0].getID(),      303)
+        keyV = 'S301 - Track A Fork Power'
+        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 301)
+        self.setSignalPwr(keyV, 1)
+
+        keyV = 'S302 - Track B Fork Power'
+        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 302)
+        self.setSignalPwr(keyV, 1)
+
+        keyV = 'S303 - City LightBox'
+        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 303)
+        self.setSignalPwr(keyV, 1)
 
 #-----------------------------------------------------------------------------
     def addSensors(self):
@@ -176,13 +199,9 @@ class MapMgr(object):
         if sKey in self.signalDict.keys():
             for signalObj in self.signalDict[sKey]:
                 # Set the signal statues.
-                ctrlid = self.signalDict['S100 - Powerplant Lights'][0].getID()
+                ctrlid = self.signalDict[sKey][0].getID()
                 self.updatePLCout(ctrlid, value)
                 signalObj.setState(value)
-
-
-
-
         
         if sKey == 'S301 - Track A Fork Power':
             self.forkA.forkOn = value
@@ -432,7 +451,7 @@ class managerPLC(object):
         if plcP:
             plcP.updateOutput(devP, state)
             
-            
+
     def hookSensor(self, sensorId):
         if sensorId <= 23:
             plcIdx, plcPos = sensorId//8, sensorId%8

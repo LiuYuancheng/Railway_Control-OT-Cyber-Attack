@@ -35,7 +35,7 @@ class PanelMap(wx.Panel):
 
 
         self.mapMgr = manager.MapMgr(self)
-        gv.iMapMgr = self.mapMgr
+        gv.iMapMgr  = self.mapMgr
         #self.leftTimge = wx.Image(png)
         self.toggle = False     # Display flash toggle flag.
         # gate contorl parameters.(The 0-total close, 15-total open)
