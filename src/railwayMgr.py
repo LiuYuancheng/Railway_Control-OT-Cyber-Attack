@@ -106,6 +106,9 @@ class MapMgr(object):
         self.signalDict['S101 - Airport Lights'] = self.createSignals(
             [(565, 110)], gv.APOPNG_PATH, gv.APFPNG_PATH, True, False)
 
+        self.signalDict['Monitoring Cam'] = self.createSignals(
+            [(445, 80)], gv.CAMPNG_PATH, gv.CAMPNG_PATH, True, False)
+
         # define all the sensors.
         self.sensorList = []
         self.rwAsensorId = self.rwBsensorId = -1
@@ -213,10 +216,6 @@ class MapMgr(object):
         state = 1 if value else 0
         gv.iAgentMgr.updatePLCout(ctrlid, state)
         
-
-
-
-
 #-----------------------------------------------------------------------------
     def changeGateState(self, openFlag):
         """ Change the gate states"""
@@ -346,7 +345,7 @@ class MapMgr(object):
         self.trainA.updateTrainPos()
         self.trainB.updateTrainPos()
         [crtAsensorId, crtBsensorId] = self.checkSensor()
-
+        self.updateCamView((crtAsensorId, crtBsensorId))
         self.updatePLCIn((crtAsensorId, crtBsensorId)) # need to run before setTACT/setBAct
 
         self.setTAact(crtAsensorId)
@@ -379,6 +378,22 @@ class MapMgr(object):
         elif trainName == 'TrainB':
             self.trainB.setEmgStop(state)
 
+    def updateCamView(self, sensorL):
+        (crtAsensorId, crtBsensorId) = sensorL
+        if self.rwAsensorId == -1 and crtAsensorId in (12, 25):
+            if gv.iDetailPanel:
+                 gv.iDetailPanel.setPlay()
+        if crtAsensorId == -1 and self.rwAsensorId in (12, 25):
+            if gv.iDetailPanel:
+                 gv.iDetailPanel.setStop()
+
+        if self.rwBsensorId == -1 and crtBsensorId in (12, 25):
+            if gv.iDetailPanel:
+                 gv.iDetailPanel.setPlay()
+        if crtBsensorId == -1 and self.rwBsensorId in (12, 25):
+            if gv.iDetailPanel:
+                 gv.iDetailPanel.setStop()
+        
 #-----------------------------------------------------------------------------
     def updatePLCIn(self, idList):
         (crtAsensorId, crtBsensorId) = idList

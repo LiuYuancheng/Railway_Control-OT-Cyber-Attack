@@ -82,6 +82,26 @@ class PanelMap(wx.Panel):
     def onClick(self, event):
         x1, y1 = event.GetPosition()
         print("The user has clicked the pos"+str((x1, y1 )))
+        if gv.iMapMgr.signalDict['Monitoring Cam'][0].checkNear(x1, y1, 20):
+            print("xxxxxxxxxxxx")
+            if self.infoWindow is None and gv.iDetailPanel is None:
+                posF = gv.iMainFrame.GetPosition()
+                x = posF[0]
+                y = posF[1]+300
+                if not self.selectedPts is None:
+                    x += self.selectedPts[0]
+                    y += self.selectedPts[1]
+                self.infoWindow = wx.MiniFrame(gv.iMainFrame, -1,
+                    'Monitoring camera view', pos=(x+10, y+10), size=(300, 210),
+                    style=wx.DEFAULT_FRAME_STYLE)
+                gv.iDetailPanel = rwp.CameraView(self.infoWindow, 0)
+                #gv.iDetailPanel.updateState(idx=idx, state='Normal', origalV=0, changedV=0)
+                #gv.iAttackCtrlPanel.loatAttPtState(idx)
+                self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)
+                self.infoWindow.Show()
+
+
+
         for idx, point in enumerate(self.attackPts):
             (x2, y2) = point
             dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)

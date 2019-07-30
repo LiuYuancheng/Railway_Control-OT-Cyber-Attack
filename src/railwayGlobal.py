@@ -86,6 +86,11 @@ APFPNG_PATH = "".join([dirpath, "\\img\\AirportOff.png"])   # AirPort area light
 STONPNG_PATH = "".join([dirpath, "\\img\\stationOn.png"])   # station light on.
 STOFPNG_PATH = "".join([dirpath, "\\img\\stationOff.png"])  # station light off.
 
+# Camera:
+CAMPNG_PATH = "".join([dirpath, "\\img\\cameraUp.png"])   # station light on.
+TPSGIP_PATH = "".join([dirpath, "\\img\\trailPass.gif"])   # station light on.
+
+
 
 CLPNG_PATH = "".join([dirpath, "\\img\\clash.png"]) 
 

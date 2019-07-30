@@ -13,6 +13,7 @@
 #-----------------------------------------------------------------------------
 import wx
 import wx.grid
+from wx.adv import Animation, AnimationCtrl
 import time
 import math
 import random
@@ -494,6 +495,25 @@ class PanelSimuCtrl(wx.Panel):
             gv.iMapPanel.updateDisplay()
             if gv.iDetailPanel:
                 gv.iDetailPanel.updateState(idx=1, state='Normal', origalV=0, changedV=0)
+
+
+class CameraView(wx.Panel):
+    def __init__(self, parent, idx, size=(280, 200)):
+        """CameraView."""
+        wx.Panel.__init__(self, parent)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        anim = Animation(gv.TPSGIP_PATH)
+        self.ctrl = AnimationCtrl(self, -1, anim)
+        self.ctrl.Stop()
+        sizer.Add(self.ctrl)
+        self.SetSizerAndFit(sizer)
+        self.Show()
+
+    def setPlay(self):
+        self.ctrl.Play()
+
+    def setStop(self):
+        self.ctrl.Stop()
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
