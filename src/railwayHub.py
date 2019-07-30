@@ -46,7 +46,7 @@ class railWayHubFrame(wx.Frame):
         sysBgPanel = wx.Panel(nb)
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
         hbox0.AddSpacer(10)
-        self.setPanel0 = rwp.PanelSysCtrl(sysBgPanel)
+        gv.iPowCtrlPanel = self.setPanel0 = rwp.PanelSysCtrl(sysBgPanel)
         hbox0.Add(self.setPanel0, flag=flagsR, border=2)
         hbox0.AddSpacer(10)
         gv.iTrainAPanel = self.trainACtPanel = rwp.PanelTrainCtrl(sysBgPanel, 'TrainA')
@@ -111,6 +111,7 @@ class railWayHubFrame(wx.Frame):
         (name, ip, port, _, _) = gv.PLC_CFG['PLC'+str(idx)]
         plcAgent = agent.AgentPLC(self, idx, name, ip, port)
         plcPanel = rwp.PanelPLC(plcBgPanel, 'PLC'+str(idx)+name, ip+':'+port)
+        plcPanel.setConnection(1)
         gv.iAgentMgr.appendPLC(plcAgent, plcPanel)
         return plcPanel
 

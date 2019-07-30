@@ -135,8 +135,12 @@ class PanelPLC(wx.Panel):
         mSizer.Add(self.nameLb, flag=flagsR, border=2)
         self.ipaddrLb = wx.StaticText(self, label="PLC IPaddr: ".ljust(15)+self.ipAddr)
         mSizer.Add(self.ipaddrLb, flag=flagsR, border=2)
-        self.connLb = wx.StaticText(self, label="Connection:".ljust(15)+self.connected['0'])
-        mSizer.Add(self.connLb, flag=flagsR, border=2)
+        hbox0 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox0.Add(wx.StaticText(self, label="Connection:".ljust(15)), flag=flagsR, border=2)
+        self.connLb = wx.StaticText(self, label=self.connected['0'])
+        hbox0.Add(self.connLb, flag=flagsR, border=2)
+        mSizer.Add(hbox0, flag=flagsR, border=2)
+
         mSizer.AddSpacer(10)
         # Row idx = 1: set the GPIO and feed back of the PLC. 
         mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1), style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
@@ -163,6 +167,12 @@ class PanelPLC(wx.Panel):
             mSizer.Add(hsizer, flag=flagsR, border=2)
             mSizer.AddSpacer(3)
         return mSizer
+
+    def setConnection(self, state):
+        color = wx.Colour('GREEN') if state else wx.Colour(120, 120, 120)
+        self.connLb.SetLabel(self.connected[str(state)])
+        self.connLb.SetBackgroundColour(color)
+        self.Refresh(False)
 
     #-----------------------------------------------------------------------------
     def updateInput(self, idx, status): 
@@ -196,48 +206,17 @@ class PanelPLC(wx.Panel):
         """
         obj = event.GetEventObject()
         print("PLC panel:   Button idx %s" % str(obj.GetName()))
+        plcIdx = (obj.GetName().split('[')[0][-1])
         idx = int(obj.GetName().split(':')[-1])
         self.gpioOuList[idx] = 1 - self.gpioOuList[idx]
-        
-        
         self.updateOutput(idx, self.gpioOuList[idx])
-        
-        #[lbtext, color] = ['ON', wx.Colour('Green')] if self.gpioOuList[idx] else [
-        #    'OFF', wx.Colour(200, 200, 200)]
-        #obj.SetLabel(lbtext)
-        #obj.SetBackgroundColour(color)
-
-        if str(obj.GetName()) == 'PLC0 [m221]:0':
-            if lbtext == 'ON':
-                gv.iMapPanel.lightOn = 2
-                gv.iMapPanel.updateDisplay()
-            else:
-                gv.iMapPanel.lightOn = 1
-                gv.iMapPanel.updateDisplay()
-        elif str(obj.GetName()) == 'PLC1 [m221]:0':
-            if lbtext == 'ON':
-                railWayPoints = [(550, 20), (20, 20), (20, 330),
-                         (130, 330), (180, 390), (500, 390), (550, 330)]
-                gv.iRailWay.setRailWayPts(railWayPoints)
-                gv.iMapPanel.forkSt = False
-                
-            else:
-                railWayPoints = [(550, 20), (20, 20), (20, 330),
-                         (130, 330), (550, 330)]
-                gv.iRailWay.setRailWayPts(railWayPoints)
-                gv.iMapPanel.forkSt = True
-            gv.iMapPanel.fordWide = 0
-
-        elif str(obj.GetName()) == 'PLC1 [m221]:1':
-            if lbtext == 'ON':
-                gv.iMapPanel.train2Lock = False
-                
-            else:
-                gv.iMapPanel.train2Lock = True
-            gv.iMapPanel.fordWide = 0
-
-        else:
-            gv.iMapPanel.lightOn = 0
+        # Update the element on the map.
+        tag = str((int(plcIdx)+1)*100+idx) 
+        for element in gv.iPowCtrlPanel.powerLabel:
+            if tag in element:
+                gv.iMapMgr.setSignalPwr(element, self.gpioOuList[idx])
+                break
+        return 
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -335,7 +314,7 @@ class PanelTrainCtrl(wx.Panel):
 
         # Row idx = 1: Train speed contorl
         
-        vsizer.Add(wx.StaticText(self, label="Train Speed:"), flag=flagsR, border=2)
+        vsizer.Add(wx.StaticText(self, label="Train Throttle and Speed:"), flag=flagsR, border=2)
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
         self.speedDisplay = wx.Gauge(self, range = 10, size = (100, 20), style =  wx.GA_HORIZONTAL)
         hbox1.Add(self.speedDisplay, flag=flagsR, border=2)
@@ -373,7 +352,7 @@ class PanelTrainCtrl(wx.Panel):
         # Row idx = 4: Station wait time contorl
         hbox4 = wx.BoxSizer(wx.HORIZONTAL)
         hbox4.Add(wx.StaticText(self, label="Station waitT [sec]:"), flag=flagsR, border=2)
-        self.wTimeCtrl = wx.SpinCtrl(self, -1, '10', size = (50, -1), min=1, max=20)
+        self.wTimeCtrl = wx.SpinCtrl(self, -1, '3', size = (50, -1), min=1, max=20)
         hbox4.Add(self.wTimeCtrl, flag=flagsR, border=2)
         vsizer.Add(hbox4, flag=flagsR, border=2)
 

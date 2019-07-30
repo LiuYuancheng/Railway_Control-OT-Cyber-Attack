@@ -110,6 +110,7 @@ iMapMgr = None
 iMapPanel = None    # History chart panel.
 iPlcPanelList = []  # Plc panel list. 
 iPlcMgr = None
+iPowCtrlPanel = None
 iRailWay = None
 iSensorCount = 0    # number of sensors. 
 iTrainAPanel = None # Train A control panel. 
