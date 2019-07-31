@@ -217,7 +217,6 @@ class PanelPLC(wx.Panel):
             if tag in element:
                 gv.iMapMgr.setSignalPwr(element, self.gpioOuList[idx])
                 break
-        return 
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -241,6 +240,7 @@ class PanelSysCtrl(wx.Panel):
         hsizer = self.buidUISizer()
         self.SetSizer(hsizer)
 
+#-----------------------------------------------------------------------------
     def buidUISizer(self):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
@@ -287,7 +287,8 @@ class PanelTrainCtrl(wx.Panel):
         hsizer = self.buidUISizer()
         self.SetSizer(hsizer)
         self.setState(0, 0)
-    
+
+#-----------------------------------------------------------------------------
     def buidUISizer(self):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
@@ -378,26 +379,23 @@ class PanelTrainCtrl(wx.Panel):
          size = (bmp.GetWidth()+10, bmp.GetHeight()+10))
         self.stopbtn1.Bind(wx.EVT_BUTTON, self.emgStop)
         hbox5.Add(self.stopbtn1, flag=flagsR, border=2)
-
-        hbox5.AddSpacer(5)
-
-        
+        hbox5.AddSpacer(5)        
         vsizer.Add(hbox5, flag=flagsR, border=2)
-        
-
         return vsizer
 
+#-----------------------------------------------------------------------------
     def emgStop(self, event):
-
         if gv.iMapMgr:
             gv.iMapMgr.setEmgStop(self.tName, True)
             self.setState(5, 0)
 
+#-----------------------------------------------------------------------------
     def emgRec(self, event):
            if gv.iMapMgr:
             gv.iMapMgr.setEmgStop(self.tName, False)
             self.setState(0, 0)
 
+#-----------------------------------------------------------------------------
     def setState(self, idx, rwIdx): 
         """ Set the train running state. """
         state = self.statDict[str(idx)]
@@ -419,6 +417,7 @@ class PanelSimuCtrl(wx.Panel):
         hsizer = self.buidUISizer()
         self.SetSizer(hsizer)
 
+#-----------------------------------------------------------------------------
     def buidUISizer(self):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
@@ -477,11 +476,13 @@ class PanelSimuCtrl(wx.Panel):
         vsizer.AddSpacer(5)
         return vsizer
 
+#-----------------------------------------------------------------------------
     def loatAttPtState(self, id):
         """ Load the attack point's state. 
         """
         self.idLb.SetLabel("Attack point ID: [%s] " %str(id).zfill(3))
 
+#-----------------------------------------------------------------------------
     def setAttck(self, event):
         buttonLb = event.GetEventObject().GetLabel()
         if buttonLb == 'Set Attack': 
@@ -496,10 +497,11 @@ class PanelSimuCtrl(wx.Panel):
             if gv.iDetailPanel:
                 gv.iDetailPanel.updateState(idx=1, state='Normal', origalV=0, changedV=0)
 
-
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 class CameraView(wx.Panel):
     def __init__(self, parent, idx, size=(280, 200),  style=wx.TRANSPARENT_WINDOW):
-        """CameraView."""
+        """ Panel to simulate the camera view."""
         wx.Panel.__init__(self, parent)
         sizer = wx.BoxSizer(wx.VERTICAL)
         anim = Animation(gv.TPSGIP_PATH)
@@ -529,6 +531,7 @@ class PanelAttackSet(wx.Panel):
 
         self.SetSizer(hsizer)
 
+#-----------------------------------------------------------------------------
     def buidUISizer(self):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
@@ -557,6 +560,7 @@ class PanelAttackSet(wx.Panel):
 
         return vsizer
 
+#-----------------------------------------------------------------------------
     def updateState(self, idx=None, state=None, origalV=None, changedV=None):
         if not idx is None and self.idx!= idx :
             self.idx = idx
