@@ -92,15 +92,13 @@ class PanelMap(wx.Panel):
                     x += self.selectedPts[0]
                     y += self.selectedPts[1]
                 self.infoWindow = wx.MiniFrame(gv.iMainFrame, -1,
-                    'Monitoring camera view', pos=(x+10, y+10), size=(300, 210),
+                    'Monitoring camera view', pos=(x+10, y+10), size=(310, 230),
                     style=wx.DEFAULT_FRAME_STYLE)
                 gv.iDetailPanel = rwp.CameraView(self.infoWindow, 0)
                 #gv.iDetailPanel.updateState(idx=idx, state='Normal', origalV=0, changedV=0)
                 #gv.iAttackCtrlPanel.loatAttPtState(idx)
                 self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)
                 self.infoWindow.Show()
-
-
 
         for idx, point in enumerate(self.attackPts):
             (x2, y2) = point
@@ -171,10 +169,21 @@ class PanelMap(wx.Panel):
 
         #self.DrawAttackPt(dc)
         self.DrawGate(dc)
+
+        # Draw the camera view line.
+        dc.SetPen(wx.Pen('GREEN', width=1, style=wx.PENSTYLE_SOLID))
+        camPos = gv.iMapMgr.signalDict['Monitoring Cam'][0].getPos()
+        dc.DrawLine(camPos[0], camPos[1], camPos[0]-10, camPos[1]-50)
+        dc.DrawLine(camPos[0], camPos[1], camPos[0]+10, camPos[1]-50)
+
+
         #self.DrawStation(dc)
         dc.SetPen(self.dcDefPen)
         dc.SetBrush(wx.Brush(wx.Colour('GRAY')))
         dc.DrawRectangle(525, 155, 9, 110)
+
+
+
         self._drawSignal(dc)
         #if self.toggle:
         #    if self.forkSt: 

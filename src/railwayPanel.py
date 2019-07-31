@@ -498,7 +498,7 @@ class PanelSimuCtrl(wx.Panel):
 
 
 class CameraView(wx.Panel):
-    def __init__(self, parent, idx, size=(280, 200)):
+    def __init__(self, parent, idx, size=(280, 200),  style=wx.TRANSPARENT_WINDOW):
         """CameraView."""
         wx.Panel.__init__(self, parent)
         sizer = wx.BoxSizer(wx.VERTICAL)
