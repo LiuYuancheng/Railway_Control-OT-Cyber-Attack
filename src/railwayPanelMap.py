@@ -33,22 +33,14 @@ class PanelMap(wx.Panel):
         self.stopbitmap = wx.Bitmap(gv.LSJPG_PATH)
         self.clashbitmap = wx.Bitmap(gv.CLPNG_PATH)
 
-
         self.mapMgr = manager.MapMgr(self)
         gv.iMapMgr  = self.mapMgr
         #self.leftTimge = wx.Image(png)
         self.toggle = False     # Display flash toggle flag.
         # gate contorl parameters.(The 0-total close, 15-total open)
-
-        
-
-
-
-
-
+    
         #self.trainA = agent.AgentTrain(self, -1, headPosA, self.trackA)
         gv.iRailWay = self.mapMgr.trainA
-
 
         # set the sensor position.
         # Id of the sensor which detected the train passing.
@@ -92,7 +84,7 @@ class PanelMap(wx.Panel):
                     x += self.selectedPts[0]
                     y += self.selectedPts[1]
                 self.infoWindow = wx.MiniFrame(gv.iMainFrame, -1,
-                    'Monitoring camera view', pos=(x+10, y+10), size=(310, 230),
+                    'Monitoring camera view', pos=(x+10, y+10), size=(300, 230),
                     style=wx.DEFAULT_FRAME_STYLE)
                 gv.iDetailPanel = rwp.CameraView(self.infoWindow, 0)
                 #gv.iDetailPanel.updateState(idx=idx, state='Normal', origalV=0, changedV=0)

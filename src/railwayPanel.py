@@ -407,6 +407,66 @@ class PanelTrainCtrl(wx.Panel):
         self.speedDisplay.SetValue(state[2]//10)
         self.Refresh(False)
 
+
+class PanelAttackSimu(wx.Panel):
+    """ Load different kind off attack simulation stuation.
+    """
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+        self.SetBackgroundColour(wx.Colour(200, 200, 200))
+        self.infoWindow = None 
+        hsizer = self.buidUISizer()
+        self.SetSizer(hsizer)
+
+    def buidUISizer(self):
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        vsizer = wx.BoxSizer(wx.VERTICAL)
+        vsizer.Add(wx.StaticText(self, label="Active Attack Simulation:"), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        self.idLb = wx.StaticText(self, label="Normal")
+        self.idLb.SetBackgroundColour(wx.Colour('GREEN'))
+
+        vsizer.Add(self.idLb, flag=flagsR, border=2)
+        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
+                                     style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        
+        self.rb1 = wx.RadioButton(self, -1, 'Ransomware in the HMI', style=wx.RB_GROUP)
+        vsizer.Add(self.rb1, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        
+        self.rb2 = wx.RadioButton(self, -1, 'Man in the Middle from IOT device')
+        vsizer.Add(self.rb2, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        
+        self.rb3 = wx.RadioButton(self, -1, 'Trojan in teh technician PC')
+        vsizer.Add(self.rb3, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        
+        self.processDisplay = wx.Gauge(self, range = 10, size = (150, 15), style =  wx.GA_HORIZONTAL)
+        vsizer.Add(self.processDisplay, flag=flagsR, border=2)
+        
+        hsizer1 = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.simuBt1 = wx.Button(self, label='Start Attack', style=wx.BU_LEFT)
+        self.simuBt1.Bind(wx.EVT_BUTTON, self.setAttck)
+        hsizer1.Add(self.simuBt1, flag=flagsR, border=2)
+        hsizer1.AddSpacer(5)
+        self.simuBt2 = wx.Button(self, label='Clear Attack', style=wx.BU_LEFT)
+        #self.simuBt2.Bind(wx.EVT_BUTTON, self.setAttck)
+        hsizer1.Add(self.simuBt2, flag=flagsR, border=2)
+        vsizer.Add(hsizer1, flag=flagsR, border=2)
+
+        vsizer.AddSpacer(5)
+        vsizer.AddSpacer(5)
+        return vsizer
+
+    def setAttck(self, event):
+        self.infoWindow = RansomwareFrame(gv.iMainFrame)
+
+
+
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelSimuCtrl(wx.Panel):
@@ -583,3 +643,16 @@ class PanelAttackSet(wx.Panel):
         if not changedV is None and self.changedV != changedV:
             self.changedV = changedV
             self.hackLb.SetLabel("Hacked input: %s" %str(changedV))
+
+class RansomwareFrame(wx.Frame):
+    """ Railway system control hub."""
+    def __init__(self, parent):
+        """ Init the UI and parameters """
+        wx.Frame.__init__(self, parent, -1, 'Ransomware', style=wx.MINIMIZE_BOX)
+        self.SetBackgroundColour(wx.Colour('BLACK'))
+        self.Show()
+        self.Maximize()
+
+
+
+
