@@ -33,7 +33,7 @@ TTICO_PATH = "".join([dirpath, "\\img\\title.ico"])
 # Map background path.
 BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg1.png"])
 RAJPG_PATH = "".join([dirpath, "\\img\\ransomwareAtt.jpg"])
-
+TAGIF_PATH = "".join([dirpath, "\\img\\trojanAtt.gif"])
 
 WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
 HTPNG_PATH = "".join([dirpath, "\\img\\hitPPl.png"])

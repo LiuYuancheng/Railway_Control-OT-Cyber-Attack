@@ -462,10 +462,10 @@ class PanelAttackSimu(wx.Panel):
         return vsizer
 
     def setAttck(self, event):
-        self.infoWindow = RansomwareFrame(gv.iMainFrame)
-
-
-
+        if self.rb1.GetValue():
+            self.infoWindow = RansomwareFrame(gv.iMainFrame)
+        else:
+            self.infoWindow = TrojanAttFrame(gv.iMainFrame)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -644,6 +644,8 @@ class PanelAttackSet(wx.Panel):
             self.changedV = changedV
             self.hackLb.SetLabel("Hacked input: %s" %str(changedV))
 
+
+
 class RansomwareFrame(wx.Frame):
     """ Railway system control hub."""
     def __init__(self, parent):
@@ -653,10 +655,77 @@ class RansomwareFrame(wx.Frame):
         bmp = wx.Image(gv.RAJPG_PATH, wx.BITMAP_TYPE_JPEG).ConvertToBitmap()
         screenSZ = wx.GetDisplaySize()
         wx.StaticBitmap(self, -1, bmp, pos= (screenSZ[0]//2-350, screenSZ[0]//2-300))
-
         self.Show()
         self.Maximize()
 
 
+class TrojanAttFrame(wx.Frame):
+    def __init__(self,parent):
+        wx.Frame.__init__( self, parent, title="Am I transparent?",
+                           style=wx.MINIMIZE_BOX )
+        self.SetBackgroundColour(wx.Colour('BLACK'))
+        self.alphaValue = 255
+        self.alphaIncrement = -4
 
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        anim = Animation(gv.TAGIF_PATH)
+        self.ctrl = AnimationCtrl(self, -1, anim)
+        self.ctrl.Play()
+        sizer.Add(self.ctrl, flag=wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_CENTER_HORIZONTAL, border=2)
+        self.SetSizerAndFit(sizer)
+   
+        self.changeAlpha_timer = wx.Timer( self )
+        self.changeAlpha_timer.Start( 50 )       # 20 changes per second
+        self.Bind( wx.EVT_TIMER, self.ChangeAlpha )
+        self.Bind( wx.EVT_CLOSE, self.OnCloseWindow )
+        
+        self.Show()
+        self.Maximize()
+
+    #end transparentWin class
+    #--------------------------------------------------------
+    def ChangeAlpha( self, evt )  :
+        """ The term "alpha" means variable transparency
+              as opposed to a "mask" which is binary transparency.
+              alpha == 255 :  fully opaque
+              alpha ==   0 :  fully transparent (mouse is ineffective!)
+
+            Only top-level controls can be transparent; no other controls can.
+            This is because they are implemented by the OS, not wx.
+        """
+
+        self.alphaValue += self.alphaIncrement
+        if (self.alphaValue) <= 0 or (self.alphaValue >= 255) :
+
+            # Reverse the increment direction.
+            self.alphaIncrement = -self.alphaIncrement
+
+            if self.alphaValue <= 0 :
+                self.alphaValue = 0
+
+            if self.alphaValue > 255 :
+                self.alphaValue = 255
+        #end if
+
+        #self.stTxt.SetLabel( str( self.alphaValue ) )
+
+        # Note that we no longer need to use ctypes or win32api to
+        # make transparent windows, however I'm not removing the
+        # MakeTransparent code from this sample as it may be helpful
+        # to someone for other uses, someday.
+
+        #self.MakeTransparent( self.alphaValue )
+
+        # Instead, just call the SetTransparent() method
+        self.SetTransparent( self.alphaValue )      # Easy !
+
+    #end ChangeAlpha def
+
+    #--------------------------------------------------------
+
+    def OnCloseWindow( self, evt ) :
+
+        self.changeAlpha_timer.Stop()
+        del self.changeAlpha_timer       # avoid a memory leak
+        self.Destroy()
 
