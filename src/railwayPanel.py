@@ -650,6 +650,10 @@ class RansomwareFrame(wx.Frame):
         """ Init the UI and parameters """
         wx.Frame.__init__(self, parent, -1, 'Ransomware', style=wx.MINIMIZE_BOX)
         self.SetBackgroundColour(wx.Colour('BLACK'))
+        bmp = wx.Image(gv.RAJPG_PATH, wx.BITMAP_TYPE_JPEG).ConvertToBitmap()
+        screenSZ = wx.GetDisplaySize()
+        wx.StaticBitmap(self, -1, bmp, pos= (screenSZ[0]//2-350, screenSZ[0]//2-300))
+
         self.Show()
         self.Maximize()
 

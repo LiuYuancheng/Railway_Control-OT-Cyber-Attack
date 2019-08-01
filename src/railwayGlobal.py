@@ -32,6 +32,7 @@ TTICO_PATH = "".join([dirpath, "\\img\\title.ico"])
 
 # Map background path.
 BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg1.png"])
+RAJPG_PATH = "".join([dirpath, "\\img\\ransomwareAtt.jpg"])
 
 
 WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
@@ -89,6 +90,11 @@ STOFPNG_PATH = "".join([dirpath, "\\img\\stationOff.png"])  # station light off.
 # Camera:
 CAMPNG_PATH = "".join([dirpath, "\\img\\cameraUp.png"])   # station light on.
 TPSGIP_PATH = "".join([dirpath, "\\img\\trailPass.gif"])   # station light on.
+
+
+
+
+
 
 
 
