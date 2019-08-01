@@ -23,8 +23,8 @@ class transparentWin(wx.Frame):
         #pnl = rwp.CameraView(self, 0)
         # pnl.setPlay()
         baPanel = wx.Panel(self)
-        self.stTxt = wx.StaticText( baPanel, -1, str( self.alphaValue ), (25, 25) )
-        self.stTxt.SetFont( wx.Font( 18, wx.SWISS, wx.NORMAL, wx.NORMAL ) )
+        self.stTxt = wx.StaticText(baPanel, -1, str(self.alphaValue), (25, 25))
+        self.stTxt.SetFont(wx.Font(18, wx.SWISS, wx.NORMAL, wx.NORMAL))
 
         self.changeAlpha_timer = wx.Timer( self )
         self.changeAlpha_timer.Start( 50 )       # 20 changes per second
