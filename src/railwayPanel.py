@@ -718,7 +718,7 @@ class TrojanAttFrame(wx.Frame):
 
         self.count -=1
         if self.count%100 == 0:
-            self.stTxt.SetLabel("Your computer has been took over by the Trojan, we will release control in "+str(self.count//100)+" sec")
+            self.stTxt.SetLabel("Your computer has been took over by the Trojan, we will release control in "+str(self.count//100).zfill(2)+" sec")
         if self.count == 0:
             self.OnCloseWindow(None)
 
