@@ -303,123 +303,123 @@ class PanelTrainCtrl(wx.Panel):
 
 #-----------------------------------------------------------------------------
     def buidUISizer(self):
+        """ Build the UI and the return the wx.sizer. """
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
-        self.ctrlAct = wx.CheckBox(self, -1 , self.tName+" Control")
+        # Set the panel title.
+        self.ctrlAct = wx.CheckBox(self, -1, self.tName+" Control")
         self.ctrlAct.SetValue(True)
         vsizer.Add(self.ctrlAct, flag=flagsR, border=2)
-
         vsizer.AddSpacer(5)
         vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
-                                     style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-        # Row idx = 0: train state control.
+        # Row idx = 0: train state display.
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox0.Add(wx.StaticText(self, label="Train status:"), flag=flagsR, border=2)
+        hbox0.Add(wx.StaticText(self, label="Train status:"),
+                  flag=flagsR, border=2)
         hbox0.AddSpacer(5)
-        self.statLb = wx.StaticText(self, label="run".center(16))
-        #self.statLb.SetBackgroundColour(wx.Colour('GREEN'))
-        hbox0.Add(self.statLb, flag=flagsR, border=2)
+        self.stateLb = wx.StaticText(self, label="Running".center(16))
+        hbox0.Add(self.stateLb, flag=flagsR, border=2)
         vsizer.Add(hbox0, flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-
-        self.rwLabel = wx.StaticText(self, label="RailWay Pos: "+self.tName[-1])
+        self.rwLabel = wx.StaticText(
+            self, label="RailWay Pos: "+self.tName[-1])
         vsizer.Add(self.rwLabel, flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-
         # Row idx = 1: Train speed contorl
-        
-        vsizer.Add(wx.StaticText(self, label="Train Throttle and Speed:"), flag=flagsR, border=2)
+        vsizer.Add(wx.StaticText(
+            self, label="Train Throttle and Speed:"), flag=flagsR, border=2)
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.speedDisplay = wx.Gauge(self, range = 10, size = (100, 20), style =  wx.GA_HORIZONTAL)
-        hbox1.Add(self.speedDisplay, flag=flagsR, border=2)
+        self.throttleBar = wx.Gauge(
+            self, range=10, size=(100, 17), style=wx.GA_HORIZONTAL)
+        hbox1.Add(self.throttleBar, flag=flagsR, border=2)
         hbox1.AddSpacer(5)
         self.speedLb = wx.StaticText(self, label="[ 80km/h ]")
         hbox1.Add(self.speedLb, flag=flagsR, border=2)
         vsizer.Add(hbox1, flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-
         vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
                                      style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-
         # Row idx = 2: Train direction contorl
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox2.Add(wx.StaticText(self, label="Direction :"), flag=flagsR, border=2)
-        
-        self.dirCtrl = wx.ComboBox(self, -1, choices=['anticlockwise', 'clockwise'], style=wx.CB_READONLY)
+        hbox2.Add(wx.StaticText(self, label="Direction :"),
+                  flag=flagsR, border=2)
+        self.dirCtrl = wx.ComboBox(
+            self, -1, choices=['anticlockwise', 'clockwise'], style=wx.CB_READONLY)
         self.dirCtrl.SetSelection(0)
         hbox2.Add(self.dirCtrl, flag=flagsR, border=2)
         vsizer.Add(hbox2, flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-
-        # Row idx =3 : Train speed control
+        # Row idx =3 : Train max speed control
         hbox3 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox3.Add(wx.StaticText(self, label="Speed Ctrl [*10km]"), flag=flagsR, border=2)
-        self.speedCtrl = wx.SpinCtrl(self, -1, '8', size = (50, -1), min=1, max=10) 
+        hbox3.Add(wx.StaticText(
+            self, label="Speed Ctrl [*10km]"), flag=flagsR, border=2)
+        self.speedCtrl = wx.SpinCtrl(
+            self, -1, '8', size=(50, -1), min=1, max=10)
         hbox3.Add(self.speedCtrl, flag=flagsR, border=2)
         hbox3.AddSpacer(5)
         vsizer.Add(hbox3, flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-        #self.speedDisplay.SetValue(8)
-        
-        
-        # Row idx = 4: Station wait time contorl
+        # Row idx = 4: Station wait time control
         hbox4 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox4.Add(wx.StaticText(self, label="Station waitT [sec]:"), flag=flagsR, border=2)
-        self.wTimeCtrl = wx.SpinCtrl(self, -1, '3', size = (50, -1), min=1, max=20)
+        hbox4.Add(wx.StaticText(
+            self, label="Station waitT [sec]:"), flag=flagsR, border=2)
+        self.wTimeCtrl = wx.SpinCtrl(
+            self, -1, '3', size=(50, -1), min=1, max=20)
         hbox4.Add(self.wTimeCtrl, flag=flagsR, border=2)
         vsizer.Add(hbox4, flag=flagsR, border=2)
-
-        # Row idx = 5: Station wait time contorl
+        # Row idx = 5: Load setting, recover and emergency stop buttons.
         hbox5 = wx.BoxSizer(wx.HORIZONTAL)
+        # load setting button.
         hbox5.AddSpacer(5)
         bmp0 = wx.Bitmap(gv.LDSET_PATH, wx.BITMAP_TYPE_ANY)
-        self.loadbtn1 = wx.BitmapButton(self, id = wx.ID_ANY, bitmap = bmp0,
-         size = (bmp0.GetWidth()+10, bmp0.GetHeight()+10))
-        self.loadbtn1.Bind(wx.EVT_BUTTON, self.emgStop)
+        self.loadbtn1 = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=bmp0,
+                                        size=(bmp0.GetWidth()+10, bmp0.GetHeight()+10))
         hbox5.Add(self.loadbtn1, flag=flagsR, border=2)
-        
+        # recover button.
         hbox5.AddSpacer(5)
         bmp1 = wx.Bitmap(gv.RECOV_PATH, wx.BITMAP_TYPE_ANY)
-        self.recbtn1 = wx.BitmapButton(self, id = wx.ID_ANY, bitmap = bmp1,
-         size = (bmp1.GetWidth()+10, bmp1.GetHeight()+10))
-        self.recbtn1.Bind(wx.EVT_BUTTON, self.emgRec)
+        self.recbtn1 = wx.BitmapButton(self, id=wx.NewId(), bitmap=bmp1,
+                                       size=(bmp1.GetWidth()+10, bmp1.GetHeight()+10))
+        self.recbtn1.Bind(wx.EVT_BUTTON, self.emgHandle)
         hbox5.Add(self.recbtn1, flag=flagsR, border=2)
+        # emergency stop button.
         hbox5.AddSpacer(5)
         bmp = wx.Bitmap(gv.EMGST_PATH, wx.BITMAP_TYPE_ANY)
-        self.stopbtn1 = wx.BitmapButton(self, id = wx.ID_ANY, bitmap = bmp,
-         size = (bmp.GetWidth()+10, bmp.GetHeight()+10))
-        self.stopbtn1.Bind(wx.EVT_BUTTON, self.emgStop)
+        self.stopbtn1 = wx.BitmapButton(self, id=wx.NewId(), bitmap=bmp,
+                                        size=(bmp.GetWidth()+10, bmp.GetHeight()+10))
+        self.stopbtn1.Bind(wx.EVT_BUTTON, self.emgHandle)
         hbox5.Add(self.stopbtn1, flag=flagsR, border=2)
-        hbox5.AddSpacer(5)        
+        hbox5.AddSpacer(5)
         vsizer.Add(hbox5, flag=flagsR, border=2)
         return vsizer
 
 #-----------------------------------------------------------------------------
-    def emgStop(self, event):
-        if gv.iMapMgr:
-            gv.iMapMgr.setEmgStop(self.tName, True)
-            self.setState(5, 0)
-
-#-----------------------------------------------------------------------------
-    def emgRec(self, event):
-           if gv.iMapMgr:
-            gv.iMapMgr.setEmgStop(self.tName, False)
-            self.setState(0, 0)
+    def emgHandle(self, event):
+        """ Set/recover the train to/from emergency stop situaton 
+        """
+        if not gv.iMapMgr: return
+        obj = event.GetEventObject()
+        (stop, speed) = (False, 0) if obj.GetId() == self.recbtn1.GetId() else (True, 5)
+        gv.iMapMgr.setEmgStop(self.tName, stop)
+        self.setState(speed, 0)  # recover
 
 #-----------------------------------------------------------------------------
     def setState(self, idx, rwIdx): 
-        """ Set the train running state. """
+        """ Set the train running state. idx: speed idx in self.statDict"""
         state = self.statDict[str(idx)]
-        self.statLb.SetLabel(str(state[0]).center(16))
-        self.statLb.SetBackgroundColour(wx.Colour(state[1]))
+        self.stateLb.SetLabel(str(state[0]).center(16))
+        self.stateLb.SetBackgroundColour(wx.Colour(state[1]))
         railWay = "[ Track A ]" if rwIdx == 0 else "[ Track B ]"
         self.rwLabel.SetLabel("RailWay Pos: " + railWay)
         self.speedLb.SetLabel("[ %dkm/h ]" %state[2])
-        self.speedDisplay.SetValue(state[2]//10)
+        self.throttleBar.SetValue(state[2]//10)
         self.Refresh(False)
 
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
 class PanelAttackSimu(wx.Panel):
     """ Load different kind off attack simulation stuation.
