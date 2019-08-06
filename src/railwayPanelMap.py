@@ -326,6 +326,20 @@ class PanelMap(wx.Panel):
         [li,ri,lo,ro] = self.mapMgr.gate2.getGatePts()
         dc.DrawLine(li[0], li[1], lo[0], lo[1])
         dc.DrawLine(ri[0], ri[1], ro[0], ro[1])
+        
+        # Draw the accident 
+        if self.toggle and gv.iSensorAttack:
+            if self.mapMgr.rwAsensorId == 7 or self.mapMgr.rwAsensorId == 20 or \
+                self.mapMgr.rwBsensorId == 7 or self.mapMgr.rwBsensorId == 20:
+                dc.DrawBitmap(self.hitbitmap, 300-15, 380-15)
+                if self.msgPop:
+                    self.msgPop = False
+                    gv.iMapMgr.setEmgStop('TrainA', True)
+                    gv.iMapMgr.setEmgStop('TrainB', True)
+                    wx.MessageBox('Train Accident Happened!', 'Caution!', wx.OK | wx.ICON_ERROR)
+                    gv.iMapMgr.setEmgStop('TrainA', False)
+                    gv.iMapMgr.setEmgStop('TrainB', False)
+
 
         return
 
@@ -366,10 +380,6 @@ class PanelMap(wx.Panel):
         dc.DrawRectangle(525, 160, 12, 100)
         
         return
-
-
-
-
 
         dc.SetPen(wx.Pen('BLACK', width=1, style=wx.PENSTYLE_DOT))
         dc.SetBrush(wx.Brush(wx.Colour('Black')))

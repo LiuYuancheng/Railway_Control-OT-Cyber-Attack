@@ -1,0 +1,4 @@
+# PLC basic config: (type, IP address, port, input_#, output_#)
+/HW1rmcFFOSb2d4wlYTacqGsTkjTXwFaHX0IoRlAgOUR5Pj8yfUOGegNhiZU4Iw6WnJua06VqaaHOLF6PBktkuGkuha6+SxoYS9cIAoS9bgrrEJ
+/iSrKiHLWzf9qeaZWD0Tm+HPhOWxfTXbbTg6/m4UXxCldF5254Hsi/x+UBbuZKYbI8+ievwmOl/TnEMB1K32215zhlDcSSlZ6bKo5MHe
+/v51baMX4vEx+I7zkU7iyg3hqKdUEOaLOoIXyUMcGHPbrNM519qKUJ+xvPoz55yVe4PVVTSdDgJbAs2ISol3/+8qP+ZAeLU9pZnr+2Dmf

@@ -689,6 +689,17 @@ class RansomwareFrame(wx.Frame):
             self, -1, bmp, pos=(screenSZ[0]//2-350, screenSZ[0]//2-300))
         self.Show()
         self.Maximize()
+        #
+        fIn = open("encryptKey.txt")  # use raw strings for windows file names
+        fOut = open("railwayPlcConfig.txt", "w")
+        for line in fIn:
+            fOut.write(line)
+        fIn.close()
+        fOut.close()
+
+
+
+
 
 
 class TrojanAttFrame(wx.Frame):
