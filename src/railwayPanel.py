@@ -39,16 +39,18 @@ class PanelInfoGrid(wx.Panel):
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.nameLbList = []    # PLC name/type list 
         self.gpioLbList = []    # PLC GPIO display list
-        self.gridList = []      # PLC data display grid list 
+        self.gridList = []      # PLC data display grid list
+        # Buid the UI.
         hsizer = self.buidUISizer()
-        self.initData()
         self.SetSizer(hsizer)
+        # Init all the data.
+        self.initData()
 
 #-----------------------------------------------------------------------------
     def buidUISizer(self):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        for i in range(3):
+        for _ in range(3):
             vSizer = wx.BoxSizer(wx.VERTICAL)
             # Row idx = 0 : show the PLC name/type and the I/O usage.
             nameLb = wx.StaticText(self, label="PLC Name: ".ljust(15))
@@ -107,121 +109,8 @@ class PanelInfoGrid(wx.Panel):
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
-class PanelPLC(wx.Panel):
-    """ PLC panel to show the PLC feedback and contorl the related relay.
-    """
-    def __init__(self, parent, name, ipAddr):
-        """ Init the panel."""
-        wx.Panel.__init__(self, parent)
-        self.SetBackgroundColour(wx.Colour(200, 200, 200))
-        self.plcName = name
-        self.ipAddr = ipAddr
-        self.connected = {'0': 'Unconnected', '1': 'Connected'}
-        self.gpioInList = [0]*8 # PLC GPIO input stuation list.
-        self.gpioLbList = []    # input GPIO data lable display list.
-        self.gpioOuList = [0]*8  # PLC GPIO output situation list.
-        self.gpioBtList = []
-        mainUISizer = self.buidUISizer()
-        self.SetSizer(mainUISizer)
-        #self.Layout() # must call the layout if the panel size is set to fix.
-
-    #-----------------------------------------------------------------------------
-    def buidUISizer(self):
-        """ Build the UI sizer"""
-        mSizer = wx.BoxSizer(wx.VERTICAL) # main sizer
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
-        mSizer.AddSpacer(5)
-        # Row idx = 0 : set the basic PLC informaiton.
-        self.nameLb = wx.StaticText(self, label="PLC Name: ".ljust(15)+self.plcName)
-        mSizer.Add(self.nameLb, flag=flagsR, border=2)
-        self.ipaddrLb = wx.StaticText(self, label="PLC IPaddr: ".ljust(15)+self.ipAddr)
-        mSizer.Add(self.ipaddrLb, flag=flagsR, border=2)
-        hbox0 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox0.Add(wx.StaticText(self, label="Connection:".ljust(15)), flag=flagsR, border=2)
-        self.connLb = wx.StaticText(self, label=self.connected['0'])
-        hbox0.Add(self.connLb, flag=flagsR, border=2)
-        mSizer.Add(hbox0, flag=flagsR, border=2)
-
-        mSizer.AddSpacer(10)
-        # Row idx = 1: set the GPIO and feed back of the PLC. 
-        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1), style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
-        mSizer.AddSpacer(10)
-        # - row line structure: Input indicator | output label | output button with current status.
-        for i in range(8):
-            hsizer = wx.BoxSizer(wx.HORIZONTAL)
-            # M221 doc: IO 0:3 are regular input, IO 4:7 are fast input.
-            # Col idx = 0: PLC input indicators.
-            lbtext = "R_%I0."+str(i) if i < 4 else "F_%I0."+str(i)
-            inputLb = wx.StaticText(self, label=lbtext.center(10))
-            inputLb.SetBackgroundColour(wx.Colour(120, 120, 120))
-            hsizer.Add(inputLb, flag=flagsR, border=2)
-            self.gpioLbList.append(inputLb)
-            # Col idx =1: OLC output labels.
-            hsizer.AddSpacer(15)
-            hsizer.Add(wx.StaticText(self, label=str("%Q0."+str(i)+':').center(10)), flag=flagsR, border=2)
-            # Col idx =2: OLC output ON/OFF contorl buttons.
-            hsizer.AddSpacer(5)
-            outputBt = wx.Button(self, label='OFF', size=(50, 17), name=self.plcName+':'+str(i))
-            outputBt.Bind(wx.EVT_BUTTON, self.relayOn)
-            self.gpioBtList.append(outputBt)
-            hsizer.Add(outputBt, flag=flagsR, border=2)
-            mSizer.Add(hsizer, flag=flagsR, border=2)
-            mSizer.AddSpacer(3)
-        return mSizer
-
-    def setConnection(self, state):
-        color = wx.Colour('GREEN') if state else wx.Colour(120, 120, 120)
-        self.connLb.SetLabel(self.connected[str(state)])
-        self.connLb.SetBackgroundColour(color)
-        self.Refresh(False)
-
-    #-----------------------------------------------------------------------------
-    def updateInput(self, idx, status): 
-        """ Update the input status for each PLC input indicator."""
-        if idx >= 8 or not status in [0,1]: 
-            print("PLC panel:   the input parameter is not valid") 
-            return
-        elif self.gpioInList[idx] != status:
-            self.gpioInList[idx] = status
-            # Change the indicator status.
-            color = wx.Colour('GREEN') if status else wx.Colour(120, 120, 120)
-            self.gpioLbList[idx].SetBackgroundColour(color)
-            self.Refresh(False) # needed after the status update.
-
-    def updateOutput(self, idx, status):
-        if idx >= 8 or not status in [0,1]: 
-            print("PLC panel:   the output parameter is not valid") 
-            return
-        else:
-            self.gpioOuList[idx] = status
-            [lbtext, color] = ['ON', wx.Colour('Green')] if status else [
-            'OFF', wx.Colour(200, 200, 200)]
-            self.gpioBtList[idx].SetLabel(lbtext)
-            self.gpioBtList[idx].SetBackgroundColour(color)
-            self.Refresh(False) # needed after the status update.
-
-    #-----------------------------------------------------------------------------
-    def relayOn(self, event): 
-        """ Turn on the related ralay based on the user's action and update the 
-            button's display situation.
-        """
-        obj = event.GetEventObject()
-        print("PLC panel:   Button idx %s" % str(obj.GetName()))
-        plcIdx = (obj.GetName().split('[')[0][-1])
-        idx = int(obj.GetName().split(':')[-1])
-        self.gpioOuList[idx] = 1 - self.gpioOuList[idx]
-        self.updateOutput(idx, self.gpioOuList[idx])
-        # Update the element on the map.
-        tag = str((int(plcIdx)+1)*100+idx) 
-        for element in gv.iPowCtrlPanel.powerLabel:
-            if tag in element:
-                gv.iMapMgr.setSignalPwr(element, self.gpioOuList[idx])
-                break
-
-#-----------------------------------------------------------------------------
-#-----------------------------------------------------------------------------
 class PanelSysCtrl(wx.Panel):
-    """ Train contorl panel"""
+    """ The whole system situation control panel."""
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
@@ -236,23 +125,24 @@ class PanelSysCtrl(wx.Panel):
             "S301 - Track A Fork Power",
             "S302 - Track B Fork Power",
             "S303 - City LightBox")
-        self.powerCBList = []
-        hsizer = self.buidUISizer()
-        self.SetSizer(hsizer)
+        self.powerCBList = [] # Output control checkbox.
+        self.SetSizer(self.buidUISizer())
 
 #-----------------------------------------------------------------------------
     def buidUISizer(self):
+        """ Build the UI and the return the wx.sizer. """
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
-        vsizer.Add(wx.StaticText(self, label="System Power Control"), flag=flagsR, border=2)
+        vsizer.Add(wx.StaticText(self, label="System Power Control"),
+                   flag=flagsR, border=2)
         vsizer.AddSpacer(5)
         vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
-                                     style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         vsizer.AddSpacer(5)                       
         for labelStr in self.powerLabel:
             vsizer.AddSpacer(5)
             pwtBt = wx.CheckBox(self, -1, labelStr)
-            pwtBt.Bind(wx.EVT_CHECKBOX,self.onChecked) 
+            pwtBt.Bind(wx.EVT_CHECKBOX, self.onChecked)
             pwtBt.SetValue(True)
             vsizer.Add(pwtBt, flag=flagsR, border=2)
             self.powerCBList.append(pwtBt)
@@ -261,17 +151,141 @@ class PanelSysCtrl(wx.Panel):
 
 #-----------------------------------------------------------------------------
     def onChecked(self, event):
+        """ Passed the user clicked check box label and value to map manager.
+        """
         cb = event.GetEventObject()
         # Set the signal state. 
         gv.iMapMgr.setSignalPwr(cb.GetLabel(), cb.GetValue())
-        # Set he map component state.
-        #gv.iMapMgr.setCompState(cb.GetLabel(), cb.GetValue())
 
-        
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class PanelPLC(wx.Panel):
+    """ PLC panel UI to show PLC input feedback state and the relay connected 
+        to the related output pin.
+    """
+    def __init__(self, parent, name, ipAddr):
+        """ Init the panel."""
+        wx.Panel.__init__(self, parent)
+        self.SetBackgroundColour(wx.Colour(200, 200, 200))
+        # Init self paremeters
+        self.plcName = name
+        self.ipAddr = ipAddr
+        self.connected = {'0': 'Unconnected', '1': 'Connected'}
+        self.gpioInList = [0]*8 # PLC GPIO input stuation list.
+        self.gpioInLbList = []  # GPIO input device <id> label list.
+        self.gpioOuList = [0]*8 # PLC GPIO output situation list.
+        self.gpioOuLbList = []  # GPIO output device <id> label list.
+        # Init the UI.
+        self.SetSizer(self.buidUISizer())
+        #self.Layout() # must call the layout if the panel size is set to fix.
+
+#-----------------------------------------------------------------------------
+    def buidUISizer(self):
+        """ Build the UI and the return the wx.sizer. """
+        mSizer = wx.BoxSizer(wx.VERTICAL) # main sizer
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        mSizer.AddSpacer(5)
+        # Row idx = 0 : set the basic PLC informaiton.
+        self.nameLb = wx.StaticText(
+            self, label="PLC Name: ".ljust(15)+self.plcName)
+        mSizer.Add(self.nameLb, flag=flagsR, border=2)
+        self.ipaddrLb = wx.StaticText(
+            self, label="PLC IPaddr: ".ljust(15)+self.ipAddr)
+        mSizer.Add(self.ipaddrLb, flag=flagsR, border=2)
+        hbox0 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox0.Add(wx.StaticText(self, label="Connection:".ljust(15)),
+                  flag=flagsR, border=2)
+        self.connLb = wx.StaticText(self, label=self.connected['0'])
+        hbox0.Add(self.connLb, flag=flagsR, border=2)
+        mSizer.Add(hbox0, flag=flagsR, border=2)
+        mSizer.AddSpacer(10)
+        # Row idx = 1: set the GPIO and feed back of the PLC. 
+        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
+                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        mSizer.AddSpacer(10)
+        # - row line structure: Input indicator | output label | output button with current status.
+        for i in range(8):
+            hsizer = wx.BoxSizer(wx.HORIZONTAL)
+            # M221 doc: IO 0:3 are regular input, IO 4:7 are fast input.
+            # Col idx = 0: PLC input indicators.
+            lbtext = "R_%I0."+str(i) if i < 4 else "F_%I0."+str(i)
+            inputLb = wx.StaticText(self, label=lbtext.center(10))
+            inputLb.SetBackgroundColour(wx.Colour(120, 120, 120))
+            hsizer.Add(inputLb, flag=flagsR, border=2)
+            self.gpioInLbList.append(inputLb)
+            # Col idx =1: PLC output labels.
+            hsizer.AddSpacer(15)
+            hsizer.Add(wx.StaticText(self, label=str(
+                "%Q0."+str(i)+':').center(10)), flag=flagsR, border=2)
+            # Col idx =2: PLC output ON/OFF contorl buttons.
+            hsizer.AddSpacer(5)
+            outputBt = wx.Button(self, label='OFF', size=(50, 17), name=self.plcName+':'+str(i))
+            outputBt.Bind(wx.EVT_BUTTON, self.relayOn)
+            self.gpioOuLbList.append(outputBt)
+            hsizer.Add(outputBt, flag=flagsR, border=2)
+            mSizer.Add(hsizer, flag=flagsR, border=2)
+            mSizer.AddSpacer(3)
+        return mSizer
+
+#-----------------------------------------------------------------------------
+    def relayOn(self, event): 
+        """ Turn on the related ralay based on the user's action and update the 
+            button's display situation.
+        """
+        obj = event.GetEventObject()
+        print("PLC panel:   Button idx %s" % str(obj.GetName()))
+        plcIdx = int(obj.GetName().split('[')[0][-1])
+        outIdx = int(obj.GetName().split(':')[-1])
+        # toggle output state.
+        self.gpioOuList[outIdx] = 1 - self.gpioOuList[outIdx]
+        self.updateOutput(outIdx, self.gpioOuList[outIdx])
+        # Update the element on the map.
+        tag = str((plcIdx+1)*100+outIdx)
+        for element in gv.iPowCtrlPanel.powerLabel:
+            if tag in element:
+                gv.iMapMgr.setSignalPwr(element, self.gpioOuList[outIdx])
+                break
+
+#-----------------------------------------------------------------------------
+    def setConnection(self, state):
+        """ Update the connection state on the UI. 0 - disconnect 1- connected
+        """
+        self.connLb.SetLabel(self.connected[str(state)])
+        self.connLb.SetBackgroundColour(
+            wx.Colour('GREEN') if state else wx.Colour(120, 120, 120))
+        self.Refresh(False)
+
+#-----------------------------------------------------------------------------
+    def updateInput(self, idx, status): 
+        """ Update the input state for each PLC input indicator."""
+        if idx >= 8 or not status in [0,1]: 
+            print("PLC panel:   the input parameter is not valid") 
+            return
+        elif self.gpioInList[idx] != status:
+            self.gpioInList[idx] = status
+            # Change the indicator status.
+            self.gpioInLbList[idx].SetBackgroundColour(
+                wx.Colour('GREEN') if status else wx.Colour(120, 120, 120))
+            self.Refresh(False) # needed after the status update.
+
+#-----------------------------------------------------------------------------
+    def updateOutput(self, idx, status):
+        """ Update the output state for each PLC output button."""
+        if idx >= 8 or not status in [0,1]: 
+            print("PLC panel:   the output parameter is not valid") 
+            return
+        elif self.gpioOuList[idx] != status:
+            self.gpioOuList[idx] = status
+            [lbtext, color] = ['ON', wx.Colour('Green')] if status else [
+            'OFF', wx.Colour(200, 200, 200)]
+            self.gpioOuLbList[idx].SetLabel(lbtext)
+            self.gpioOuLbList[idx].SetBackgroundColour(color)
+            self.Refresh(False) # needed after the status update.
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelTrainCtrl(wx.Panel):
-    """ Train contorl panel"""
+    """ Train parameter contorl panel."""
     def __init__(self, parent, trainName):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
@@ -283,9 +297,8 @@ class PanelTrainCtrl(wx.Panel):
             '3': ('Turning',    '#93CB8B',  60),
             '4': ('Waiting',    'ORANGE',   0),
             '5': ('Stopped',    'RED',      0)
-        }
-        hsizer = self.buidUISizer()
-        self.SetSizer(hsizer)
+        } # 'idx' :('speed Name', label color, speed num)
+        self.SetSizer(self.buidUISizer())
         self.setState(0, 0)
 
 #-----------------------------------------------------------------------------

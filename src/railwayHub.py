@@ -3,8 +3,8 @@
 # Name:        railwayHub.py
 #
 # Purpose:     This function is used to create a rail control hub to show the 
-#              different situation of the cyber-security attack's effect for the 
-#              railway PLC system.
+#              different situation of the cyber-security attack's influence for
+#              the railway HMI and PLC system.
 #
 # Author:      Yuancheng Liu
 #
@@ -16,11 +16,11 @@
 import wx # use wx to build the UI.
 import time
 from datetime import datetime
+import railwayAgent as agent
+import railwayMgr as manager
 import railwayGlobal as gv 
 import railwayPanel as rwp
 import railwayPanelMap as rwpm 
-import railwayAgent as agent
-import railwayMgr as manager
 
 PERIODIC = 300
 
@@ -115,7 +115,7 @@ class railWayHubFrame(wx.Frame):
         (name, ip, port, _, _) = gv.PLC_CFG['PLC'+str(idx)]
         plcAgent = agent.AgentPLC(self, idx, name, ip, port)
         plcPanel = rwp.PanelPLC(plcBgPanel, 'PLC'+str(idx)+name, ip+':'+port)
-        plcPanel.setConnection(1)
+        plcPanel.setConnection(0)
         gv.iAgentMgr.appendPLC(plcAgent, plcPanel)
         return plcPanel
 
