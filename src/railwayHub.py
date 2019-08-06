@@ -127,6 +127,7 @@ class railWayHubFrame(wx.Frame):
         if gv.iEmgStop: return
         timeStr = time.time()
         self.mapPanel.periodic(timeStr)
+        self.attackPanel.periodic(timeStr)
 
     #-----------------------------------------------------------------------------
     def OnClose(self, event):

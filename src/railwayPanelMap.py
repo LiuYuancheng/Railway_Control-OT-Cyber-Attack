@@ -187,6 +187,15 @@ class PanelMap(wx.Panel):
         self.toggle = not self.toggle
 
     def _drawSensors(self, dc):
+        # Show the isolated sensors.
+        if gv.iSensorAttack and self.toggle:
+            senIdlist = (6, 19, 8, 21)
+            dc.SetBrush(wx.Brush('RED'))
+            for i in senIdlist:
+                sensor = self.mapMgr.sensorList[i]
+                sensorPos = sensor.pos
+                dc.DrawRectangle(sensorPos[0]-7, sensorPos[1]-7, 14, 14)
+
         dc.SetBrush(wx.Brush('GRAY'))
         for sensor in self.mapMgr.sensorList:
             sensorPos = sensor.pos
@@ -199,7 +208,7 @@ class PanelMap(wx.Panel):
             else:
                 dc.DrawRectangle(sensorPos[0]-4, sensorPos[1]-4, 8, 8)
 
-
+        
     def _drawSignal(self, dc):
         """ draw the signals on the map.
         """

@@ -416,6 +416,7 @@ class PanelAttackSimu(wx.Panel):
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
         self.infoWindow = None 
         hsizer = self.buidUISizer()
+        self.attCount = -1 
         self.SetSizer(hsizer)
 
     def buidUISizer(self):
@@ -423,11 +424,7 @@ class PanelAttackSimu(wx.Panel):
         vsizer = wx.BoxSizer(wx.VERTICAL)
         vsizer.Add(wx.StaticText(self, label="Active Attack Simulation:"), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-        self.idLb = wx.StaticText(self, label="Normal")
-        self.idLb.SetBackgroundColour(wx.Colour('GREEN'))
-
-        vsizer.Add(self.idLb, flag=flagsR, border=2)
-        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
+        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(210, -1),
                                      style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
         
@@ -443,9 +440,14 @@ class PanelAttackSimu(wx.Panel):
         vsizer.Add(self.rb3, flag=flagsR, border=2)
         vsizer.AddSpacer(5)
         
+        self.idLb = wx.StaticText(self, label="Normal".center(20))
+        self.idLb.SetBackgroundColour(wx.Colour('GREEN'))
+        vsizer.Add(self.idLb, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+
         self.processDisplay = wx.Gauge(self, range = 10, size = (150, 15), style =  wx.GA_HORIZONTAL)
         vsizer.Add(self.processDisplay, flag=flagsR, border=2)
-        
+        vsizer.AddSpacer(10)
         hsizer1 = wx.BoxSizer(wx.HORIZONTAL)
 
         self.simuBt1 = wx.Button(self, label='Start Attack', style=wx.BU_LEFT)
@@ -453,7 +455,7 @@ class PanelAttackSimu(wx.Panel):
         hsizer1.Add(self.simuBt1, flag=flagsR, border=2)
         hsizer1.AddSpacer(5)
         self.simuBt2 = wx.Button(self, label='Clear Attack', style=wx.BU_LEFT)
-        #self.simuBt2.Bind(wx.EVT_BUTTON, self.setAttck)
+        self.simuBt2.Bind(wx.EVT_BUTTON, self.clearAttack)
         hsizer1.Add(self.simuBt2, flag=flagsR, border=2)
         vsizer.Add(hsizer1, flag=flagsR, border=2)
 
@@ -461,16 +463,45 @@ class PanelAttackSimu(wx.Panel):
         vsizer.AddSpacer(5)
         return vsizer
 
+    def periodic(self, now):
+
+        if self.attCount == 1:
+            self.idLb.SetLabel("Prepare to start attack")
+            self.idLb.SetBackgroundColour(wx.Colour('YELLOW'))
+            self.attCount += 1
+            self.Refresh(False)
+        elif 1 < self.attCount < 10:
+            self.processDisplay.SetValue(self.attCount)
+            self.attCount += 1
+        elif self.attCount == 10:
+            self.idLb.SetLabel("System under attack")
+            self.idLb.SetBackgroundColour(wx.Colour('RED'))
+            self.Refresh(False)
+            if self.rb1.GetValue():
+                self.infoWindow = RansomwareFrame(gv.iMainFrame)
+            elif self.rb2.GetValue():
+                gv.iSensorAttack = True
+            elif self.rb3.GetValue():
+                self.infoWindow = TrojanAttFrame(gv.iMainFrame)
+            self.attCount += 1
+        elif self.attCount == 0:
+            self.idLb.SetLabel("Normal".center(20))
+            self.idLb.SetBackgroundColour(wx.Colour('GREEN'))
+            self.processDisplay.SetValue(self.attCount)
+            self.Refresh(False)
+            self.attCount = -1
+            gv.iSensorAttack = False
+
     def setAttck(self, event):
-        if self.rb1.GetValue():
-            self.infoWindow = RansomwareFrame(gv.iMainFrame)
-        else:
-            self.infoWindow = TrojanAttFrame(gv.iMainFrame)
+        self.attCount = 1
+
+    def clearAttack(self, event):
+        self.attCount = 0
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelSimuCtrl(wx.Panel):
-    """ Simulation contorl panel"""
+    """ The panel to set different kind the attack situaltion."""
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
@@ -581,14 +612,13 @@ class CameraView(wx.Panel):
 #-----------------------------------------------------------------------------
 class PanelAttackSet(wx.Panel):
     def __init__(self, parent, idx, size=(140, 150)):
-        """ Set the attack situaltion."""
+        """ The panel to set different kind the attack situaltion."""
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
         self.idx = idx 
         self.hackState = ""
         self.origalV = self.changedV = 0
         hsizer = self.buidUISizer()
-
         self.SetSizer(hsizer)
 
 #-----------------------------------------------------------------------------

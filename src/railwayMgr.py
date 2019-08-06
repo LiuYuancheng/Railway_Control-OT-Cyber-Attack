@@ -277,10 +277,10 @@ class MapMgr(object):
                 if self.rwAsensorId == 10:
                     self.trainA.setDockCount(5)
                     gv.iMapMgr.setSignalPwr('StationA signal', 1)
-                elif self.rwAsensorId == 6:
+                elif self.rwAsensorId == 6 and not gv.iSensorAttack:
                     self.gateLockA = True
                     self.changeGateState(False)
-                elif self.rwAsensorId == 8:
+                elif self.rwAsensorId == 8 and not gv.iSensorAttack:
                     self.gateLockA = False
                     if not (self.gateLockA or self.gateLockB):
                         self.changeGateState(True)
@@ -293,10 +293,10 @@ class MapMgr(object):
                 if self.rwAsensorId == 23:
                     self.trainA.setDockCount(5)
                     gv.iMapMgr.setSignalPwr('StationB signal', 1)
-                elif self.rwAsensorId == 19:
+                elif self.rwAsensorId == 19 and not gv.iSensorAttack:
                     self.gateLockA = True
                     self.changeGateState(False)
-                elif self.rwAsensorId == 21:
+                elif self.rwAsensorId == 21 and not gv.iSensorAttack:
                     self.gateLockA = False
                     if not (self.gateLockA or self.gateLockB):
                         self.changeGateState(True)
@@ -321,10 +321,10 @@ class MapMgr(object):
                 if self.rwBsensorId == 10:
                     self.trainB.setDockCount(5)
                     gv.iMapMgr.setSignalPwr('StationA signal', 1)
-                elif self.rwBsensorId == 6:
+                elif self.rwBsensorId == 6 and not gv.iSensorAttack:
                     self.gateLockB = True
                     self.changeGateState(False)
-                elif self.rwBsensorId == 8:
+                elif self.rwBsensorId == 8 and not gv.iSensorAttack:
                     self.gateLockB = False
                     if not (self.gateLockA or self.gateLockB):
                         self.changeGateState(True)
@@ -337,10 +337,10 @@ class MapMgr(object):
                 if self.rwBsensorId == 23:
                     self.trainB.setDockCount(5)
                     gv.iMapMgr.setSignalPwr('StationB signal', 1)
-                elif self.rwBsensorId == 19:
+                elif self.rwBsensorId == 19 and not gv.iSensorAttack:
                     self.gateLockB = True
                     self.changeGateState(False)
-                elif self.rwBsensorId == 21:
+                elif self.rwBsensorId == 21 and not gv.iSensorAttack:
                     self.gateLockB = False
                     if not (self.gateLockA or self.gateLockB):
                         self.changeGateState(True)

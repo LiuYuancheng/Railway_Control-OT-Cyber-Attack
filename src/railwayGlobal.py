@@ -126,7 +126,7 @@ iRailWay = None
 iSensorCount = 0    # number of sensors. 
 iTrainAPanel = None # Train A control panel. 
 iTrainBPanel = None # Train B control panel.
-
+iSensorAttack = False
 
 
 
