@@ -8,7 +8,7 @@
 # Author:      Yuancheng Liu
 #
 # Created:     2019/07/29
-# Copyright:   YC
+# Copyright:   YC @ Singtel Cyber Security Research & Development Laboratory
 # License:     YC
 #-----------------------------------------------------------------------------
 import wx
@@ -18,16 +18,15 @@ import railwayAgent as agent
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class MapMgr(object):
-    """ Map Manager to init an calculate differet element in the map.
-    """
+    """ Map Manager to init/control differet elements in the map."""
     def __init__(self, parent):
-        """ Init all the element on the map. All the parameters are public to other 
-            module.
+        """ Init all the element on the map. All the parameters are public to 
+            other module.
         """ 
         self.signalDict = {}    # name follow the <PanelSysCtrl.powerLabel>
         self.gateAct = False    # flag to identify whether the gate is moving.
         
-        # Add the inside railway and the train (A).
+        # Add the inside railway to the train (A).
         self.trackA = [(300, 50), (140, 50),
                        (100, 90), (100, 150), (100, 210), (100, 330),
                        (140, 370), (300, 370), (460, 370),
@@ -40,7 +39,7 @@ class MapMgr(object):
         headPosA = [320, 50]
         self.trainA = agent.AgentTrain(self, 0, headPosA, self.trackA)
 
-        # Add the outside railway and the train (B).
+        # Add the outside railway to the train (B).
         self.trackB = [(300, 30), (140, 30),
                        (80, 90), (80, 150), (80, 210), (80, 330),
                        (140, 390), (300, 390), (460, 390),
@@ -58,7 +57,7 @@ class MapMgr(object):
         self.forkA = agent.AgentFork(self, -1, forkAPts, True)
         self.signalDict['S301 - Track A Fork Power'] = self.createSignals(
             [(120, 150)], gv.FSPNG_PATH, gv.FAPNG_PATH, self.forkA.getState(), True)
-        
+
         # Add the outside railway fork (B).
         forkBPts = [(80, 150), (80, 210), (100, 210)]
         self.forkB = agent.AgentFork(self, -1, forkBPts, True)
@@ -89,7 +88,7 @@ class MapMgr(object):
         self.signalDict['S200 - Station Lights'] = self.createSignals(
             [(485, 210)], gv.STONPNG_PATH, gv.STOFPNG_PATH, True, False)
 
-        # Define the environment items.
+        # Define the environment items as signals.
         # Power Plant
         self.signalDict['S100 - Powerplant Lights'] = self.createSignals(
             [(210, 130)], gv.POPNG_PATH, gv.PFPNG_PATH, True, False)
@@ -110,23 +109,23 @@ class MapMgr(object):
             [(445, 80)], gv.CAMPNG_PATH, gv.CAMPNG_PATH, True, False)
 
         # define all the sensors.
-        self.sensorList = []
+        self.sensorList = [] # list to store all the sensors.
         self.rwAsensorId = self.rwBsensorId = -1 # triggled sensor by train A and B.
         self.addSensors()
         self.hookPCLCtrl()
 
-#-----------------------------------------------------------------------------
+#--MapMgr----------------------------------------------------------------------
     def addSensors(self):
-        """ added the train detection sensors in the sensor List """
+        """ added the train detection sensors in the sensor List. """
         # Add the rail way sensors.
         for pos in self.trackA + self.trackB:
             sensor = agent.AgentSensor(self, -1, pos)
             gv.iAgentMgr.hookSensor(sensor.sensorID) # sensor group ID.
             self.sensorList.append(sensor)
 
-#-----------------------------------------------------------------------------
+#--MapMgr----------------------------------------------------------------------
     def changeGateState(self, openFlag):
-        """ Change the gate states"""
+        """ Change the gate states based on the action flag."""
         # track A gate:
         self.gate1.moveDoor(openFg=openFlag)
         gate1Psignal = self.signalDict['Gate1Ppl'][0]
@@ -142,7 +141,7 @@ class MapMgr(object):
         # Update the current gate action states.
         self.gateAct = True
 
-#-----------------------------------------------------------------------------
+#--MapMgr----------------------------------------------------------------------
     def checkSensor(self):
         """ Check which sensor has been triggered by the train pass."""
         sensorIDfb = [-1, -1]  # Triggered sensor ID:[TrainA, TrainB]
@@ -157,7 +156,7 @@ class MapMgr(object):
                             break
         return sensorIDfb  # return [-1, -1] if there is no sensor detected.
 
-#-----------------------------------------------------------------------------
+#--MapMgr----------------------------------------------------------------------
     def createSignals(self, posList, onImgPath, offImgPath, state, flash):
         """ Create a signal object list. Return: list of agentSignal objs. """
         signalObjList = []
@@ -171,47 +170,24 @@ class MapMgr(object):
         gv.iCtrlCount += 1 # update the controled signal's count which is used for set iD.
         return signalObjList
 
-#-----------------------------------------------------------------------------
+#--MapMgr----------------------------------------------------------------------
     def hookPCLCtrl(self):
         """ Hook the output signal to the PLC control."""
-        keyV = 'S100 - Powerplant Lights'
-        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 100)
-        self.setSignalPwr(keyV, 1)
-
-        keyV = 'S101 - Airport Lights'
-        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 101)
-        self.setSignalPwr(keyV, 1)
-
-        keyV = 'S102 - Industrial Lightbox'
-        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 102)
-        self.setSignalPwr(keyV, 1)
-
-        keyV = 'S200 - Station Lights'
-        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 200)
-        self.setSignalPwr(keyV, 1)
-
-        #gv.iAgentMgr.hookCtrl(self.signalDict['S201 - Auto Level Crossing'][0].getID(),201)
-        keyV = 'S202 - Residential Lightbox'
-        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 202)
-        self.setSignalPwr(keyV, 1)
-
-        #gv.iAgentMgr.hookCtrl(self.signalDict['S300 - Turnout Toggle'][0].getID(),     300)
-        keyV = 'S301 - Track A Fork Power'
-        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 301)
-        self.setSignalPwr(keyV, 1)
-
-        keyV = 'S302 - Track B Fork Power'
-        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 302)
-        self.setSignalPwr(keyV, 1)
-
-        keyV = 'S303 - City LightBox'
-        gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), 303)
-        self.setSignalPwr(keyV, 1)
+        KeySet = (('S100 - Powerplant Lights',  100),
+                ('S101 - Airport Lights',       101),
+                ('S102 - Industrial Lightbox',  102),
+                ('S200 - Station Lights',       200), 
+                ('S202 - Residential Lightbox', 202), 
+                ('S301 - Track A Fork Power',   301),
+                ('S302 - Track B Fork Power',   302),
+                ('S303 - City LightBox',        303))
+        for (keyV, keyId) in KeySet:
+            gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), keyId)
+            self.setSignalPwr(keyV, 1)
 
 #-----------------------------------------------------------------------------
     def periodic(self , now):
-        """ Periodicly call back function.
-        """
+        """ Periodicly call back function."""
         # update the trains position.
         self.trainA.updateTrainPos()
         self.trainB.updateTrainPos()

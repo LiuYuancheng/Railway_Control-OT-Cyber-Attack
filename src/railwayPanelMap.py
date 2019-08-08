@@ -29,8 +29,6 @@ class PanelMap(wx.Panel):
         self.bitmap = wx.Bitmap(gv.BGPNG_PATH)      # background bitmap
         self.wkbitmap = wx.Bitmap(gv.WKJPG_PATH)    # pedestrians wald bitmap.
         self.hitbitmap = wx.Bitmap(gv.HTPNG_PATH)
-        self.passbitmap = wx.Bitmap(gv.LPJPG_PATH)
-        self.stopbitmap = wx.Bitmap(gv.LSJPG_PATH)
         self.clashbitmap = wx.Bitmap(gv.CLPNG_PATH)
 
         self.mapMgr = manager.MapMgr(self)
@@ -38,10 +36,7 @@ class PanelMap(wx.Panel):
         #self.leftTimge = wx.Image(png)
         self.toggle = False     # Display flash toggle flag.
         # gate contorl parameters.(The 0-total close, 15-total open)
-    
-        #self.trainA = agent.AgentTrain(self, -1, headPosA, self.trackA)
-        gv.iRailWay = self.mapMgr.trainA
-
+  
         # set the sensor position.
         # Id of the sensor which detected the train passing.
         self.dockCount = 0       # flag to identify train in the station. 
@@ -380,35 +375,6 @@ class PanelMap(wx.Panel):
         dc.DrawRectangle(525, 160, 12, 100)
         
         return
-
-        dc.SetPen(wx.Pen('BLACK', width=1, style=wx.PENSTYLE_DOT))
-        dc.SetBrush(wx.Brush(wx.Colour('Black')))
-        if self.dockCount == 0:    
-            dc.DrawRectangle(568, 110, 30, 30)
-            dc.DrawRectangle(568, 180, 30, 30)
-            if not self.toggle:
-                dc.DrawBitmap(self.stopbitmap, 564, 145)
-            else:
-                dc.SetBrush(wx.Brush(wx.Colour('LIGHT GRAY')))
-                dc.DrawRectangle(564, 145, 30, 30)
-                dc.SetFont(wx.Font(9, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-                dc.DrawText( str(self.timeCount//2).zfill(2)+"S", 568, 150)
-        else:
-            y = 110 if self.toggle else 180
-            dc.DrawRectangle(568, y, 30, 30)
-            dc.SetPen(wx.Pen('#FFC000', width=1, style=wx.PENSTYLE_SOLID))
-            dc.SetBrush(wx.Brush(wx.Colour('#FFC000')))
-            dc.DrawRectangle(536, 116, 29, 90)
-            points = [(530, 114), (565, 114), (565, 208), (530, 208), (530, 114)]
-            dc.SetPen(wx.Pen('Green', width=2, style=wx.PENSTYLE_SOLID))
-            for i in range(len(points)-1):
-                dc.DrawLine(points[i], points[i+1])
-            dc.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD))
-            dc.DrawText( str(self.dockCount//2).zfill(2)+"S", 535, 130)
-            img = self.passbitmap if self.toggle else self.wkbitmap
-            dc.DrawBitmap(img, 564, 145)
-            self.timeCount = 166
-
 
 
     def checkClash(self):

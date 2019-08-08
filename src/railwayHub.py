@@ -9,20 +9,21 @@
 # Author:      Yuancheng Liu
 #
 # Created:     2019/07/01
-# Copyright:   YC
+# Copyright:   YC @ Singtel Cyber Security Research & Development Laboratory
 # License:     YC
 #-----------------------------------------------------------------------------
 
 import wx # use wx to build the UI.
 import time
 from datetime import datetime
+
+import railwayGlobal as gv 
 import railwayAgent as agent
 import railwayMgr as manager
-import railwayGlobal as gv 
 import railwayPanel as rwp
 import railwayPanelMap as rwpm 
 
-PERIODIC = 300
+PERIODIC = 300 # periodicly call by 300ms
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -34,14 +35,25 @@ class railWayHubFrame(wx.Frame):
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetIcon(wx.Icon(gv.TTICO_PATH))
         gv.iMainFrame = self
-        gv.iAgentMgr =  manager.managerPLC(self)
-        
+        gv.iAgentMgr = manager.managerPLC(self)
+        # build the user interface.
+        self.SetSizer(self.buidUISizer())
+        # Set the periodic feedback:
+        self.lastPeriodicTime = time.time()
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.periodic)
+        self.timer.Start(PERIODIC)  # every 300 ms
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.Refresh(False)
+
+#--railWayHubFrame-------------------------------------------------------------
+    def buidUISizer(self):
+        """ Build the UI and the return the wx.sizer. """
         # Init all the UI components: 
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
         # Row idx = 0 : Set all the control and information display panel in a wx NoteBook.
         nb = wx.Notebook(self)
-        
         # Tab 0: System power control + train control.
         sysBgPanel = wx.Panel(nb)
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
@@ -55,9 +67,9 @@ class railWayHubFrame(wx.Frame):
         gv.iTrainBPanel = self.trainBCtPanel = rwp.PanelTrainCtrl(sysBgPanel, 'TrainB')
         hbox0.Add(self.trainBCtPanel, flag=flagsR, border=2)
         hbox0.AddSpacer(10)
-        sysBgPanel.SetSizer(hbox0)
+        #sysBgPanel.SetSizer(hbox0)
+        sysBgPanel.SetSizerAndFit(hbox0)
         nb.AddPage(sysBgPanel, "System ")
-
         # Tab 1: PLC contorl panel.
         plcBgPanel = wx.Panel(nb)
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
@@ -67,73 +79,58 @@ class railWayHubFrame(wx.Frame):
             hbox1.Add(plcPanel, flag=flagsR, border=2)
             gv.iPlcPanelList.append(plcPanel)
             hbox1.AddSpacer(10)
-
         plcBgPanel.SetSizer(hbox1)
         nb.AddPage(plcBgPanel, "PLC Control")
-        
         # Tab 2: PLC detail grid display panel.
-        gv.iDataPanel = dataPanel = rwp.PanelInfoGrid(nb)
-        nb.AddPage(dataPanel, "Data Display")
-
+        gv.iDataPanel = self.dataPanel = rwp.PanelInfoGrid(nb)
+        nb.AddPage(self.dataPanel, "Data Display")
         # Tab 3: Program setting and attack simulation panel.
         setBgPanel = wx.Panel(nb)
         hbox3 = wx.BoxSizer(wx.HORIZONTAL)
         hbox3.AddSpacer(10)
-
         self.attackPanel = rwp.PanelAttackSimu(setBgPanel)
         hbox3.Add(self.attackPanel, flag=flagsR, border=2)
-
-        gv.iAttackCtrlPanel = self.simuPanel = rwp.PanelPointAtt(setBgPanel)
-        hbox3.Add(self.simuPanel, flag=flagsR, border=2)
-        hbox3.AddSpacer(10)
+        #gv.iAttackCtrlPanel = self.simuPanel = rwp.PanelPointAtt(setBgPanel)
+        #hbox3.Add(self.simuPanel, flag=flagsR, border=2)
+        #hbox3.AddSpacer(10)
         setBgPanel.SetSizer(hbox3)
         nb.AddPage(setBgPanel, "Setting")
-
-        # Tab 4: Help message tag.
-
         vsizer.Add(nb, flag=flagsR, border=2)
-        
-        # Row idx = 1: set the train map display panel. 
+
+        # Row idx = 1: set the train map display panel.
         gv.iMapPanel = self.mapPanel = rwpm.PanelMap(self)
         vsizer.Add(self.mapPanel, flag=flagsR, border=2)
-        
-        self.SetSizer(vsizer)
-        # Set the periodic feedback: 
-        self.lastPeriodicTime = time.time() 
-        self.timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.periodic)
-        self.timer.Start(PERIODIC)  # every 500 ms
+        return vsizer
 
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self.Refresh(False)
-
-#-----------------------------------------------------------------------------
+#--railWayHubFrame-------------------------------------------------------------
     def initPLC(self, idx, plcBgPanel):
-        """ Init the PLC agent to connect to the hardware and the PLC panel to display 
-            the PLC state.
+        """ Init the PLC agent to connect to the hardware and the PLC panel to 
+            display/control the PLC state.
         """
         (name, ip, port, _, _) = gv.PLC_CFG['PLC'+str(idx)]
         plcAgent = agent.AgentPLC(self, idx, name, ip, port)
         plcPanel = rwp.PanelPLC(plcBgPanel, 'PLC'+str(idx)+name, ip+':'+port)
-        plcPanel.setConnection(0)
+        plcPanel.setConnection(1)
         gv.iAgentMgr.appendPLC(plcAgent, plcPanel)
         return plcPanel
 
-    #-----------------------------------------------------------------------------
+#--railWayHubFrame-------------------------------------------------------------
     def periodic(self, event):
         """ Call back every periodic time."""
         # Set the title of the frame.
-        self.SetTitle( ' '.join((gv.APP_NAME, datetime.now().strftime("[ %m/%d/%Y, %H:%M:%S ]"))))
-        if gv.iEmgStop: return
+        self.SetTitle(
+            ' '.join((gv.APP_NAME, datetime.now().strftime("[ %m/%d/%Y, %H:%M:%S ]"))))
+        if gv.iEmgStop:
+            return
         timeStr = time.time()
         self.mapPanel.periodic(timeStr)
         self.attackPanel.periodic(timeStr)
 
-    #-----------------------------------------------------------------------------
+#--railWayHubFrame-------------------------------------------------------------
     def OnClose(self, event):
-        #self.ser.close()
         self.Destroy()
 
+#-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class MyApp(wx.App):
     def OnInit(self):
