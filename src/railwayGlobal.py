@@ -7,7 +7,7 @@
 # Author:      Yuancheng Liu
 #
 # Created:     2019/05/17
-# Copyright:   YC
+# Copyright:   YC @ Singtel Cyber Security Research & Development Laboratory
 # License:     YC
 #-----------------------------------------------------------------------------
 import os
@@ -18,7 +18,6 @@ print("Current working directory is : %s" %dirpath)
 APP_NAME = 'RailWay PLC Control Hub V1.0'
 
 #------<CONSTANTS>-------------------------------------------------------------
-
 # Agent type 
 RAYWAY_TYPE = 'RW'
 SENSOR_TYPE = 'SS'
@@ -27,32 +26,34 @@ ATTPT_TYPE  = 'AP'
 SIGNAL_TYPE = 'SL'
 FORK_TYPE   = 'FK'
 
-# Title icon path.
+# PLC basic config: (type, IP address, port, input_#, output_#)
+PLC_CFG = {
+    'PLC0'  : ('[m221]',    "192.168.0.101", '4343', 8, 8), 
+    'PLC1'  : ('[m221]',    "192.168.0.102", '4343', 8, 8), 
+    'PLC2'  : ('[S7-1200]', "192.168.0.103", '4343', 8, 8)
+}
+
+#------<IMAGES PATH>-------------------------------------------------------------
+# Title icon path:
 TTICO_PATH = "".join([dirpath, "\\img\\title.ico"])
 
-# Map background path.
-BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg1.png"])
-RAJPG_PATH = "".join([dirpath, "\\img\\ransomwareAtt.jpg"])
-TAGIF_PATH = "".join([dirpath, "\\img\\trojanAtt.gif"])
+# Panel background path:
+BGPNG_PATH = "".join([dirpath, "\\img\\Trainbg1.png"])      # map panel.
+RAJPG_PATH = "".join([dirpath, "\\img\\ransomwareAtt.jpg"]) # ransomeare attack panel.
+TAGIF_PATH = "".join([dirpath, "\\img\\trojanAtt.gif"])     # tronjan attack panel.
 
-WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])
-HTPNG_PATH = "".join([dirpath, "\\img\\hitPPl.png"])
-LTPNG_PATH = "".join([dirpath, "\\img\\left.png"])
+# Pedestrian cross signal at the gate: 
+WKJPG_PATH = "".join([dirpath, "\\img\\walk.jpg"])          # Pedestrian pass.
+HTPNG_PATH = "".join([dirpath, "\\img\\hitPPl.png"])        # Pedestrian accident.
+PPPNG_PATH = "".join([dirpath, "\\img\\passS18.png"])       # signal for people pass 
+PSPNG_PATH = "".join([dirpath, "\\img\\stopS18.png"])       # signal for people stop 
+CPPNG_PATH = "".join([dirpath, "\\img\\gateCarP18.png"])    # signal for cars pass    
+CSPNG_PATH = "".join([dirpath, "\\img\\gateCarS18.png"])    # signal for cars stop.
 
 # Train setting panel path:
 LDSET_PATH = "".join([dirpath, "\\img\\loadSet32.png"])     # load setting.    
 EMGST_PATH = "".join([dirpath, "\\img\\emgStop32.png"])     # emergency stop.
 RECOV_PATH = "".join([dirpath, "\\img\\reset32.png"])       # train station recover.
-
-
-LPJPG_PATH = "".join([dirpath, "\\img\\Ppass.jpg"])   # light for people pass 
-LSJPG_PATH = "".join([dirpath, "\\img\\Pstop.jpg"])
-
-# Cross signal: 
-PPPNG_PATH = "".join([dirpath, "\\img\\passS18.png"])       # signal for people pass 
-PSPNG_PATH = "".join([dirpath, "\\img\\stopS18.png"])       # signal for people stop 
-CPPNG_PATH = "".join([dirpath, "\\img\\gateCarP18.png"])    # signal for cars pass    
-CSPNG_PATH = "".join([dirpath, "\\img\\gateCarS18.png"])    # signal for cars stop.
 
 # Railway fork signal:
 FSPNG_PATH = "".join([dirpath, "\\img\\forkOnS18.png"])     # fork go straight signal. 
@@ -87,25 +88,12 @@ APFPNG_PATH = "".join([dirpath, "\\img\\AirportOff.png"])   # AirPort area light
 STONPNG_PATH = "".join([dirpath, "\\img\\stationOn.png"])   # station light on.
 STOFPNG_PATH = "".join([dirpath, "\\img\\stationOff.png"])  # station light off.
 
-# Camera:
+# Camera signal and the camera panel view:
 CAMPNG_PATH = "".join([dirpath, "\\img\\cameraUp.png"])   # station light on.
 TPSGIP_PATH = "".join([dirpath, "\\img\\trailPass.gif"])   # station light on.
 
-
-
-
-
-
-
-
+# Train clash image:
 CLPNG_PATH = "".join([dirpath, "\\img\\clash.png"]) 
-
-# PLC basic config: (type, IP address, port, input_#, output_#)
-PLC_CFG = {
-    'PLC0'  : ('[m221]',    "192.168.0.101", '4343', 8, 8), 
-    'PLC1'  : ('[m221]',    "192.168.0.102", '4343', 8, 8), 
-    'PLC2'  : ('[S7-1200]', "192.168.0.103", '4343', 8, 8)
-}
 
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
 # Set the global reference here.
@@ -113,20 +101,19 @@ iAgentMgr = None
 iAttackCtrlPanel = None
 iCtrlCount = 0      # device PLC control count.
 iDataPanel = None   # display panel
-iDetailPanel = None
-
+iDetailPanel = None # detail panel to show the component's information.
 iEmgStop = False    # emergency stop
-iMainFrame = None   # Main frame. 
-iMapMgr = None
+iMainFrame = None   # Main frame 
+iMapMgr = None      # map manager
 iMapPanel = None    # History chart panel.
+iPlcSimulation = True   # Flag to identify whether connect to real PLC 
 iPlcPanelList = []  # Plc panel list. 
-iPlcMgr = None
-iPowCtrlPanel = None
-iRailWay = None
+iPlcMgr = None      # Plc manager 
+iPowCtrlPanel = None  # Power control panel.   
 iSensorCount = 0    # number of sensors. 
 iTrainAPanel = None # Train A control panel. 
 iTrainBPanel = None # Train B control panel.
-iSensorAttack = False
+iSensorAttack = False # Flag of sensor attack situation active.
 
 
 
