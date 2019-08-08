@@ -86,7 +86,7 @@ class PanelMap(wx.Panel):
                 self.infoWindow = wx.MiniFrame(gv.iMainFrame, -1,
                     'Monitoring camera view', pos=(x+10, y+10), size=(300, 230),
                     style=wx.DEFAULT_FRAME_STYLE)
-                gv.iDetailPanel = rwp.CameraView(self.infoWindow, 0)
+                gv.iDetailPanel = rwp.PanelCameraView(self.infoWindow, 0)
                 #gv.iDetailPanel.updateState(idx=idx, state='Normal', origalV=0, changedV=0)
                 #gv.iAttackCtrlPanel.loatAttPtState(idx)
                 self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)
@@ -121,7 +121,7 @@ class PanelMap(wx.Panel):
             self.infoWindow = wx.MiniFrame(gv.iMainFrame, -1,
                 'Attack Point', pos=(x+10, y+10), size=(150, 150),
                 style=wx.DEFAULT_FRAME_STYLE)
-            gv.iDetailPanel = rwp.PanelAttackSet(self.infoWindow, idx)
+            gv.iDetailPanel = rwp.PanelDetailInfo(self.infoWindow, idx)
             gv.iDetailPanel.updateState(idx=idx, state='Normal', origalV=0, changedV=0)
             gv.iAttackCtrlPanel.loatAttPtState(idx)
             self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)

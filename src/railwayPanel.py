@@ -8,7 +8,7 @@
 # Author:      Yuancheng Liu
 #
 # Created:     2019/07/01
-# Copyright:   YC
+# Copyright:   YC @ Singtel Cyber Security Research & Development Laboratory
 # License:     YC
 #-----------------------------------------------------------------------------
 import wx
@@ -28,6 +28,123 @@ class PanelPlaceHolder(wx.Panel):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         wx.StaticText(self, -1, "Place Holder:", (20, 20))
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class PanelAttackSimu(wx.Panel):
+    """ Load different kinds off attack simulation stuation in the system."""
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+        self.SetBackgroundColour(wx.Colour(200, 200, 200))
+        self.infoWindow = None  # popup information window.
+        self.attCount = -1      # count number to ctrl the time delay to start attack.        
+        self.SetSizer(self.buidUISizer())
+
+#--PanelAttackSimu-------------------------------------------------------------
+    def buidUISizer(self):
+        """ Build the UI and the return the wx.sizer. """
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        vsizer = wx.BoxSizer(wx.VERTICAL)
+        vsizer.Add(wx.StaticText(
+            self, label="Active Attack Simulation:"), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(210, -1),
+                                     style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        # Set the attack selection part.
+        self.attRb1 = wx.RadioButton(self, -1, 'Ransomware in the HMI.', style=wx.RB_GROUP)
+        vsizer.Add(self.attRb1, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        self.attRb2 = wx.RadioButton(self, -1, 'Man in the middle from IOT device.')
+        vsizer.Add(self.attRb2, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        self.attRb3 = wx.RadioButton(self, -1, 'Trojan in the technician PC.')
+        vsizer.Add(self.attRb3, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        self.attRb4 = wx.RadioButton(self, -1, 'Black energy attack.')
+        vsizer.Add(self.attRb4, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        # Set the attack state.
+        self.idLb = wx.StaticText(self, label="Normal".center(20))
+        self.idLb.SetBackgroundColour(wx.Colour('GREEN'))
+        vsizer.Add(self.idLb, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        self.processDisplay = wx.Gauge(
+            self, range=10, size=(150, 15), style=wx.GA_HORIZONTAL)
+        vsizer.Add(self.processDisplay, flag=flagsR, border=2)
+        vsizer.AddSpacer(10)
+        # Attack simulation start/clear.
+        hsizer0 = wx.BoxSizer(wx.HORIZONTAL)
+        self.simuSBt = wx.Button(self, label='Start Attack', style=wx.BU_LEFT)
+        self.simuSBt.Bind(wx.EVT_BUTTON, self.setAttck)
+        hsizer0.Add(self.simuSBt, flag=flagsR, border=2)
+        hsizer0.AddSpacer(5)
+        self.simuCBt = wx.Button(self, label='Clear Attack', style=wx.BU_LEFT)
+        self.simuCBt.Bind(wx.EVT_BUTTON, self.setAttck)
+        hsizer0.Add(self.simuCBt, flag=flagsR, border=2)
+        vsizer.Add(hsizer0, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        return vsizer
+
+#--PanelAttackSimu-------------------------------------------------------------
+    def periodic(self, now):
+        """ periodic call back to show the current attack state. """
+        if self.attCount == 1:
+            self.idLb.SetLabel("Prepare to start attack")
+            self.idLb.SetBackgroundColour(wx.Colour('YELLOW'))
+            self.Refresh(False)
+            self.attCount += 1
+        elif 1 < self.attCount < 10:
+            self.processDisplay.SetValue(self.attCount)
+            self.attCount += 1
+        elif self.attCount == 10:
+            self.idLb.SetLabel("System under attack")
+            self.idLb.SetBackgroundColour(wx.Colour('RED'))
+            self.Refresh(False)
+            if self.attRb1.GetValue():
+                self.infoWindow = RansomwareFrame(gv.iMainFrame)
+            elif self.attRb2.GetValue():
+                gv.iSensorAttack = True
+            elif self.attRb3.GetValue():
+                self.infoWindow = TrojanAttFrame(gv.iMainFrame)
+            self.attCount += 1
+        elif self.attCount == 0:
+            # Clear all the attack state.
+            self.idLb.SetLabel("Normal".center(20))
+            self.idLb.SetBackgroundColour(wx.Colour('GREEN'))
+            self.Refresh(False)
+            self.processDisplay.SetValue(self.attCount)
+            self.attCount = -1
+            gv.iSensorAttack = False
+
+#--PanelAttackSimu-------------------------------------------------------------
+    def setAttck(self, event):
+        """ Start or clear the attack.
+        """
+        obj = event.GetEventObject()
+        self.attCount = 1 if 'Start' in obj.GetLabel() else 0
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class PanelCameraView(wx.Panel):
+    """ Panel play a gif image to simulation the camera view when train pass."""
+    def __init__(self, parent, idx, size=(280, 200), style=wx.TRANSPARENT_WINDOW):
+        """ Panel to simulate the camera view."""
+        wx.Panel.__init__(self, parent)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        self.animCtrl = AnimationCtrl(self, -1, Animation(gv.TPSGIP_PATH))
+        self.animCtrl.Stop() # stop the gif play first.
+        sizer.Add(self.animCtrl)
+        self.SetSizerAndFit(sizer)
+        self.Show()
+
+#--PanelCameraView-------------------------------------------------------------
+    def setPlay(self, plagFlag):
+        """ Set the gif play or stop"""
+        if plagFlag:
+            self.animCtrl.Play()
+        else:
+            self.animCtrl.Stop()
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -109,56 +226,6 @@ class PanelInfoGrid(wx.Panel):
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
-class PanelSysCtrl(wx.Panel):
-    """ The whole system situation control panel."""
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
-        self.SetBackgroundColour(wx.Colour(200, 200, 200))
-        self.powerLabel = (
-            "S100 - Powerplant Lights", 
-            "S101 - Airport Lights",
-            "S102 - Industrial Lightbox",
-            "S200 - Station Lights",
-            "S201 - Auto Level Crossing",
-            "S202 - Residential Lightbox",
-            "S300 - Turnout Toggle",
-            "S301 - Track A Fork Power",
-            "S302 - Track B Fork Power",
-            "S303 - City LightBox")
-        self.powerCBList = [] # Output control checkbox.
-        self.SetSizer(self.buidUISizer())
-
-#-----------------------------------------------------------------------------
-    def buidUISizer(self):
-        """ Build the UI and the return the wx.sizer. """
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
-        vsizer = wx.BoxSizer(wx.VERTICAL)
-        vsizer.Add(wx.StaticText(self, label="System Power Control"),
-                   flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
-                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
-        vsizer.AddSpacer(5)                       
-        for labelStr in self.powerLabel:
-            vsizer.AddSpacer(5)
-            pwtBt = wx.CheckBox(self, -1, labelStr)
-            pwtBt.Bind(wx.EVT_CHECKBOX, self.onChecked)
-            pwtBt.SetValue(True)
-            vsizer.Add(pwtBt, flag=flagsR, border=2)
-            self.powerCBList.append(pwtBt)
-        vsizer.AddSpacer(10)
-        return vsizer
-
-#-----------------------------------------------------------------------------
-    def onChecked(self, event):
-        """ Passed the user clicked check box label and value to map manager.
-        """
-        cb = event.GetEventObject()
-        # Set the signal state. 
-        gv.iMapMgr.setSignalPwr(cb.GetLabel(), cb.GetValue())
-
-#-----------------------------------------------------------------------------
-#-----------------------------------------------------------------------------
 class PanelPLC(wx.Panel):
     """ PLC panel UI to show PLC input feedback state and the relay connected 
         to the related output pin.
@@ -179,7 +246,7 @@ class PanelPLC(wx.Panel):
         self.SetSizer(self.buidUISizer())
         #self.Layout() # must call the layout if the panel size is set to fix.
 
-#-----------------------------------------------------------------------------
+#--PanelPLC--------------------------------------------------------------------
     def buidUISizer(self):
         """ Build the UI and the return the wx.sizer. """
         mSizer = wx.BoxSizer(wx.VERTICAL) # main sizer
@@ -227,7 +294,7 @@ class PanelPLC(wx.Panel):
             mSizer.AddSpacer(3)
         return mSizer
 
-#-----------------------------------------------------------------------------
+#--PanelPLC--------------------------------------------------------------------
     def relayOn(self, event): 
         """ Turn on the related ralay based on the user's action and update the 
             button's display situation.
@@ -246,7 +313,7 @@ class PanelPLC(wx.Panel):
                 gv.iMapMgr.setSignalPwr(element, self.gpioOuList[outIdx])
                 break
 
-#-----------------------------------------------------------------------------
+#--PanelPLC--------------------------------------------------------------------
     def setConnection(self, state):
         """ Update the connection state on the UI. 0 - disconnect 1- connected
         """
@@ -255,7 +322,7 @@ class PanelPLC(wx.Panel):
             wx.Colour('GREEN') if state else wx.Colour(120, 120, 120))
         self.Refresh(False)
 
-#-----------------------------------------------------------------------------
+#--PanelPLC--------------------------------------------------------------------
     def updateInput(self, idx, status): 
         """ Update the input state for each PLC input indicator."""
         if idx >= 8 or not status in [0,1]: 
@@ -268,7 +335,7 @@ class PanelPLC(wx.Panel):
                 wx.Colour('GREEN') if status else wx.Colour(120, 120, 120))
             self.Refresh(False) # needed after the status update.
 
-#-----------------------------------------------------------------------------
+#--PanelPLC--------------------------------------------------------------------
     def updateOutput(self, idx, status):
         """ Update the output state for each PLC output button."""
         if idx >= 8 or not status in [0,1]: 
@@ -281,6 +348,148 @@ class PanelPLC(wx.Panel):
             self.gpioOuLbList[idx].SetLabel(lbtext)
             self.gpioOuLbList[idx].SetBackgroundColour(color)
             self.Refresh(False) # needed after the status update.
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class PanelPointAtt(wx.Panel):
+    """ The panel to set different cyber attack on the components in the system.
+        Such as the sensor, signal and connection wires. 
+    """
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+        self.SetBackgroundColour(wx.Colour(200, 200, 200))
+        self.SetSizer(self.buidUISizer())
+
+#--PanelPointAtt---------------------------------------------------------------
+    def buidUISizer(self):
+        """ Build the UI and the return the wx.sizer. """
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        vsizer = wx.BoxSizer(wx.VERTICAL)
+        vsizer.Add(wx.StaticText(
+            self, label="Active component attack:"), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(165, -1),
+                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        self.idLb = wx.StaticText(self, label="Attack point ID: [001] ")
+        vsizer.Add(self.idLb, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        vsizer.Add(wx.StaticText(self, label="Active attack type:"),
+                   flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        self.simuCb1 = wx.CheckBox(self, -1, '1. Ransomware')
+        vsizer.Add(self.simuCb1, flag=flagsR, border=2)
+        #self.simuCb1.Disable()
+        vsizer.AddSpacer(5)
+        self.simuCb2 = wx.CheckBox(self, -1, '2. ManInMiddle')
+        vsizer.Add(self.simuCb2, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        self.simuCb3 = wx.CheckBox(self, -1, '3. TrojarAttack')
+        vsizer.Add(self.simuCb3, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        self.simuCb4 = wx.CheckBox(self, -1, '4. EternalBlue')
+        vsizer.Add(self.simuCb4, flag=flagsR, border=2)
+        #self.simuCb4.Disable()
+        vsizer.AddSpacer(5)
+        self.attackCtrl = wx.ComboBox(
+            self, -1, choices=['Overwrite input', 'Overwrite output'], style=wx.CB_READONLY)
+        self.attackCtrl.SetSelection(0)
+        vsizer.Add(self.attackCtrl, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        hsizer.Add(wx.StaticText(self, label="Overwrite data:"),
+                   flag=flagsR, border=2)
+        hsizer.AddSpacer(5)
+        self.tc1 = wx.TextCtrl(self, -1, "", size=(40, -1),
+                               style=wx.TE_PROCESS_ENTER)
+        self.tc1.SetValue("1")
+        hsizer.Add(self.tc1, flag=flagsR, border=2)
+        
+        vsizer.Add(hsizer, flag=flagsR, border=2)
+        vsizer.AddSpacer(10)
+        hsizer0 = wx.BoxSizer(wx.HORIZONTAL)
+        self.simuBt1 = wx.Button(self, label='Set Attack', style=wx.BU_LEFT, size=(60,25))
+        self.simuBt1.Bind(wx.EVT_BUTTON, self.setAttck)
+        hsizer0.Add(self.simuBt1, flag=flagsR, border=2)
+        hsizer0.AddSpacer(5)
+        self.simuBt2 = wx.Button(self, label='Clear', style=wx.BU_LEFT, size=(60,25))
+        self.simuBt2.Bind(wx.EVT_BUTTON, self.setAttck)
+        hsizer0.Add(self.simuBt2, flag=flagsR, border=2)
+        vsizer.Add(hsizer0, flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        return vsizer
+
+#--PanelPointAtt---------------------------------------------------------------
+    def loatAttPtState(self, id):
+        """ Load the attack point's ID. """
+        self.idLb.SetLabel("Attack point ID: [%s] " %str(id).zfill(3))
+
+#--PanelPointAtt---------------------------------------------------------------
+    def setAttck(self, event):
+        buttonLb = event.GetEventObject().GetLabel()
+        if buttonLb == 'Set Attack':
+            gv.iMapPanel.setHackedPt(0)
+            gv.iMapPanel.updateDisplay()
+            hackedV = self.tc1.GetValue()
+            if gv.iDetailPanel:
+                gv.iDetailPanel.updateState(
+                    idx=1, state='Man in mid', origalV=0, changedV=hackedV)
+        else:
+            gv.iMapPanel.setHackedPt(-2)
+            gv.iMapPanel.updateDisplay()
+            if gv.iDetailPanel:
+                gv.iDetailPanel.updateState(
+                    idx=1, state='Normal', origalV=0, changedV=0)
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class PanelSysCtrl(wx.Panel):
+    """ The whole system situation control panel."""
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+        self.SetBackgroundColour(wx.Colour(200, 200, 200))
+        self.powerLabel = (
+            "S100 - Powerplant Lights", 
+            "S101 - Airport Lights",
+            "S102 - Industrial Lightbox",
+            "S200 - Station Lights",
+            "S201 - Auto Level Crossing",
+            "S202 - Residential Lightbox",
+            "S300 - Turnout Toggle",
+            "S301 - Track A Fork Power",
+            "S302 - Track B Fork Power",
+            "S303 - City LightBox")
+        self.powerCBList = [] # Output control checkbox.
+        self.SetSizer(self.buidUISizer())
+
+#--PanelSysCtrl----------------------------------------------------------------
+    def buidUISizer(self):
+        """ Build the UI and the return the wx.sizer. """
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        vsizer = wx.BoxSizer(wx.VERTICAL)
+        vsizer.Add(wx.StaticText(self, label="System Power Control"),
+                   flag=flagsR, border=2)
+        vsizer.AddSpacer(5)
+        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(180, -1),
+                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        vsizer.AddSpacer(5)                       
+        for labelStr in self.powerLabel:
+            vsizer.AddSpacer(5)
+            pwtBt = wx.CheckBox(self, -1, labelStr)
+            pwtBt.Bind(wx.EVT_CHECKBOX, self.onChecked)
+            pwtBt.SetValue(True)
+            vsizer.Add(pwtBt, flag=flagsR, border=2)
+            self.powerCBList.append(pwtBt)
+        vsizer.AddSpacer(10)
+        return vsizer
+
+#--PanelSysCtrl----------------------------------------------------------------
+    def onChecked(self, event):
+        """ Passed the user clicked check box label and value to map manager.
+        """
+        cb = event.GetEventObject()
+        # Set the signal state. 
+        gv.iMapMgr.setSignalPwr(cb.GetLabel(), cb.GetValue())
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -301,7 +510,7 @@ class PanelTrainCtrl(wx.Panel):
         self.SetSizer(self.buidUISizer())
         self.setState(0, 0)
 
-#-----------------------------------------------------------------------------
+#--PanelTrainCtrl--------------------------------------------------------------
     def buidUISizer(self):
         """ Build the UI and the return the wx.sizer. """
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
@@ -396,404 +605,182 @@ class PanelTrainCtrl(wx.Panel):
         vsizer.Add(hbox5, flag=flagsR, border=2)
         return vsizer
 
-#-----------------------------------------------------------------------------
+#--PanelTrainCtrl--------------------------------------------------------------
     def emgHandle(self, event):
-        """ Set/recover the train to/from emergency stop situaton 
-        """
+        """ Set/recover the train to/from emergency stop situaton."""
         if not gv.iMapMgr: return
         obj = event.GetEventObject()
         (stop, speed) = (False, 0) if obj.GetId() == self.recbtn1.GetId() else (True, 5)
         gv.iMapMgr.setEmgStop(self.tName, stop)
         self.setState(speed, 0)  # recover
 
-#-----------------------------------------------------------------------------
+#--PanelTrainCtrl--------------------------------------------------------------
     def setState(self, idx, rwIdx): 
-        """ Set the train running state. idx: speed idx in self.statDict"""
+        """ Set the train running state. idx: speed idx in <self.statDict>."""
         state = self.statDict[str(idx)]
         self.stateLb.SetLabel(str(state[0]).center(16))
         self.stateLb.SetBackgroundColour(wx.Colour(state[1]))
         railWay = "[ Track A ]" if rwIdx == 0 else "[ Track B ]"
         self.rwLabel.SetLabel("RailWay Pos: " + railWay)
-        self.speedLb.SetLabel("[ %dkm/h ]" %state[2])
+        self.speedLb.SetLabel("[ %dkm/h ]" % state[2])
         self.throttleBar.SetValue(state[2]//10)
         self.Refresh(False)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
-
-class PanelAttackSimu(wx.Panel):
-    """ Load different kind off attack simulation stuation.
-    """
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
-        self.SetBackgroundColour(wx.Colour(200, 200, 200))
-        self.infoWindow = None 
-        hsizer = self.buidUISizer()
-        self.attCount = -1 
-        self.SetSizer(hsizer)
-
-    def buidUISizer(self):
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
-        vsizer = wx.BoxSizer(wx.VERTICAL)
-        vsizer.Add(wx.StaticText(self, label="Active Attack Simulation:"), flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(210, -1),
-                                     style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-        
-        self.rb1 = wx.RadioButton(self, -1, 'Ransomware in the HMI', style=wx.RB_GROUP)
-        vsizer.Add(self.rb1, flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-        
-        self.rb2 = wx.RadioButton(self, -1, 'Man in the Middle from IOT device')
-        vsizer.Add(self.rb2, flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-        
-        self.rb3 = wx.RadioButton(self, -1, 'Trojan in teh technician PC')
-        vsizer.Add(self.rb3, flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-        
-        self.idLb = wx.StaticText(self, label="Normal".center(20))
-        self.idLb.SetBackgroundColour(wx.Colour('GREEN'))
-        vsizer.Add(self.idLb, flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-
-        self.processDisplay = wx.Gauge(self, range = 10, size = (150, 15), style =  wx.GA_HORIZONTAL)
-        vsizer.Add(self.processDisplay, flag=flagsR, border=2)
-        vsizer.AddSpacer(10)
-        hsizer1 = wx.BoxSizer(wx.HORIZONTAL)
-
-        self.simuBt1 = wx.Button(self, label='Start Attack', style=wx.BU_LEFT)
-        self.simuBt1.Bind(wx.EVT_BUTTON, self.setAttck)
-        hsizer1.Add(self.simuBt1, flag=flagsR, border=2)
-        hsizer1.AddSpacer(5)
-        self.simuBt2 = wx.Button(self, label='Clear Attack', style=wx.BU_LEFT)
-        self.simuBt2.Bind(wx.EVT_BUTTON, self.clearAttack)
-        hsizer1.Add(self.simuBt2, flag=flagsR, border=2)
-        vsizer.Add(hsizer1, flag=flagsR, border=2)
-
-        vsizer.AddSpacer(5)
-        vsizer.AddSpacer(5)
-        return vsizer
-
-    def periodic(self, now):
-
-        if self.attCount == 1:
-            self.idLb.SetLabel("Prepare to start attack")
-            self.idLb.SetBackgroundColour(wx.Colour('YELLOW'))
-            self.attCount += 1
-            self.Refresh(False)
-        elif 1 < self.attCount < 10:
-            self.processDisplay.SetValue(self.attCount)
-            self.attCount += 1
-        elif self.attCount == 10:
-            self.idLb.SetLabel("System under attack")
-            self.idLb.SetBackgroundColour(wx.Colour('RED'))
-            self.Refresh(False)
-            if self.rb1.GetValue():
-                self.infoWindow = RansomwareFrame(gv.iMainFrame)
-            elif self.rb2.GetValue():
-                gv.iSensorAttack = True
-            elif self.rb3.GetValue():
-                self.infoWindow = TrojanAttFrame(gv.iMainFrame)
-            self.attCount += 1
-        elif self.attCount == 0:
-            self.idLb.SetLabel("Normal".center(20))
-            self.idLb.SetBackgroundColour(wx.Colour('GREEN'))
-            self.processDisplay.SetValue(self.attCount)
-            self.Refresh(False)
-            self.attCount = -1
-            gv.iSensorAttack = False
-
-    def setAttck(self, event):
-        self.attCount = 1
-
-    def clearAttack(self, event):
-        self.attCount = 0
-
-#-----------------------------------------------------------------------------
-#-----------------------------------------------------------------------------
-class PanelSimuCtrl(wx.Panel):
-    """ The panel to set different kind the attack situaltion."""
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
-        self.SetBackgroundColour(wx.Colour(200, 200, 200))
-        hsizer = self.buidUISizer()
-        self.SetSizer(hsizer)
-
-#-----------------------------------------------------------------------------
-    def buidUISizer(self):
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
-        vsizer = wx.BoxSizer(wx.VERTICAL)
-        vsizer.Add(wx.StaticText(self, label="Active attack simulation:"), flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-        vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(165, -1),
-                                     style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-
-        self.idLb = wx.StaticText(self, label="Attack point ID: [001] ")
-        vsizer.Add(self.idLb, flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-        vsizer.Add(wx.StaticText(self, label="Active attack type:"), flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-        self.simuCb1 = wx.CheckBox(self, -1 ,'1. Random some where')
-        vsizer.Add(self.simuCb1, flag=flagsR, border=2)
-        self.simuCb1.Disable()
-
-        vsizer.AddSpacer(5)
-        self.simuCb2 = wx.CheckBox(self, -1 ,'2. Man in middle')
-        vsizer.Add(self.simuCb2, flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-        self.simuCb3 = wx.CheckBox(self, -1 ,'3. Trojar attack')
-        vsizer.Add(self.simuCb3, flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-        self.simuCb4 = wx.CheckBox(self, -1 ,'4. Eternal blue')
-        vsizer.Add(self.simuCb4, flag=flagsR, border=2)
-        self.simuCb4.Disable()
-        vsizer.AddSpacer(5)
-        self.attackCtrl = wx.ComboBox(self, -1, choices=['Overwrite input', 'Overwrite output'], style=wx.CB_READONLY)
-        self.attackCtrl.SetSelection(0)
-        vsizer.Add(self.attackCtrl, flag=flagsR, border=2)
-        vsizer.AddSpacer(5)
-        hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(wx.StaticText(self, label="Overwrite data:"), flag=flagsR, border=2)
-        hsizer.AddSpacer(5)
-        
-        self.tc1 = wx.TextCtrl(self, -1, "", size=(40, -1), style=wx.TE_PROCESS_ENTER)
-        self.tc1.SetValue("1")
-        hsizer.Add(self.tc1, flag=flagsR, border=2)
-        
-        vsizer.Add(hsizer, flag=flagsR, border=2)
-        vsizer.AddSpacer(10)
-
-        hsizer1 = wx.BoxSizer(wx.HORIZONTAL)
-
-        self.simuBt1 = wx.Button(self, label='Set Attack', style=wx.BU_LEFT, size=(60,25))
-        self.simuBt1.Bind(wx.EVT_BUTTON, self.setAttck)
-        hsizer1.Add(self.simuBt1, flag=flagsR, border=2)
-        hsizer1.AddSpacer(5)
-        self.simuBt2 = wx.Button(self, label='Clear', style=wx.BU_LEFT, size=(60,25))
-        self.simuBt2.Bind(wx.EVT_BUTTON, self.setAttck)
-        hsizer1.Add(self.simuBt2, flag=flagsR, border=2)
-        vsizer.Add(hsizer1, flag=flagsR, border=2)
-
-        vsizer.AddSpacer(5)
-        return vsizer
-
-#-----------------------------------------------------------------------------
-    def loatAttPtState(self, id):
-        """ Load the attack point's state. 
-        """
-        self.idLb.SetLabel("Attack point ID: [%s] " %str(id).zfill(3))
-
-#-----------------------------------------------------------------------------
-    def setAttck(self, event):
-        buttonLb = event.GetEventObject().GetLabel()
-        if buttonLb == 'Set Attack': 
-            gv.iMapPanel.setHackedPt(0)
-            gv.iMapPanel.updateDisplay()
-            hackedV = self.tc1.GetValue()
-            if gv.iDetailPanel:
-                gv.iDetailPanel.updateState(idx=1, state='Man in mid', origalV=0, changedV=hackedV)
-        else:
-            gv.iMapPanel.setHackedPt(-2)
-            gv.iMapPanel.updateDisplay()
-            if gv.iDetailPanel:
-                gv.iDetailPanel.updateState(idx=1, state='Normal', origalV=0, changedV=0)
-
-#-----------------------------------------------------------------------------
-#-----------------------------------------------------------------------------
-class CameraView(wx.Panel):
-    def __init__(self, parent, idx, size=(280, 200),  style=wx.TRANSPARENT_WINDOW):
-        """ Panel to simulate the camera view."""
-        wx.Panel.__init__(self, parent)
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        anim = Animation(gv.TPSGIP_PATH)
-        self.ctrl = AnimationCtrl(self, -1, anim)
-        self.ctrl.Stop()
-        sizer.Add(self.ctrl)
-        self.SetSizerAndFit(sizer)
-        self.Show()
-
-    def setPlay(self):
-        self.ctrl.Play()
-
-    def setStop(self):
-        self.ctrl.Stop()
-
-#-----------------------------------------------------------------------------
-#-----------------------------------------------------------------------------
-class PanelAttackSet(wx.Panel):
+class PanelDetailInfo(wx.Panel):
+    """ The panel show the components' detail infomation."""
     def __init__(self, parent, idx, size=(140, 150)):
-        """ The panel to set different kind the attack situaltion."""
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
         self.idx = idx 
         self.hackState = ""
         self.origalV = self.changedV = 0
-        hsizer = self.buidUISizer()
-        self.SetSizer(hsizer)
+        self.SetSizer(self.buidUISizer())
 
-#-----------------------------------------------------------------------------
+#--PanelDetailInfo-------------------------------------------------------------
     def buidUISizer(self):
+        """ Build the UI and the return the wx.sizer. """
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
-
-        self.idLb = wx.StaticText(self, label="Attack point ID: [%s] " %str(self.idx).zfill(3))
+        self.idLb = wx.StaticText(
+            self, label="Attack point ID: [%s] " % str(self.idx).zfill(3))
         vsizer.Add(self.idLb, flag=flagsR, border=2)
         vsizer.AddSpacer(10)
-
         vsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(135, -1),
-                                     style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         vsizer.AddSpacer(5)
-        
-
         self.stateLb =  wx.StaticText(self, label="Normal")
         self.stateLb.SetBackgroundColour(wx.Colour('GREEN'))
         vsizer.Add(self.stateLb, flag=flagsR, border=2)
         vsizer.AddSpacer(10)
-
         self.orignLb = wx.StaticText(self, label="Orignal input: ")
         vsizer.Add(self.orignLb, flag=flagsR, border=2)
         vsizer.AddSpacer(10)
-
         self.hackLb = wx.StaticText(self, label="Hacked input: None")
         vsizer.Add(self.hackLb, flag=flagsR, border=2)
         vsizer.AddSpacer(10)
-
         return vsizer
 
-#-----------------------------------------------------------------------------
+#--PanelDetailInfo-------------------------------------------------------------
     def updateState(self, idx=None, state=None, origalV=None, changedV=None):
-        if not idx is None and self.idx!= idx :
+        """ Update the state when the user changed the setting
+        """
+        if not idx is None and self.idx != idx:
             self.idx = idx
-            self.idLb.SetLabel("Attack point ID: [%s] " %str(self.idx).zfill(3))
-    
+            self.idLb.SetLabel(
+                "Attack point ID: [%s] " % str(self.idx).zfill(3))
         if not state is None and self.hackState != state:
             self.hackState = state
             if self.hackState != 'Normal':
                 self.stateLb.SetLabel(self.hackState)
                 self.stateLb.SetBackgroundColour(wx.Colour('RED'))
-            else: 
+            else:
                 self.stateLb.SetLabel("Normal")
                 self.stateLb.SetBackgroundColour(wx.Colour('Green'))
             self.Refresh(False)
-
         if not origalV is None and self.origalV != origalV:
             self.origalV = origalV
-            self.orignLb.SetLabel("Orignal input: %s" %str(origalV))
-
+            self.orignLb.SetLabel("Orignal input: %s" % str(origalV))
         if not changedV is None and self.changedV != changedV:
             self.changedV = changedV
-            self.hackLb.SetLabel("Hacked input: %s" %str(changedV))
+            self.hackLb.SetLabel("Hacked input: %s" % str(changedV))
 
-
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 class RansomwareFrame(wx.Frame):
-    """ Railway system control hub."""
-
+    """ Popup frame to show the ransomeware attack simulation situation."""
     def __init__(self, parent):
         """ Init the UI and parameters """
         wx.Frame.__init__(self, parent, -1, 'Ransomware',
                           style=wx.MINIMIZE_BOX)
         self.SetBackgroundColour(wx.Colour('BLACK'))
-        bmp = wx.Image(gv.RAJPG_PATH, wx.BITMAP_TYPE_JPEG).ConvertToBitmap()
         screenSZ = wx.GetDisplaySize()
-        wx.StaticBitmap(
-            self, -1, bmp, pos=(screenSZ[0]//2-350, screenSZ[0]//2-300))
-        self.Show()
+        wx.StaticBitmap(self, -1, wx.Image(gv.RAJPG_PATH, wx.BITMAP_TYPE_JPEG).ConvertToBitmap(),
+                        pos=(screenSZ[0]//2-350, screenSZ[0]//2-300))
         self.Maximize()
-        #
-        fIn = open("encryptKey.txt")  # use raw strings for windows file names
+        self.encryptSetFile()
+        self.Show()
+
+#--RansomwareFrame-------------------------------------------------------------
+    def encryptSetFile(self): 
+        """Simulation the file attack by ransomeware."""
+        fIn = open("encryptKey.txt")
         fOut = open("railwayPlcConfig.txt", "w")
         for line in fIn:
             fOut.write(line)
         fIn.close()
         fOut.close()
 
-
-
-
-
-
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 class TrojanAttFrame(wx.Frame):
+    """ Popup frame to show a transparent window to block the desktop to simulate
+        the trojan attack.
+    """
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent, title="Am I transparent?",
-                          style=wx.MINIMIZE_BOX)
+        wx.Frame.__init__(self, parent, title="TrojanAttFrame",style=wx.MINIMIZE_BOX)
         self.SetBackgroundColour(wx.Colour('BLACK'))
-        self.alphaValue = 255
+        self.alphaValue = 255   # transparent control
         self.alphaIncrement = -4
-        self.count = 1000
+        self.count = 500        # count to control when to stop the attack.   
+        # Build the main UI.
+        self.SetSizerAndFit(self.buidUISizer())
+
+        self.changeAlpha_timer = wx.Timer(self)
+        self.changeAlpha_timer.Start(100)       # 10 changes per second
+        self.Bind(wx.EVT_TIMER, self.changeAlpha)
+        self.Bind(wx.EVT_CLOSE, self.onCloseWindow)
+        # Set the frame cover full desktop.
+        self.Maximize()
+        self.ShowFullScreen(True)
+        self.Show()
+
+#--TrojanAttFrame--------------------------------------------------------------
+    def buidUISizer(self):
+        """ Build the UI and the return the wx.sizer. """
         sizer = wx.BoxSizer(wx.VERTICAL)
-        anim = Animation(gv.TAGIF_PATH)
-        self.ctrl = AnimationCtrl(self, -1, anim)
+        self.ctrl = AnimationCtrl(self, -1, Animation(gv.TAGIF_PATH))
         self.ctrl.Play()
         sizer.Add(self.ctrl, flag=wx.ALIGN_CENTER_VERTICAL |
                   wx.ALIGN_CENTER_HORIZONTAL, border=2)
-        
-        self.stTxt = wx.StaticText(self, -1, "Your computer has been took over by YC's Trojan, we will release control in 10 sec" )
+        self.stTxt = wx.StaticText(
+            self, -1, "Your computer has been took over by YC's Trojan, we will release control in 10 sec")
         self.stTxt.SetBackgroundColour(wx.Colour('GREEN'))
-        self.stTxt.SetFont( wx.Font( 30, wx.SWISS, wx.NORMAL, wx.NORMAL ) )
+        self.stTxt.SetFont(wx.Font(30, wx.SWISS, wx.NORMAL, wx.NORMAL))
         sizer.Add(self.stTxt, flag=wx.ALIGN_CENTER, border=2)
-    
-        self.SetSizerAndFit(sizer)
+        return sizer
 
-        self.changeAlpha_timer = wx.Timer(self)
-        self.changeAlpha_timer.Start(50)       # 20 changes per second
-        self.Bind(wx.EVT_TIMER, self.ChangeAlpha)
-        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
-
-        self.Show()
-        self.Maximize()
-
-    #end transparentWin class
-    #--------------------------------------------------------
-    def ChangeAlpha(self, evt):
-        """ The term "alpha" means variable transparency
+ #--TrojanAttFrame--------------------------------------------------------------
+    def changeAlpha(self, evt):
+        """ The term "alpha" means variable transparency this function we 
+            follow the examle in =: 
+            https://wiki.wxpython.org/Transparent%20Frames
               as opposed to a "mask" which is binary transparency.
               alpha == 255 :  fully opaque
               alpha ==   0 :  fully transparent (mouse is ineffective!)
-
             Only top-level controls can be transparent; no other controls can.
             This is because they are implemented by the OS, not wx.
         """
-
         self.alphaValue += self.alphaIncrement
         if (self.alphaValue) <= 0 or (self.alphaValue >= 255):
-
             # Reverse the increment direction.
             self.alphaIncrement = -self.alphaIncrement
-
             if self.alphaValue <= 0:
                 self.alphaValue = 0
-
             if self.alphaValue > 255:
                 self.alphaValue = 255
-        #end if
-
+        # Show the release time text.
         self.count -=1
         if self.count%100 == 0:
             self.stTxt.SetLabel("Your computer has been took over by the Trojan, we will release control in "+str(self.count//100).zfill(2)+" sec")
         if self.count == 0:
-            self.OnCloseWindow(None)
+            self.onCloseWindow(None)
+        self.SetTransparent(self.alphaValue)
 
-        #self.stTxt.SetLabel( str( self.alphaValue ) )
-
-        # Note that we no longer need to use ctypes or win32api to
-        # make transparent windows, however I'm not removing the
-        # MakeTransparent code from this sample as it may be helpful
-        # to someone for other uses, someday.
-
-        #self.MakeTransparent( self.alphaValue )
-
-        # Instead, just call the SetTransparent() method
-        self.SetTransparent(self.alphaValue)      # Easy !
-
-    #end ChangeAlpha def
-
-    #--------------------------------------------------------
-
-    def OnCloseWindow(self, evt):
-
+#--TrojanAttFrame--------------------------------------------------------------
+    def onCloseWindow(self, evt):
+        """ Stop the timeer and close the window."""
         self.changeAlpha_timer.Stop()
         del self.changeAlpha_timer       # avoid a memory leak
         self.Destroy()

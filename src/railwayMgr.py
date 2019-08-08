@@ -376,13 +376,13 @@ class MapMgr(object):
         if gv.iDetailPanel:
             (crtAsensorId, crtBsensorId) = sensorL
             if self.rwAsensorId == -1 and crtAsensorId in (12, 25):
-                gv.iDetailPanel.setPlay()
+                gv.iDetailPanel.setPlay(True)
             if crtAsensorId == -1 and self.rwAsensorId in (12, 25):
-                gv.iDetailPanel.setStop()
+                gv.iDetailPanel.setPlay(False)
             if self.rwBsensorId == -1 and crtBsensorId in (12, 25):
-                gv.iDetailPanel.setPlay()
+                gv.iDetailPanel.setPlay(True)
             if crtBsensorId == -1 and self.rwBsensorId in (12, 25):
-                gv.iDetailPanel.setStop()
+                gv.iDetailPanel.setPlay(False)
         
 #-----------------------------------------------------------------------------
     def updatePLCIn(self, idList):

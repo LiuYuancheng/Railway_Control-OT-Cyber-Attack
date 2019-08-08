@@ -83,7 +83,7 @@ class railWayHubFrame(wx.Frame):
         self.attackPanel = rwp.PanelAttackSimu(setBgPanel)
         hbox3.Add(self.attackPanel, flag=flagsR, border=2)
 
-        gv.iAttackCtrlPanel = self.simuPanel = rwp.PanelSimuCtrl(setBgPanel)
+        gv.iAttackCtrlPanel = self.simuPanel = rwp.PanelPointAtt(setBgPanel)
         hbox3.Add(self.simuPanel, flag=flagsR, border=2)
         hbox3.AddSpacer(10)
         setBgPanel.SetSizer(hbox3)

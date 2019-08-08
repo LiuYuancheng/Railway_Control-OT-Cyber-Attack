@@ -29,52 +29,41 @@ class transparentWin(wx.Frame):
 
         self.changeAlpha_timer = wx.Timer(self)
         self.changeAlpha_timer.Start(50)       # 20 changes per second
-        self.Bind(wx.EVT_TIMER, self.ChangeAlpha)
-        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
+        self.Bind(wx.EVT_TIMER, self.changeAlpha)
+        self.Bind(wx.EVT_CLOSE, self.onCloseWindow)
 
     #end transparentWin class
     #--------------------------------------------------------
-    def ChangeAlpha(self, evt):
-        """ The term "alpha" means variable transparency
+    def changeAlpha(self, evt):
+        """ The term "alpha" means variable transparency this function we 
+            follow the examle in =: 
+            https://wiki.wxpython.org/Transparent%20Frames
               as opposed to a "mask" which is binary transparency.
               alpha == 255 :  fully opaque
               alpha ==   0 :  fully transparent (mouse is ineffective!)
-
             Only top-level controls can be transparent; no other controls can.
             This is because they are implemented by the OS, not wx.
         """
-
         self.alphaValue += self.alphaIncrement
         if (self.alphaValue) <= 0 or (self.alphaValue >= 255):
-
             # Reverse the increment direction.
             self.alphaIncrement = -self.alphaIncrement
-
             if self.alphaValue <= 0:
                 self.alphaValue = 0
-
             if self.alphaValue > 255:
                 self.alphaValue = 255
-        #end if
-
-        #self.stTxt.SetLabel( str( self.alphaValue ) )
-
         # Note that we no longer need to use ctypes or win32api to
         # make transparent windows, however I'm not removing the
         # MakeTransparent code from this sample as it may be helpful
         # to someone for other uses, someday.
-
         #self.MakeTransparent( self.alphaValue )
-
         # Instead, just call the SetTransparent() method
         self.SetTransparent(self.alphaValue)      # Easy !
 
-    #end ChangeAlpha def
-
     #--------------------------------------------------------
-
-    def OnCloseWindow(self, evt):
-
+    def onCloseWindow(self, evt):
+        """ Stop the timeer and close the window.
+        """
         self.changeAlpha_timer.Stop()
         del self.changeAlpha_timer       # avoid a memory leak
         self.Destroy()
