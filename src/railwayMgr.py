@@ -194,7 +194,7 @@ class MapMgr(object):
         # finded the triggered sensor to the related action.
         [crtAsensorId, crtBsensorId] = self.checkSensor()
         self.updateCamView((crtAsensorId, crtBsensorId))
-        self.updatePLCIn((crtAsensorId, crtBsensorId)) # need to run before setTACT/setBAct
+        self.updatePlcIn((crtAsensorId, crtBsensorId)) # need to run before setTACT/setBAct
         self.setTrainAact(crtAsensorId) # self.rwAsensorId = crtAsensorId 
         self.setTrainBact(crtBsensorId) # self.rwBsensorId = crtBsensorId 
 
@@ -212,7 +212,7 @@ class MapMgr(object):
             self.gate1.moveDoor(openFg= not(self.gateLockA or self.gateLockB))
             self.gateAct = self.gate2.moveDoor(openFg= not(self.gateLockA or self.gateLockB))
 
-#-----------------------------------------------------------------------------
+#--MapMgr----------------------------------------------------------------------
     def setEmgStop(self, trainName, state):
         """ Set the train emergency stop. """
         if trainName == 'TrainA':
@@ -220,10 +220,9 @@ class MapMgr(object):
         elif trainName == 'TrainB':
             self.trainB.setEmgStop(state)
 
-#-----------------------------------------------------------------------------
+#--MapMgr----------------------------------------------------------------------
     def setSignalPwr(self, sKey, sValue):
-        """ Set the signal power on/off based on the signal's key
-        """ 
+        """ Set the signal power on/off based on the signal's key.""" 
         value = True if sValue else False
         # Update the signal state.
         if sKey in self.signalDict.keys():
@@ -238,7 +237,7 @@ class MapMgr(object):
         elif sKey == 'S302 - Track B Fork Power':
             self.forkB.forkOn = value
     
-#-----------------------------------------------------------------------------
+#--MapMgr----------------------------------------------------------------------
     def setTrainAact(self, crtAsensorId):
         """ Set the train A's action base on the sensor ID, train id 0: train is 
             on the inside railway, train id 1: train is on the outside railway.
@@ -283,7 +282,7 @@ class MapMgr(object):
                     self.trainA.id = 0
             self.updateTPnlDisplay(0, crtAsensorId)
 
-#-----------------------------------------------------------------------------
+#--MapMgr----------------------------------------------------------------------
     def setTrainBact(self, crtBsensorId):
         """ Set the train B's action base on the sensor ID, train id 0: train is 
             on the inside railway, train id 1: train is on the outside railway.
@@ -292,7 +291,6 @@ class MapMgr(object):
             if self.rwBsensorId >= 0 and crtBsensorId < 0:
                 self.sensorList[self.rwBsensorId].setSensorState(0)
             self.rwBsensorId = crtBsensorId
-            #rwId = self.trainA.getID()
             if self.trainB.getID() == 0:
                 if self.rwBsensorId == 10:
                     self.trainB.setDockCount(5)
@@ -327,45 +325,26 @@ class MapMgr(object):
                     self.trainB.id = 0
             self.updateTPnlDisplay(1, crtBsensorId)
 
-#-----------------------------------------------------------------------------
-    def updateTPnlDisplay(self, trainID ,sensorId):
-        """ Update the train panel display. """
-        if sensorId < 0: return # sensors are not triggered.
-        dispalyPnl = gv.iTrainAPanel if trainID == 0 else gv.iTrainBPanel
-        state= 0 # state idx refer to <PanelTrainCtrl:self.statDict >
-        if sensorId in (12, 25, 2, 15, 7, 20):
-            state = 0
-        elif sensorId in (10, 23):
-            state = 4
-        elif sensorId in (3, 16, 6, 19, 9, 22):
-            state = 1
-        elif sensorId in (4, 17, 0, 13):
-            state = 2
-        elif sensorId in (1, 14, 5, 18, 8, 21, 11, 24):
-            state = 3
-        rwIdx = 0 if sensorId <13 else 1
-        dispalyPnl.setState(state, rwIdx)
-
-#-----------------------------------------------------------------------------
+#--MapMgr----------------------------------------------------------------------
     def updateCamView(self, sensorL):
-        """ update the camera view """
+        """ update the camera view when the train pass camera."""
         if gv.iDetailPanel:
             (crtAsensorId, crtBsensorId) = sensorL
             if self.rwAsensorId == -1 and crtAsensorId in (12, 25):
-                gv.iDetailPanel.setPlay(True)
+                gv.iDetailPanel.setPlay(True)   # Train A pass the camera area.
             if crtAsensorId == -1 and self.rwAsensorId in (12, 25):
-                gv.iDetailPanel.setPlay(False)
+                gv.iDetailPanel.setPlay(False)  # Train A left the camrea area.
             if self.rwBsensorId == -1 and crtBsensorId in (12, 25):
-                gv.iDetailPanel.setPlay(True)
+                gv.iDetailPanel.setPlay(True)   # Train B pass the camera area.
             if crtBsensorId == -1 and self.rwBsensorId in (12, 25):
-                gv.iDetailPanel.setPlay(False)
-        
-#-----------------------------------------------------------------------------
-    def updatePLCIn(self, idList):
-        """ Update PLC panel's input.
-        """
+                gv.iDetailPanel.setPlay(False)  # Traom B left the camera area.
+    
+#--MapMgr----------------------------------------------------------------------
+    def updatePlcIn(self, idList):
+        """ Update the PLC panel's input."""
         (crtAsensorId, crtBsensorId) = idList
         idList, stateList = [], []
+        # Check train A left/enter the sensor detection area when sensor state change.
         if self.rwAsensorId != crtAsensorId:
             if self.rwAsensorId >= 0 and crtAsensorId < 0:
                 idList.append(self.rwAsensorId)
@@ -373,6 +352,7 @@ class MapMgr(object):
             elif crtAsensorId >= 0 and self.rwAsensorId < 0:
                 idList.append(crtAsensorId)
                 stateList.append(1)
+        # Check train B left/enter the sensor detection area when sensor state change.
         if self.rwBsensorId != crtBsensorId:
             if self.rwBsensorId >= 0 and crtBsensorId < 0:
                 idList.append(self.rwBsensorId)
@@ -382,68 +362,90 @@ class MapMgr(object):
                 stateList.append(1)
         # Update the PLC panel if any thing changed.
         if gv.iAgentMgr and len(idList) > 0:
-            gv.iAgentMgr.updatePLCIn(idList, stateList)
+            gv.iAgentMgr.updatePlcIn(idList, stateList)
 
+#--MapMgr----------------------------------------------------------------------
+    def updateTPnlDisplay(self, trainID ,sensorId):
+        """ Update the train panel display. """
+        if sensorId < 0: return # sensors are not triggered.
+        dispalyPnl = gv.iTrainAPanel if trainID == 0 else gv.iTrainBPanel
+        rwIdx = 0 if sensorId < 13 else 1
+        state = 0  # state idx refer to <PanelTrainCtrl:self.statDict >
+        if sensorId in (2, 7, 12, 15, 20, 25):
+            state = 0   # start to run.
+        elif sensorId in (3, 6, 9, 16, 19, 22):
+            state = 1   # start to slow down.
+        elif sensorId in (0, 4, 17, 13):
+            state = 2   # start to accelerate.
+        elif sensorId in (1, 5, 8, 11, 14, 18, 21, 24):
+            state = 3   # start to turn.
+        elif sensorId in (10, 23):
+            state = 4   # start to wait.
+        dispalyPnl.setState(state, rwIdx)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class managerPLC(object):
-    """ Object hook to control the PLC through the ModBus(TCPIP)."""
+    """ Manager object hook to control the PLC through the ModBus(TCPIP)."""
     def __init__(self, parent):
         self.parent = parent
         self.plcAgentList = [] # list of the Agent plc connect to the hardware
         self.plcPanelList = [] # list of the panel plc shown on the UI.
 
-#-----------------------------------------------------------------------------
+#--managerPLC------------------------------------------------------------------
     def appendPLC(self, plcAgent, plcPanel):
         self.plcAgentList.append(plcAgent)
         self.plcPanelList.append(plcPanel)
 
-#-----------------------------------------------------------------------------
+#--managerPLC------------------------------------------------------------------
     def findInDevPLC(self, devIdx):
         """ Find the Agent PLC and the PLC display panel based on the device id.
         """
         for i, agent in enumerate(self.plcAgentList):
             plcInterfaceID = agent.checkDev(devIdx)
-            if  plcInterfaceID >=0 :
+            if plcInterfaceID >= 0:
                 return (self.plcAgentList[i], self.plcPanelList[i], plcInterfaceID)
         return (None, None, -1)
 
-#-----------------------------------------------------------------------------
+#--managerPLC------------------------------------------------------------------
     def findOutDevPLC(self, ctrlIdx):
         """ Find the Agent PLC and the PLC display panel based on the device id.
         """
         for i, agent in enumerate(self.plcAgentList):
             plcInterfaceID = agent.checkCtrl(ctrlIdx)
-            if  plcInterfaceID >=0 :
+            if plcInterfaceID >= 0:
                 return (self.plcAgentList[i], self.plcPanelList[i], plcInterfaceID)
         return (None, None, -1)
 
-#-----------------------------------------------------------------------------
+#--managerPLC------------------------------------------------------------------
+    def hookCtrl(self, ctrlId, tagNum):
+        """ Hook the output deve to the PLC."""
+        plcIdx, plcPos = tagNum//100-1, tagNum % 100
+        self.plcAgentList[plcIdx].hookCtrl(ctrlId, plcPos)
+
+#--managerPLC------------------------------------------------------------------
     def hookSensor(self, sensorId):
+        """ Hook the sensor to the PLC input. """
         if sensorId <= 23:
             plcIdx, plcPos = sensorId//8, sensorId%8
             self.plcAgentList[plcIdx].hookSensor(sensorId, plcPos)
 
-#-----------------------------------------------------------------------------
-    def hookCtrl(self, ctrlId, tagNum):
-        plcIdx,  plcPos = tagNum//100-1, tagNum%100
-        self.plcAgentList[plcIdx].hookCtrl(ctrlId, plcPos)
-
-#-----------------------------------------------------------------------------
-    def updatePLCIn(self, devIDList, stateList):
+#--managerPLC------------------------------------------------------------------
+    def updatePlcIn(self, devIDList, stateList):
+        """ update the Plc's input. """
         for i in range(len(devIDList)):
             devId, devS = devIDList[i], stateList[i]
-            (plcA, plcP, devP) = self.findInDevPLC(devIDList[i])
-            if plcA: plcA.setInput(devId, devS)
-            if plcP: plcP.updateInput(devP, devS)
+            (plcAgt, plcPnl, devP) = self.findInDevPLC(devIDList[i])
+            if plcAgt: plcAgt.setInput(devId, devS)     # update the agent's input.
+            if plcPnl: plcPnl.updateInput(devP, devS)   # update the pnale's input
 
-#-----------------------------------------------------------------------------
+#--managerPLC------------------------------------------------------------------
     def updatePLCout(self, devID, state):
+        """ update the Plc's output. """
         state = 1 if state else 0
-        (plcA, plcP, devP) = self.findOutDevPLC(devID)
-        if plcA: plcA.setOutput(devID, state)
-        if plcP: plcP.updateOutput(devP, state)
+        (plcAgt, plcPnl, devP) = self.findOutDevPLC(devID)
+        if plcAgt: plcAgt.setOutput(devID, state)
+        if plcPnl: plcPnl.updateOutput(devP, state)
         
 
 
