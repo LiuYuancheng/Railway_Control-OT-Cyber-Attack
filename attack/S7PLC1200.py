@@ -82,25 +82,22 @@ class S7PLC1200(object):
 			MX0.N-memory.
 		"""
 		data = self.getMem(mem, True)
-		out = None  # output functino selection type
-		length = 1
-		bit = 0
-		start = 0	# start position idx
+		start =bit = 0 # start position idx
 		# get the area memory address
 		memType = mem[0].lower()
 		area = self.memAreaDict[memType]
 		# Set the data lenght and start idx and call the utility functions from <snap7.util>
 		if(mem[1].lower() == 'x'):  # bit
-			length, out, start, bit = 1, OUT_BOOL, int(mem.split('.')[0][2:]), int(mem.split('.')[1])
+			start, bit = int(mem.split('.')[0][2:]), int(mem.split('.')[1])
 			set_bool(data, 0, bit, int(value))
 		elif(mem[1].lower() == 'b'):  # byte
-			length, out, start = 1, OUT_INT, int(mem[2:])
+			start = int(mem[2:])
 			set_int(data, 0, value)
 		elif(mem[1].lower() == 'd'):
-			length, out, start = 4, OUT_DWORD, int(mem.split('.')[0][2:])
+			start = int(mem.split('.')[0][2:])
 			set_dword(data, 0, value)
 		elif('freal' in mem.lower()):  # double word (real numbers)
-			length, out, start = 4, OUT_REAL, int(mem.lower().replace('freal', ''))
+			start = int(mem.lower().replace('freal', ''))
 			set_real(data, 0, value)
 		# Call the write function and return the value.
 		return self.plc.write_area(area, 0, start, data)
