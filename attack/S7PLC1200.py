@@ -105,7 +105,6 @@ class S7PLC1200(object):
 
 #-----------------------------------------------------------------------------
 
-
 def testCase():
     plc = S7PLC1200('192.168.10.73')  # ,debug=True)
     #turn on outputs cascading
@@ -119,7 +118,7 @@ def testCase():
         sleep(.5)
     plc.plc.disconnect()
 
-
+	
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
     testCase()
