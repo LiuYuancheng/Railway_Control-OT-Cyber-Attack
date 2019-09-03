@@ -34,7 +34,6 @@ MEM_ADDR = {'M0':   '0000',
             'M60':  '003c'
            }
 
-
 TID = '0000'
 PROTOCOL_ID = '0000'
 UID = '01'
@@ -54,7 +53,7 @@ class M221(object):
         except:
             print("PLC connection fail.")
 
-    def setMemory(self, mTag, val):
+    def writeMem(self, mTag, val):
         """ Set the plc memory address. mTag: (str)memory tag, val:(int) 0/1
         """
         modbus_payload = "".join(
@@ -63,7 +62,17 @@ class M221(object):
         response = self.plcAgent.recv(1024).encode('hex')
         print(response)
 
-    def disConnect(self):
+    def disconnect(self):
         """ Disconnect from PLC."""
         print("M221:    Disconnect from PLC.")
         self.plcAgent.close()
+
+#-----------------------------------------------------------------------------
+def testCase():
+    plc = M221('192.168.10.72') 
+    plc.writeMem('M10', 0)
+    plc.disconnect()
+	
+#-----------------------------------------------------------------------------
+if __name__ == '__main__':
+    testCase()
