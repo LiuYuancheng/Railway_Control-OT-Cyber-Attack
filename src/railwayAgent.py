@@ -11,10 +11,10 @@
 #-----------------------------------------------------------------------------
 import math
 import railwayGlobal as gv 
-
-#if gv.iPlcSimulation:
-#    import snap7
-#    from snap7.util import *
+# import the PLC control module.
+if not gv.iPlcSimulation:
+    import M2PLC221 as m221
+    import S7PLC1200 as s71200 
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -22,18 +22,26 @@ class AgentPLC(object):
     """ Interface to store the PLC information and control the PLC through 
         by hooking to the ModBus(TCPIP).
     """
-    def __init__(self, parent, idx, name, ipAddr, port):
+    def __init__(self, parent, idx, name, ipAddr, plcType):
         self.parent = parent
         self.idx = idx
         self.plcName = name
         self.ipAddr = ipAddr
-        self.port = port
+        self.plcType = plcType
+        self.plcConnector = None    # the connector to connect to plc
         self.devCount = 0           # input device count hook to the PLC.
         self.ctrlCount = 0          # ouput device count hook to the PLC.
         self.devIDList = [-1]*8     # input device ID list.
         self.ctrlIDList = [-1]*8    # output device ID list.
+        self.ctrlIMQList = ['']*8   # output plc IMQ list
         self.inputStates = [0]*8    # PLC input plug states list.
         self.outputStates = [0]*8   # PLC ouput plug states list.
+        # init the real plc connector if under real mode:
+        if not gv.iPlcSimulation:
+            if self.plcType == 'M':
+                self.plcConnector = m221.M221(self.ipAddr)
+            elif self.plcType == 'C':
+                self.plcConnector = s71200.S7PLC1200(self.ipAddr)
 
 #--AgentPLC--------------------------------------------------------------------
     def checkCtrl(self, idx):
@@ -62,13 +70,14 @@ class AgentPLC(object):
         return True
 
 #--AgentPLC--------------------------------------------------------------------
-    def hookCtrl(self, devId, ioOutPos):
+    def hookCtrl(self, devId, ioOutPos, imqVal):
         """ Hook a output device on the specific output plug position on the PLC.
         """
         if self.ctrlCount >= 8 or ioOutPos > 7: 
             print("AgentPLC:    All the GPIO output has beed used." ) 
             return False
         self.ctrlIDList[ioOutPos] = devId
+        self.ctrlIMQList[ioOutPos] = imqVal
         self.ctrlCount+=1
         return True
 
@@ -107,6 +116,14 @@ class AgentPLC(object):
         try:
             idx = self.ctrlIDList.index(sensorID)
             self.outputStates[idx] = state
+            imqVal = self.ctrlIMQList[idx]
+            print("PLC setup cmd: %s" % str((self.plcName, imqVal, state)))
+            if not gv.iPlcSimulation:
+                if self.plcType == 'M' and self.plcConnector:
+                    self.plcConnector.writeMem(imqVal, state)
+                elif self.plcType == 'C' and self.plcConnector:
+                    stateVal = True if state else False
+                    self.plcConnector.writeMem(imqVal, stateVal)
         except:
             print("AgentPLC:    The sensor with %s is not hooked to this PLC" %str(sensorID))
 

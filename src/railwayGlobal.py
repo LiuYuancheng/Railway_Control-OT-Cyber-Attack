@@ -28,9 +28,9 @@ FORK_TYPE   = 'FK'
 
 # PLC basic config: (type, IP address, port, input_#, output_#)
 PLC_CFG = {
-    'PLC0'  : ('[m221]',    "192.168.10.71", '502', 8, 8), 
-    'PLC2'  : ('[m221]',    "192.168.10.72", '502', 8, 8), 
-    'PLC1'  : ('[S7-1200]', "192.168.10.73", '502', 8, 8)
+    'PLC0'  : ('[m221]',    "192.168.10.71", 'M', 8, 8), 
+    'PLC2'  : ('[m221]',    "192.168.10.72", 'M', 8, 8), 
+    'PLC1'  : ('[S7-1200]', "192.168.10.73", 'S', 8, 8)
 }
 # PLC output connection map table:
 # PLC 0 [schneider M221]: 
@@ -38,9 +38,9 @@ PLC_CFG = {
 #   M10 -> Q0.1 Power Plant
 #   M60 -> Q0.2 Industrial LED
 # PLC 1 [seimens S7-1200]
-#   Q0.0 station + sensor
-#   Q0.1 level crossing pwr
-#   Q0.2 Resident LED
+#   Qx0.0-> Q0.0 station + sensor
+#   Qx0.1-> Q0.1 level crossing pwr
+#   Qx0.2-> Q0.2 Resident LED
 # PLC 2 [schneider M221]:
 #   M0  -> Q0.0 fork turnout
 #   M10 -> Q0.1 track A pwr

@@ -107,9 +107,9 @@ class railWayHubFrame(wx.Frame):
         """ Init the PLC agent to connect to the hardware and the PLC panel to 
             display/control the PLC state.
         """
-        (name, ip, port, _, _) = gv.PLC_CFG['PLC'+str(idx)]
-        plcAgent = agent.AgentPLC(self, idx, name, ip, port)
-        plcPanel = rwp.PanelPLC(plcBgPanel, 'PLC'+str(idx)+name, ip+':'+port)
+        (name, ip, plcType, _, _) = gv.PLC_CFG['PLC'+str(idx)]
+        plcAgent = agent.AgentPLC(self, idx, name, ip, plcType)
+        plcPanel = rwp.PanelPLC(plcBgPanel, 'PLC'+str(idx)+name, ip+':'+'502')
         plcPanel.setConnection(1)
         gv.iAgentMgr.appendPLC(plcAgent, plcPanel)
         return plcPanel

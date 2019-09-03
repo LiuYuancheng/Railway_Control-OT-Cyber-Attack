@@ -172,17 +172,17 @@ class MapMgr(object):
 
 #--MapMgr----------------------------------------------------------------------
     def hookPCLCtrl(self):
-        """ Hook the output signal to the PLC control."""
-        KeySet = (('S100 - Powerplant Lights',  100),
-                ('S101 - Airport Lights',       101),
-                ('S102 - Industrial Lightbox',  102),
-                ('S200 - Station Lights',       200), 
-                ('S202 - Residential Lightbox', 202), 
-                ('S301 - Track A Fork Power',   301),
-                ('S302 - Track B Fork Power',   302),
-                ('S303 - City LightBox',        303))
-        for (keyV, keyId) in KeySet:
-            gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), keyId)
+        """ Hook the output signal to the PLC control. Check global for the PLC map table"""
+        KeySet = (('S100 - Powerplant Lights',    100, 'M0'),
+                  ('S101 - Airport Lights',       101, 'M10'),
+                  ('S102 - Industrial Lightbox',  102, 'M60'),
+                  ('S200 - Station Lights',       200, 'Qx0.0'),
+                  ('S202 - Residential Lightbox', 202, 'Qx0.2'),
+                  ('S301 - Track A Fork Power',   301, 'M0'),
+                  ('S302 - Track B Fork Power',   302, 'M10'),
+                  ('S303 - City LightBox',        303, 'M60'))
+        for (keyV, keyId, imqVal) in KeySet:
+            gv.iAgentMgr.hookCtrl(self.signalDict[keyV][0].getID(), keyId, imqVal)
             self.setSignalPwr(keyV, 1)
 
 #-----------------------------------------------------------------------------
@@ -229,8 +229,8 @@ class MapMgr(object):
             for signalObj in self.signalDict[sKey]:
                 # Set the signal statues.
                 ctrlid = self.signalDict[sKey][0].getID()
-                gv.iAgentMgr.updatePLCout(ctrlid, value)
                 signalObj.setState(value)
+            gv.iAgentMgr.updatePLCout(ctrlid, value)
         # Update the element related to the signal.
         if sKey == 'S301 - Track A Fork Power':
             self.forkA.forkOn = value
@@ -418,10 +418,10 @@ class managerPLC(object):
         return (None, None, -1)
 
 #--managerPLC------------------------------------------------------------------
-    def hookCtrl(self, ctrlId, tagNum):
+    def hookCtrl(self, ctrlId, tagNum, imqVal):
         """ Hook the output deve to the PLC."""
         plcIdx, plcPos = tagNum//100-1, tagNum % 100
-        self.plcAgentList[plcIdx].hookCtrl(ctrlId, plcPos)
+        self.plcAgentList[plcIdx].hookCtrl(ctrlId, plcPos, imqVal)
 
 #--managerPLC------------------------------------------------------------------
     def hookSensor(self, sensorId):
