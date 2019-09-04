@@ -1,7 +1,7 @@
 # RailWay_PLC_Control
 ##### This project will create a 2 trains HMI system for the user to simulation different railway operation. The system use Schneider M221 and siemens s7 1200 to control the hardware. The program can also simulate 3 kind of cyber attack for the railway system. 
 
-![]([https://github.com/LiuYuancheng/RailWay_PLC_Control/blob/master/doc/UI%20screen%20shot/readme0.png](https://github.com/LiuYuancheng/RailWay_PLC_Control/blob/master/doc/UI screen shot/readme0.png))
+![]([https://github.com/LiuYuancheng/RailWay_PLC_Control/blob/master/doc/UI%20screen%20shot/readme0.png])
 
 ------
 
