@@ -177,7 +177,9 @@ class MapMgr(object):
                   ('S101 - Airport Lights',       101, 'M10'),
                   ('S102 - Industrial Lightbox',  102, 'M60'),
                   ('S200 - Station Lights',       200, 'Qx0.0'),
+                  #('S201 - Auto Level Crossing',  201, 'Qx0.1'),
                   ('S202 - Residential Lightbox', 202, 'Qx0.2'),
+                  #('S300 - Turnout Toggle',       300, 'M20'),
                   ('S301 - Track A Fork Power',   301, 'M0'),
                   ('S302 - Track B Fork Power',   302, 'M10'),
                   ('S303 - City LightBox',        303, 'M60'))
