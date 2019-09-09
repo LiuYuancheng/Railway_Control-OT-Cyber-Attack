@@ -42,24 +42,31 @@ BYTE_COUNT = '01'
 LENGTH = '0008'
 M_FC = '0f' # memory access function code.
 
+VALUES = {'0': '00', '1': '01'}
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class M221(object):
     def __init__(self, ip, debug=False):
         self.ip = ip
         self.plcAgent = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            self.plcAgent.connect((self.ip, PLC_PORT))
-        except:
-            print("PLC connection fail.")
+        self.plcAgent.connect((self.ip, 502))
+
 
     def writeMem(self, mTag, val):
         """ Set the plc memory address. mTag: (str)memory tag, val:(int) 0/1
         """
-        modbus_payload = "".join(
-            (TID, PROTOCOL_ID, LENGTH, UID, M_FC, mTag, BIT_COUNT, BYTE_COUNT, str(val)))
-        self.plcAgent.send(modbus_payload.decode('hex'))
-        response = self.plcAgent.recv(1024).encode('hex')
+        modbus_payload = TID + PROTOCOL_ID + LENGTH + UID + M_FC + MEM_ADDR[mTag] + BIT_COUNT + BYTE_COUNT + VALUES[str(val)]
+        print(modbus_payload)
+        # print modbus_payload
+        #self.plcAgent.send(modbus_payload.decode('hex'))
+        #modbus_payload = "".join(
+        #    (TID, PROTOCOL_ID, LENGTH, UID, M_FC, mTag, BIT_COUNT, BYTE_COUNT, str(val)))
+        #self.plcAgent.send(modbus_payload.decode('hex'))
+        bdata = bytes.fromhex(modbus_payload)
+        self.plcAgent.send(bdata)
+
+        #response = self.plcAgent.recv(1024).dencode('hex')
+        response = self.plcAgent.recv(1024).hex()
         print(response)
 
     def disconnect(self):

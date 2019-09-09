@@ -28,9 +28,9 @@ FORK_TYPE   = 'FK'
 
 # PLC basic config: (type, IP address, port, input_#, output_#)
 PLC_CFG = {
-    'PLC0'  : ('[m221]',    "192.168.10.71", 'M', 8, 8), 
-    'PLC2'  : ('[m221]',    "192.168.10.72", 'M', 8, 8), 
-    'PLC1'  : ('[S7-1200]', "192.168.10.73", 'S', 8, 8)
+    'PLC0'  : ('[m221]',    "192.168.10.72", 'M', 8, 8),
+    'PLC2'  : ('[m221]',    "192.168.10.71", 'M', 8, 8),
+    'PLC1'  : ('[S7-1200]', "192.168.10.73", 'C', 8, 8)
 }
 # PLC output connection map table:
 # PLC 0 [schneider M221]: 
@@ -120,7 +120,7 @@ iEmgStop = False    # emergency stop
 iMainFrame = None   # Main frame 
 iMapMgr = None      # map manager
 iMapPanel = None    # History chart panel.
-iPlcSimulation = True   # Flag to identify whether connect to real PLC 
+iPlcSimulation = False   # Flag to identify whether connect to real PLC
 iPlcPanelList = []  # Plc panel list. 
 iPlcMgr = None      # Plc manager 
 iPowCtrlPanel = None  # Power control panel.   
