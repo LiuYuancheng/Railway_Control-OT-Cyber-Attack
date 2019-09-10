@@ -35,7 +35,7 @@ PLC_CFG = {
 # PLC output connection map table:
 # PLC 0 [schneider M221]: 
 #   M10 -> Q0.0 Airport LED
-#   M10 -> Q0.1 Power Plant
+#   M0 -> Q0.1 Power Plant
 #   M60 -> Q0.2 Industrial LED
 # PLC 1 [seimens S7-1200]
 #   Qx0.0-> Q0.0 station + sensor
