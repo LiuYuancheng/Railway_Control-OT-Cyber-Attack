@@ -12,7 +12,6 @@
 
 #Reverse the memory change signal from HMI to PLC.
 if (ip.proto == TCP  && tcp.dst == 502) {
-    #msg("find the control cmd");
     # M10 -> Q0.0 Airport LED
     if (search(DATA.data ,"\x0f\x00\x0a\x00\x01\x01\x00")) {
         replace("\x0f\x00\x0a\x00\x01\x01\x00", "\x0f\x00\x0a\x00\x01\x01\x01");
@@ -30,37 +29,34 @@ if (ip.proto == TCP  && tcp.dst == 502) {
     if (search(DATA.data ,"\x0f\x00\x3c\x00\x01\x01\x00")) {
         replace("\x0f\x00\x3c\x00\x01\x01\x00", "\x0f\x00\x3c\x00\x01\x01\x01");
         msg("Reverse Industrial LED off request.\n");
+        exit();
     }
 
     if (search(DATA.data ,"\x0f\x00\x3c\x00\x01\x01\x01")) {
         replace("\x0f\x00\x3c\x00\x01\x01\x01", "\x0f\x00\x3c\x00\x01\x01\x00");
         msg("Reverse Industrial LED off request.\n");
+        exit();
     }
 
     # M0 -> Q0.1 Power Plant
     if (search(DATA.data ,"\x0f\x00\x00\x00\x01\x01\x00")) {
         replace("\x0f\x00\x00\x00\x01\x01\x00", "\x0f\x00\x00\x00\x01\x01\x01");
         msg("Power Plant LED off request.\n");
+        exit();
     }
 
     if (search(DATA.data ,"\x0f\x00\x00\x00\x01\x01\x01")) {
         replace("\x0f\x00\x00\x00\x01\x01\x01", "\x0f\x00\x00\x00\x01\x01\x00");
         msg("Power Plant LED off request.\n");
+        exit();
     }
 
-    #if (search(DATA.data ,"\x01\x00\x00\x00\x3d")) {
-    #    drop();
-    #    #msg("in filter");
-    #    log(DATA.data, "/home/pi/scada/log.txt");
-    #	exit();
-    #}
-
+    #Reverse the PLC run way light response to HMI.(method1)
     if (search(DATA.data ,"\x01\x08\x00\x00\x00\x40\x00")) {
         replace("\x01\x08\x00\x00\x00\x40\x00", "\x01\x08\x00\x04\x00\x40\x00");
         msg(">Reverse Airport LED off feedback.\n");
         exit();
     }
-
 
     if (search(DATA.data ,"\x01\x08\x00\x04\x00\x40\x00")) {
         replace("\x01\x08\x00\x04\x00\x40\x00", "\x01\x08\x00\x00\x00\x40\x00");
@@ -68,37 +64,18 @@ if (ip.proto == TCP  && tcp.dst == 502) {
         exit();
     }
 
-
 }else{
-
-#Reverse the PLC response to HMI.
-if (ip.proto == TCP  && tcp.src == 502) {
-    # Drop the PLC response.
-    #msg("xxxxxxxxx");
-
-    if (DATA.data+6 == "\x01" && DATA.data+7 == "\x01" && DATA.data+8 == "\x08" ) {
-	msg("find the match ");
-        #replace("\x01\x08\x00\x00\x00\x40\x00", "\x01\x08\x00\x04\x00\x40\x00");
-	if (DATA.data+10 == "\x00"){
-		DATA.data+10 = "\x04";
-	}
-	else{
-		DATA.data+10 = "\x00";
-	}
-        exit();
+    #Reverse the PLC run way light response to HMI.(method2)
+    if (ip.proto == TCP  && tcp.src == 502) {
+        if (DATA.data+6 == "\x01" && DATA.data+7 == "\x01" && DATA.data+8 == "\x08" ) {
+        msg("find the match ");
+        if (DATA.data+10 == "\x00"){
+            DATA.data+10 = "\x04";
+        }
+        else{
+            DATA.data+10 = "\x00";
+        }
+            exit();
+        }
     }
-
-
-    #if (search(DATA.data ,"\x01\x08\x00\x00\x00\x40\x00")) {
-    #    replace("\x01\x08\x00\x00\x00\x40\x00", "\x01\x08\x00\x04\x00\x40\x00");
-    #    msg(">Reverse Airport LED off feedback.\n");
-    #    exit();
-    #}
-
-    #if (search(DATA.data ,"\x01\x08\x00\x04\x00\x40\x00")) {
-    #    replace("\x01\x08\x00\x04\x00\x40\x00", "\x01\x08\x00\x00\x00\x40\x00");
-    #    msg(">Reverse Airport LED off feedback.\n");
-    #    exit();
-    #}
-}
 }

