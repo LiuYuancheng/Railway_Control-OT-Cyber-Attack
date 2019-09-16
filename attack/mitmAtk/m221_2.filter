@@ -10,6 +10,7 @@
 # License:     YC
 #-----------------------------------------------------------------------------
 
+exit();
 #Reverse the memory change signal from HMI to PLC.
 if (ip.proto == TCP  && tcp.dst == 502 && ip.dst == '192.168.10.71') {
 
@@ -17,32 +18,38 @@ if (ip.proto == TCP  && tcp.dst == 502 && ip.dst == '192.168.10.71') {
     if (search(DATA.data ,"\x0f\x00\x00\x00\x01\x01\x00")) {
         replace("\x0f\x00\x00\x00\x01\x01\x00", "\x0f\x00\x00\x00\x01\x01\x01");
         msg("Reverse Fork switch off request.\n");
+	exit();
     }
     if (search(DATA.data ,"\x0f\x00\x00\x00\x01\x01\x01")) {
         replace("\x0f\x00\x00\x00\x01\x01\x01", "\x0f\x00\x00\x00\x01\x01\x00");
         msg("Reverse Fork switch on request.\n");
+	exit();
     }
 
     # M10 -> Q0.1 track A pwr
     if (search(DATA.data ,"\x0f\x00\x0a\x00\x01\x01\x00")) {
         replace("\x0f\x00\x0a\x00\x01\x01\x00", "\x0f\x00\x0a\x00\x01\x01\x01");
         msg("Reverse track A pwr off request.\n");
+exit();
     }
 
     if (search(DATA.data ,"\x0f\x00\x0a\x00\x01\x01\x01")) {
         replace("\x0f\x00\x0a\x00\x01\x01\x01", "\x0f\x00\x0a\x00\x01\x01\x00");
         msg("Reverse track A pwr off request.\n");
+exit();
     }
 
     # M20 -> Q0.2 track B pwr
     if (search(DATA.data ,"\x0f\x00\x14\x00\x01\x01\x00")) {
         replace("\x0f\x00\x14\x00\x01\x01\x00", "\x0f\x00\x14\x00\x01\x01\x01");
         msg("Reverse track B pwr off request.\n");
+exit();
     }
 
     if (search(DATA.data ,"\x0f\x00\x14\x00\x01\x01\x01")) {
         replace("\x0f\x00\x14\x00\x01\x01\x01", "\x0f\x00\x14\x00\x01\x01\x00");
         msg("Reverse track B pwr off request.\n");
+exit();
     }
 
 
@@ -50,11 +57,13 @@ if (ip.proto == TCP  && tcp.dst == 502 && ip.dst == '192.168.10.71') {
     if (search(DATA.data ,"\x0f\x00\x3c\x00\x01\x01\x00")) {
         replace("\x0f\x00\x3c\x00\x01\x01\x00", "\x0f\x00\x3c\x00\x01\x01\x01");
         msg("Reverse city LED off request.\n");
+exit();
     }
 
     if (search(DATA.data ,"\x0f\x00\x3c\x00\x01\x01\x01")) {
         replace("\x0f\x00\x3c\x00\x01\x01\x01", "\x0f\x00\x3c\x00\x01\x01\x00");
         msg("Reverse city LED off request.\n");
+exit();
     }
 }
 
