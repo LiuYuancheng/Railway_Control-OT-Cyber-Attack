@@ -23,7 +23,7 @@ import railwayMgr as manager
 class PanelMap(wx.Panel):
     """ RailWay top view map panel to show the rail way control situation."""
     def __init__(self, parent):
-        wx.Panel.__init__(self, parent, size=(600, 480))
+        wx.Panel.__init__(self, parent, size=(600, 420))
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         # Init the map component manager.
         gv.iMapMgr = self.mapMgr = manager.MapMgr(self)

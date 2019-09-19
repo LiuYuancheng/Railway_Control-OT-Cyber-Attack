@@ -24,6 +24,7 @@ import railwayPanel as rwp
 import railwayPanelMap as rwpm 
 
 PERIODIC = 300 # periodicly call by 300ms
+FRAME_SIZE = (620, 740) if gv.iDisplayMode == 0 else (1240, 780)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -31,13 +32,14 @@ class railWayHubFrame(wx.Frame):
     """ Railway system control hub."""
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
-        wx.Frame.__init__(self, parent, id, title, size=(620, 740))
+        wx.Frame.__init__(self, parent, id, title, size= FRAME_SIZE)
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetIcon(wx.Icon(gv.TTICO_PATH))
         gv.iMainFrame = self
         gv.iAgentMgr = manager.managerPLC(self)
         # build the user interface.
-        self.SetSizer(self.buidUISizer())
+        uisizer = self.buidUISizerM0() if gv.iDisplayMode == 0 else self.buildUISizerM1()
+        self.SetSizer(uisizer)
         # Set the periodic feedback:
         self.lastPeriodicTime = time.time()
         self.timer = wx.Timer(self)
@@ -46,9 +48,82 @@ class railWayHubFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Refresh(False)
 
+#-----------------------------------------------------------------------------
+    def buildUISizerM1(self):
+        """ Build the UI under display mode 0 and the return the wx.sizer. """
+        # Init all the UI components: 
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        hsizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        # Col idx 0: 
+        vbox0 = wx.BoxSizer(wx.VERTICAL)
+        # Row idx 0: system control panel
+        vbox0.Add(wx.StaticText(self, label=" [ Main System Control ] "), flag=flagsR, border=2)
+        vbox0.AddSpacer(5)
+        sysBgPanel = wx.Panel(self)
+        hbox0 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox0.AddSpacer(10)
+        gv.iPowCtrlPanel = self.setPanel0 = rwp.PanelSysCtrl(sysBgPanel)
+        hbox0.Add(self.setPanel0, flag=flagsR, border=2)
+        hbox0.AddSpacer(10)
+        gv.iTrainAPanel = self.trainACtPanel = rwp.PanelTrainCtrl(sysBgPanel, 'TrainA')
+        hbox0.Add(self.trainACtPanel, flag=flagsR, border=2)
+        hbox0.AddSpacer(10)
+        gv.iTrainBPanel = self.trainBCtPanel = rwp.PanelTrainCtrl(sysBgPanel, 'TrainB')
+        hbox0.Add(self.trainBCtPanel, flag=flagsR, border=2)
+        hbox0.AddSpacer(10)
+        sysBgPanel.SetSizerAndFit(hbox0)
+        vbox0.Add(sysBgPanel, flag=flagsR, border=2)
+        vbox0.Add(wx.StaticLine(self, wx.ID_ANY, size=(590, -1), style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        vbox0.AddSpacer(5)
+
+        # Row idx 2: PLC contorl panel
+        vbox0.Add(wx.StaticText(self, label=" [ PLC Memory/Coils Control ] "), flag=flagsR, border=2)
+        vbox0.AddSpacer(5)
+        plcBgPanel = wx.Panel(self)
+        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox1.AddSpacer(10)
+        for i in range(3):
+            plcPanel = self.initPLC(i, plcBgPanel)
+            hbox1.Add(plcPanel, flag=flagsR, border=2)
+            gv.iPlcPanelList.append(plcPanel)
+            hbox1.AddSpacer(10)
+        plcBgPanel.SetSizer(hbox1)
+        vbox0.Add(plcBgPanel, flag=flagsR, border=2)
+        vbox0.Add(wx.StaticLine(self, wx.ID_ANY, size=(590, -1), style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        vbox0.AddSpacer(5)
+
+        # Row idx 2: CyberSecurity attack contorl panel
+        vbox0.Add(wx.StaticText(self, label=" [ Cyber Security Attack Simultaion Control ] "), flag=flagsR, border=2)
+        vbox0.AddSpacer(5)
+        self.attackPanel = rwp.PanelAttackSimu(self)
+        vbox0.Add(self.attackPanel, flag=flagsR, border=2)
+        hsizer.Add(vbox0, flag=flagsR, border=2)
+        
+        hsizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 780), style=wx.LI_VERTICAL), flag=flagsR, border=2)
+        hsizer.AddSpacer(10)
+
+        # Col idx 1: 
+        vbox1 = wx.BoxSizer(wx.VERTICAL)
+        # Row idx 0: Railway simulation display
+        vbox1.Add(wx.StaticText(self, label=" [ RailWay System Display ]"), flag=flagsR, border=2)
+        vbox1.AddSpacer(10)
+        gv.iMapPanel = self.mapPanel = rwpm.PanelMap(self)
+        vbox1.Add(self.mapPanel, flag=flagsR, border=2)
+        vbox1.AddSpacer(10)
+        vbox1.Add(wx.StaticLine(self, wx.ID_ANY, size=(610, -1), style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+
+        # Row idx 2:
+        vbox1.Add(wx.StaticText(self, label=" [ PLC Ladder Diagram Overwrite Control ] "), flag=flagsR, border=2)
+        vbox1.AddSpacer(10)
+        gv.iDataPanel = self.dataPanel = rwp.PanelInfoGrid(self)
+        vbox1.Add(gv.iDataPanel , flag=flagsR, border=2)
+        hsizer.Add(vbox1, flag=flagsR, border=2)
+        return hsizer
+
 #--railWayHubFrame-------------------------------------------------------------
-    def buidUISizer(self):
-        """ Build the UI and the return the wx.sizer. """
+    def buidUISizerM0(self):
+        """ Build the UI under display mode 0 and the return the wx.sizer. """
         # Init all the UI components: 
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         vsizer = wx.BoxSizer(wx.VERTICAL)
