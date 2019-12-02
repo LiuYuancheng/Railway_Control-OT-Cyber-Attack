@@ -14,8 +14,6 @@
 
 import tkinter as tk
 import socket
-import os
-import sys
 
 
 SEV_IP = ('127.0.0.1', 5005)
@@ -32,6 +30,8 @@ class controlPanel(tk.Frame):
         # Create the UDP client
         self.crtClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+
+        
         self.initWindow()
 
 #-----------------------------------------------------------------------------

