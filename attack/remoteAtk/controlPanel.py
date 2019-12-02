@@ -14,40 +14,72 @@
 
 import tkinter as tk
 import socket
+import os
+import sys
 
+
+SEV_IP = ('127.0.0.1', 5005)
+BUFFER_SZ = 1024
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 class controlPanel(tk.Frame):
 
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)   
         #reference to the master widget, which is the tk window                 
         self.master = master
-        #with that, we want to then run init_window, which doesn't yet exist
+        # Create the UDP client
+        self.crtClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
         self.initWindow()
 
-    #Creation of init_window
+#-----------------------------------------------------------------------------
     def initWindow(self):
         self.master.title("OT-plantform attack control panel")
         # allowing the widget to take the full space of the root window
         self.pack(fill=tk.BOTH, expand=1)
         # creating a button instance
-        startBt = tk.Button(self, text=" Active Attack ",command=self.startAtk)
+        self.startBt = tk.Button(self, text=" Active Attack ",command=self.startAtk)
         # placing the button on my window
-        startBt.place(x=10, y=10)
+        self.startBt.place(x=10, y=10)
 
-        stopBt = tk.Button(self, text=" Stop Attack ",command=self.startAtk)
+        self.stopBt = tk.Button(self, text=" Stop Attack ",command=self.onStopAtk)
         # placing the button on my window
-        stopBt.place(x=110, y=10)
+        self.stopBt.place(x=110, y=10)
 
-        cntBt = tk.Button(self, text=" Connect Sev ",command=self.startAtk)
-        cntBt.place(x=200, y=10)
+        self.cntBt = tk.Button(self, text=" Connect Sev ",command=self.onConnect)
+        self.cntBt.place(x=200, y=10)
 
-        text = tk.Text(self, height=7, width = 35)
-        text.place(x=10, y=40)
-        text.insert(tk.INSERT, "Init finished\n")
-        text.insert(tk.INSERT, "Try to connect to attack server\n")
+        self.text = tk.Text(self, height=7, width = 35)
+        self.text.place(x=10, y=40)
+        self.text.insert(tk.INSERT, "Init finished\n")
+        
 
+#-----------------------------------------------------------------------------
     def startAtk(self):
-        exit()
+        self.text.insert(tk.INSERT, "Start Attack\n")
+        msg = 'A;1'
+        self.crtClient.sendto(msg.encode('utf-8'), SEV_IP)
+
+
+#-----------------------------------------------------------------------------
+    def onStopAtk(self):
+        self.text.insert(tk.INSERT, "Stop Attack. \n")
+        msg = 'A;0'
+        self.crtClient.sendto(msg.encode('utf-8'), SEV_IP)
+
+#-----------------------------------------------------------------------------
+    def onConnect(self):
+        """ Try to connect to the server.
+        """
+        self.text.insert(tk.INSERT, "Try to connect to attack server\n")
+        msg = 'C;1'
+        self.crtClient.sendto(msg.encode('utf-8'), SEV_IP)
+        data, address = self.crtClient.recvfrom(BUFFER_SZ)
+        msg = data.decode(encoding="utf-8")
+        self.text.insert(tk.INSERT, "Server response: %s\n" %str(msg))
+
 
 # root window created. Here, that would be the only window, but
 # you can later have windows within windows.
