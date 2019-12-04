@@ -1,6 +1,11 @@
 #!/usr/bin/python
 import socket
-from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
+from platform import python_version
+
+if '3.' in python_version():
+    from http.server import BaseHTTPRequestHandler,HTTPServer
+else:
+    from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
 PORT_NUMBER = 8080
 SEV_IP = ('192.168.10.244', 5005)
@@ -15,7 +20,7 @@ class myHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type','text/html')
         self.end_headers()
         # Send the html message
-        self.wfile.write("405 file not found.")
+        self.wfile.write(b"405 file not found.")
         # init the server and send the attack active request.
         self.crtClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         msg = 'A;1'
