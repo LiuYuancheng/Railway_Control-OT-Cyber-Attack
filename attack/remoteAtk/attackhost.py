@@ -7,7 +7,7 @@ if '3.' in python_version():
 else:
     from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
-PORT_NUMBER = 8080
+PORT_NUMBER = 9090#8080
 SEV_IP = ('192.168.10.244', 5005)
 BUFFER_SZ = 1024
 
@@ -25,6 +25,7 @@ class myHandler(BaseHTTPRequestHandler):
         self.crtClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         msg = 'A;1'
         self.crtClient.sendto(msg.encode('utf-8'), SEV_IP)
+        print('Finished on response.')
         return
 
 try:
