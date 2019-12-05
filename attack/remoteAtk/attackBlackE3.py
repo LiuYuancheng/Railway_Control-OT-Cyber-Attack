@@ -1,35 +1,48 @@
 #!/usr/bin/python
+#-----------------------------------------------------------------------------
+# Name:        BlackE3.py
+#
+# Purpose:     This module be called from the macro in doc "operation manual.docm"
+#              to simulation the black energy 3 attack on the OT-plantform.
+#              > cmd /c C:\Python27\python.exe C:\Users\dcslyc\Documents\BlackE3.py " & sDir
+#               
+# Author:      JunWen Wong, Yuancheng Liu
+#
+# Created:     2019/12/05
+# Copyright:   NUS Singtel Cyber Security Research & Development Laboratory
+# License:     YC @ NUS
+#-----------------------------------------------------------------------------
+
 #to run - c:\Python27\python.exe BlackE3.py
 import sys
-import urllib2 
+import urllib2  # python2 urllib
 from os import system, name, path
 from time import sleep 
 
-# define our clear function 
+#-----------------------------------------------------------------------------
 def clear():
-    # for windows 
-    if name == 'nt': 
-        _ = system('cls') 
-    # for mac and linux(here, os.name is 'posix') 
-    else: 
-        _ = system('clear') 
+    """ Clear the cmd window. """
+    # for windows os.name is 'nt', mac and linux(here, os.name is 'posix'
+    _ = system('cls') if name == 'nt' else system('clear') 
 
-def progress(count, total, status=''):
-    """ Create a process bar for the searching part.
-    """
+#-----------------------------------------------------------------------------
+def progressBar(count, total, status=''):
+    """ Create a process bar."""
     bar_len = 60
     filled_len = int(round(bar_len * count / float(total)))
     percents = round(100.0 * count / float(total), 1)
     bar = '=' * filled_len + '-' * (bar_len - filled_len)
     sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', status))
-    sys.stdout.flush()
+    sys.stdout.flush() # use flash to make the current cmd line refresh.
 
+#-----------------------------------------------------------------------------
 def printLog():
-    """ Show the simulation scan log messages.
-    """
+    """ Show the simulation scan log messages."""
+    # Section 1: scan host computer information.
+    clear() 
     print('Searching for Windows credential:') 
-    for i in range(100):
-        progress(i, 100, status='Scan system file.')
+    for i in range(101):
+        progressBar(i, 100, status='Scan system file.')
         sleep(0.1)
     print('\n Credential found!\n') 
     sleep(1)
@@ -60,6 +73,7 @@ def printLog():
     print('Success\n') 
     sleep(3)
     g = raw_input("") 
+    # Section 2: scan the PLC related information.
     clear() 
     sleep(1) 
     print('smbclient -L 10.168.10.2 -U Alice -p 445\n') 
@@ -103,26 +117,25 @@ def printLog():
     sleep(2)
     print('Standby for incoming instruction\n') 
     sleep(2)
-
-    #============end=================
     g = raw_input("") 
-    #print g  
     clear() 
 
-
+#-----------------------------------------------------------------------------
 def main():
-    # Create the executable exe file in the same folder of the doc
+    # Create the simulated executable exe file in the same folder of the doc.
     if len(sys.argv) > 1:
         crtdir = sys.argv[1]
-        print("Current working directory: %s" %crtdir)
-        with open(path.join(crtdir, 'sysScanner.exe'), 'wb' ) as f:
-            f.write(b'010101010110101010101010101010101011010101')
+        try:
+            print("Current working directory: %s" %crtdir)
+            with open(path.join(crtdir, 'sysScanner.exe'), 'wb' ) as f:
+                f.write(b'010101010110101010101010101010101011010101')
+        except:
+            print("File creation permisson deny.")
     # Show the log.
-    clear() 
     sleep(1)
     printLog()
     # Connect the attack server and send the attack request.
-    urllib2.urlopen("http://localhost:9090/") 
+    urllib2.urlopen("http://localhost:8080/") 
 
 if __name__ == '__main__':
     main()
