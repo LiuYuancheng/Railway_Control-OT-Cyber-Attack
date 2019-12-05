@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #-----------------------------------------------------------------------------
-# Name:        attackServ.py
+# Name:        attackServ.py [python2.7/python3]
 #
 # Purpose:     This module will create a attack service program to run the 
 #              ettercap false data injection attack.

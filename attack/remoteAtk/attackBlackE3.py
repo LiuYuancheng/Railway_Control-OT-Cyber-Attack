@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #-----------------------------------------------------------------------------
-# Name:        BlackE3.py
+# Name:        BlackE3.py [python2.7]
 #
 # Purpose:     This module be called from the macro in doc "operation manual.docm"
 #              to simulation the black energy 3 attack on the OT-plantform.

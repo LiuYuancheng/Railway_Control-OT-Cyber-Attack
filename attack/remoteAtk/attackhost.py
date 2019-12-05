@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #-----------------------------------------------------------------------------
-# Name:        attackHost.py
+# Name:        attackHost.py [python2.7]
 #
 # Purpose:     This module is used to create a http server on port 8080 to handle
 #              the get request.
