@@ -1,9 +1,9 @@
 #!/usr/bin/python
 #-----------------------------------------------------------------------------
-# Name:        BlackE3.py [python2.7]
+# Name:        attckBlackE3.py [python2.7]
 #
-# Purpose:     This module be called from the macro in doc "operation manual.docm"
-#              to simulation the black energy 3 attack on the OT-plantform.
+# Purpose:     This module will be called from the macro in doc "operation manual.docm"
+#              to simulation the black energy 3 attack on the OT-platform.
 #              > cmd /c C:\Python27\python.exe C:\Users\dcslyc\Documents\BlackE3.py " & sDir
 #               
 # Author:      JunWen Wong, Yuancheng Liu
@@ -15,15 +15,20 @@
 
 #to run - c:\Python27\python.exe BlackE3.py
 import sys
-import urllib2  # python2 urllib
 from os import system, name, path
 from time import sleep 
+try:
+    # for Python2
+    import urllib as urllib2
+except ImportError:
+    # for Python3
+    import urllib2 
 
 #-----------------------------------------------------------------------------
 def clear():
     """ Clear the cmd window. """
     # for windows os.name is 'nt', mac and linux(here, os.name is 'posix'
-    _ = system('cls') if name == 'nt' else system('clear') 
+    _ = system('cls') if name == 'nt' else system('clear')
 
 #-----------------------------------------------------------------------------
 def progressBar(count, total, status=''):
@@ -33,7 +38,7 @@ def progressBar(count, total, status=''):
     percents = round(100.0 * count / float(total), 1)
     bar = '=' * filled_len + '-' * (bar_len - filled_len)
     sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', status))
-    sys.stdout.flush() # use flash to make the current cmd line refresh.
+    sys.stdout.flush()  # use flash to make the current cmd line refresh.
 
 #-----------------------------------------------------------------------------
 def printLog():
@@ -72,7 +77,10 @@ def printLog():
     sleep(2)
     print('Success\n') 
     sleep(3)
-    g = raw_input("") 
+    try:
+        g = raw_input("")
+    except:
+        input()
     # Section 2: scan the PLC related information.
     clear() 
     sleep(1) 
@@ -117,7 +125,10 @@ def printLog():
     sleep(2)
     print('Standby for incoming instruction\n') 
     sleep(2)
-    g = raw_input("") 
+    try:
+        _ = raw_input("")
+    except:
+        input()
     clear() 
 
 #-----------------------------------------------------------------------------
@@ -127,12 +138,12 @@ def main():
         crtdir = sys.argv[1]
         try:
             print("Current working directory: %s" %crtdir)
-            with open(path.join(crtdir, 'sysScanner.exe'), 'wb' ) as f:
-                f.write(b'010101010110101010101010101010101011010101')
+            with open(path.join(crtdir, 'sysScanner.exe'), 'wb' ) as fh:
+                fh.write(b'010101010110101010101010101010101011010101')
         except:
             print("File creation permisson deny.")
-    # Show the log.
     sleep(1)
+    # Show the log.
     printLog()
     # Connect the attack server and send the attack request.
     urllib2.urlopen("http://localhost:8080/") 

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #-----------------------------------------------------------------------------
-# Name:         controlPanel.py [python2.7/python3]
+# Name:        controlPanel.py [python2.7/python3]
 #
 # Purpose:     This module will create attack control panel to start and stop
 #              the man in the middle attack.
@@ -38,6 +38,7 @@ class controlPanel(tk.Frame):
 
 #-----------------------------------------------------------------------------
     def initWindow(self):
+        """ Init the window UI. """
         self.master.title("OT-plantform attack control panel")
         # allowing the widget to take the full space of the root window
         self.pack(fill=tk.BOTH, expand=1)
@@ -66,9 +67,8 @@ class controlPanel(tk.Frame):
 
 #-----------------------------------------------------------------------------
     def onConnect(self):
-        """ Try to connect to the server.
-        """
-        self.text.insert(tk.INSERT, "Try to connect to attack server\n")
+        """ Try to connect to the server."""
+        self.text.insert(tk.INSERT, "Try to connect to attack server.\n")
         msg = 'C;1'
         self.crtClient.sendto(msg.encode('utf-8'), SEV_IP)
         data, _ = self.crtClient.recvfrom(BUFFER_SZ)
