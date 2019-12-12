@@ -1,15 +1,15 @@
 # Remote Black Energy 3 Attack 
 #### Introduction 
 
-This project will be used to demo the "Black Energy 3" attack on the OT-PLC-Railway system. When the attack happens all the PLC output coils will be turn off but the system HMI center will show every thing normal.
+This project will demo the "Black Energy 3" attack on the OT-PLC-Railway system. When the attack happens, all the PLC output coils will be turn off but the system HMI center will show every thing normal.
 
-Steps to implement the attack: 
+Steps to implement the attack demo: 
 
-1. Connect the attack device (A Raspberry PI which with the attack server program) to the OT-PLC-Railway system by a CAT-5 cable. 
+1. Connect the attack device (A Raspberry PI with the attack server program) to the OT-PLC-Railway network system by a CAT-5 cable. 
 
-2. Attack situation 1: Attacker can use a remote attack control panel to turn off all the PLC output coils. 
-3. Attack situation 2: When a normal user open a MS word document, a document edit eable message box will pop up, if the confirm button was clicked, the attack server will turn off all the PLC output coils. 
-4. Attack situation 3: when a normal user click the "PLC detail menu" hyper-link in a MS-Word document the attack start. 
+2. Attack situation I : Attacker can use a remote attack control panel to turn off all the PLC output coils without detectable by the train supervisory control and data acquisition (SCADA) system. 
+3. Attack situation II : When a normal user open a MS-Word document, a document edit enable message box will pop up. If the confirm button was clicked, the attack server will turn off all the PLC output coils. 
+4. Attack situation III : when a normal user click the "PLC detail menu" hyper-link in a MS-Word document the attack start. 
 
 ------
 
@@ -43,24 +43,26 @@ $ ifconfig eth0 192.168.10.244 netmask 255.255.255.0 up
 
 ###### Program File List:
 
-| Program file          | Execution env     | Description                                                  |
-| --------------------- | ----------------- | ------------------------------------------------------------ |
-| attckBlackE3.py       | python2.7/python3 | This module will be called from the macro in doc "operation manual.docm"to simulation the black energy 3 attack on the OT-platform. |
+| Program File          | Execution Env     | Description                                                  |
+| --------------------- | ----------------- | :----------------------------------------------------------- |
+| attckBlackE3.py       | python2.7/python3 | This module will be called from the macro in doc "operation manual.docm"to simulation the black energy 3 attack on the OT-PLC-platform. |
 | attackHost.py         | python2.7/python3 | This module is used to create a http server on port 8080 to handle the get request. |
 | attackServ.py         | python2.7/python3 | This module will create a attack service program to run the Ettercap false data injection attack. |
 | controlPanel.py       | python2.7/python3 | This module will create attack control panel to start and stop the man in the middle attack. |
 | M2PLC221.py           | python2.7/python3 | This module is used to connect the Schneider M2xx PLC.       |
 | S7PLC1200.py          | python3           | This module is used to connect the siemens s7-1200 PLC       |
 | m221_3 filter         | C                 | This filter is used to do block all the PLC feedback data to the HMI computer.(192.168.10.21) |
-| operation manual.docm | MS word/VBA       | Word document with Macro to active the attack.               |
+| operation manual.docm | MS word/VBA       | MS-Word document with Macro to active the attack.            |
 
 ------
 
 #### Program Design 
 
-The program design is followed below diagram:
+The program design followed below diagram:
 
 ![](https://github.com/LiuYuancheng/RailWay_PLC_Control/blob/master/attack/remoteAtk/doc/attack.png)
+
+> The communication between client and server computer is using UDP.
 
 Ettercap filter network sniffing algorithm:
 
@@ -78,7 +80,7 @@ Ettercap filter network sniffing algorithm:
      $ etterfilter m221_3.filter -o m221_3.ef
      ```
 
-   - Plug the Raspberry Pi in the OT-RailWay-PLC system and setup the IP address:
+   - Plug the Raspberry Pi in the OT-PLC-Railway system and setup the IP address:
 
      ```
      $ sudo ifconfig eth0 192.168.10.244 netmask 255.255.255.0 up
@@ -90,9 +92,9 @@ Ettercap filter network sniffing algorithm:
      $ python attackServ.py
      ```
 
-2. ######  Start/stop attack from control pane
+2. ######  Start/stop attack from attack control panel
 
-   - Make should the client computer is also connected in the OT-PLC-Railway system, run/double click the **controlPanel.py** : 
+   - Make should the client computer is also connected in the OT-PLC-Railway system and its IP address is set to same subnet(192.168.10.XXX), run/double click the **controlPanel.py** : 
 
      ![](https://github.com/LiuYuancheng/RailWay_PLC_Control/blob/master/attack/remoteAtk/doc/controlPanel.png)
 
@@ -104,7 +106,7 @@ Ettercap filter network sniffing algorithm:
 
    - Run the attack host on the client computer with the word document.
 
-   - Double click the **operation manual.docm**, when the document is opened, an editing enable message box will be show. Click the "**OK**" button.
+   - Double click the MS-Word **operation manual.docm** : when the document is opened, an editing enable message box will be show. Click the "**OK**" button.
 
      ![](https://github.com/LiuYuancheng/RailWay_PLC_Control/blob/master/attack/remoteAtk/doc/macro1.png)
 
@@ -112,15 +114,15 @@ Ettercap filter network sniffing algorithm:
 
      ![](https://github.com/LiuYuancheng/RailWay_PLC_Control/blob/master/attack/remoteAtk/doc/scan1.png)
 
-     An executable file will be created with the same folder of the MS-Word document. (If the file was put in the 'Desktop', the file may not be created as the file creation permission is not high enough ) 
+     An executable file will be created with the same folder of the MS-Word document as shown below. Then the attack will be start automatically. 
 
      ![](https://github.com/LiuYuancheng/RailWay_PLC_Control/blob/master/attack/remoteAtk/doc/exeFile.png)
 
-     Then the attack will be start automatically. 
+     > If the file was put in the 'Desktop', the file may not be created as the "exe" file creation permission is not high enough.
 
 4. ###### Start the attack from the document's hyper-link
 
-   - Run the attack host on the client computer with the word document.
+   - Run the attack host on the client computer with the word/PDF document.
 
    - Click the hyper-link and the attack will be start when the bowser pop-up and shows "405 file not found error".
 
@@ -130,9 +132,9 @@ Ettercap filter network sniffing algorithm:
 
 ​	
 
+------
 
-
-
+> Last edit by LiuYuancheng(liu_yuan_cheng@hotmail.com) at 12/12/2019
 
 
 

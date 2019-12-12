@@ -2,7 +2,7 @@
 #-----------------------------------------------------------------------------
 # Name:           S7PLC1200.py
 #
-# Purpose:        This module is used to connect the siemens s7-1200 PLC. This
+# Purpose:       This module is used to connect the siemens s7-1200 PLC. This
 #                moduel was improved based on the project:
 #                http://simplyautomationized.blogspot.com/2014/12/raspberry-pi-getting-data-from-s7-1200.html
 #
