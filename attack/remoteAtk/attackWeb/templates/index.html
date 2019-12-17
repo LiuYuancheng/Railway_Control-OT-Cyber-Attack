@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background-color: #f1f1f1;
+            padding: 20px;
+            font-family: Arial;
+        }
+
+        h1 {
+            font-size: 50px;
+            word-break: break-all;
+        }
+
+        form { display: inline; }
+
+        #overlay1 {
+            position: fixed;
+            display: none;
+            width: 50%;
+            height: 50%;
+            top: 200px;
+            left: 500px;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        #overlay2 {
+            position: fixed;
+            display: none;
+            width: 50%;
+            height: 50%;
+            top: 200px;
+            left: 500px;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2;
+            cursor: pointer;
+        }
+
+
+
+        #text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 20px;
+            color: white;
+            transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+        }
+
+        .btn {
+            border: 2px solid black;
+            background-color: white;
+            color: black;
+            padding: 14px 28px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Green */
+        .success {
+            border-color: #4CAF50;
+            color: green;
+        }
+
+        .success:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Blue */
+        .info {
+            border-color: #2196F3;
+            color: dodgerblue;
+        }
+
+        .info:hover {
+            background: #2196F3;
+            color: white;
+        }
+
+        /* Orange */
+        .warning {
+            border-color: #ff9800;
+            color: orange;
+        }
+
+        .warning:hover {
+            background: #ff9800;
+            color: white;
+        }
+
+        /* Red */
+        .danger {
+            border-color: #f44336;
+            color: red;
+        }
+
+        .danger:hover {
+            background: #f44336;
+            color: white;
+        }
+
+        /* Gray */
+        .default {
+            border-color: #e7e7e7;
+            color: black;
+        }
+
+        .default:hover {
+            background: #e7e7e7;
+        }
+    </style>
+</head>
+
+<body style="background-image: url('../static/images/bgImg.jpg');"></body>>
+
+<h1 style="color:white">Enhancement of OT security cyber range platform</h1>
+<hr>
+<div id="overlay1" onclick="off1()">
+    <div id="text">back to control</div>
+    <p>
+        <img src="../static/images/attack.png" alt="Nature" style="width:100%">
+    </p>
+</div>
+
+<div id="overlay2" onclick="off2()">
+    <div id="text">back to control</div>
+    <p>
+        <img src="../static/images/mimAttack.png" alt="Nature" style="width:100%">
+    </p>
+</div>
+
+<div style="padding:20px">
+    <h2 style="color:white">Black Energy 3 attack </h2>
+    <form action="http://localhost:5000/index" method="post" >
+    <button class="btn danger" type="submit" name="submit_button" value="startAtt1">Start attack</button>
+    <button class="btn success" type="submit" name="submit_button" value="stopAtt1">Stop attack</button>
+    </form>
+    <button class="btn info" onclick="on1()">Show detail</button>
+</div>
+
+<script>
+    function on1() {
+        document.getElementById("overlay1").style.display = "block";
+    }
+
+    function off1() {
+        document.getElementById("overlay1").style.display = "none";
+    }
+</script>
+
+<div style="padding:20px">
+    <h2 style="color:white"> False data injection attack </h2>
+    <form action="http://localhost:5000/index" method="post">
+        <button class="btn danger" type="submit" name="submit_button" value="startAtt2">Start attack</button>
+        <button class="btn success" type="submit" name="submit_button" value="stopAtt2">Stop attack</button>
+    </form>
+    <button class="btn info" onclick="on2()">Show detail</button>
+
+</div>
+
+<script>
+    function on2() {
+        document.getElementById("overlay2").style.display = "block";
+    }
+
+    function off2() {
+        document.getElementById("overlay2").style.display = "none";
+    }
+</script>
+
+</body>
+
+</html>
