@@ -28,6 +28,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
+    # Add CSS in the html for flask is shown in this link: 
+    # https://pythonhow.com/add-css-to-flask-website/
     return render_template('index.html')
 
 @app.route('/index', methods = ['POST', 'GET'])
