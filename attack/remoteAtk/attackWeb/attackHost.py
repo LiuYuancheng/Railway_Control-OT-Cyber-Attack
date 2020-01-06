@@ -1,7 +1,8 @@
 import socket
 from flask import Flask, redirect, url_for, request, render_template
 
-SEV_IP = ('127.0.0.1', 5005)
+SEV_IP = ('192.168.10.244', 5005)
+ACT_IP = ('192.168.10.251', 5006)
 BUFFER_SZ = 1024
 
 # Init the UDP send server
@@ -20,7 +21,8 @@ def login():
         if request.form['submit_button'] == 'startAtt1':
             #return render_template('login.html')
             msg = 'A;1'
-            crtClient.sendto(msg.encode('utf-8'), SEV_IP)
+            #crtClient.sendto(msg.encode('utf-8'), SEV_IP)
+            crtClient.sendto(msg.encode('utf-8'), ACT_IP)
             return redirect(url_for('index'))
         elif request.form['submit_button'] == 'startAtt2':
             #return render_template('login.html')
