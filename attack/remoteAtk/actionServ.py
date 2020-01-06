@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #-----------------------------------------------------------------------------
-# Name:        attackServ.py [python2.7/python3]
+# Name:        action.py [python2.7/python3]
 #
 # Purpose:     This module will create a attack service program to run the 
 #              ettercap false data injection attack.
@@ -30,11 +30,13 @@ while True:
     if not data: break
     if isinstance(data, bytes):
         print("income message")
-        atkStr = 'explorer  "C:\Users\Administrator\Documents\doc"'
-        print(str(subprocess.Popen(atkStr, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)))
+        atkStr = 'explorer "C:\Users\Administrator\Documents\doc"'
+        print(str(subprocess.Popen(atkStr, shell=True,
+                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT)))
         time.sleep(1)
         atkStr = '"C:\Users\Administrator\Documents\doc\operation manual.docm"'
-        print(str(subprocess.Popen(atkStr, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)))          # UPD receive buffer size
+        print(str(subprocess.Popen(atkStr, shell=True, stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT)))          # UPD receive buffer size
         
     else:
         print('Data format invalid: %s' % str(data))
