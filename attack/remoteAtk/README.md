@@ -1,25 +1,31 @@
 # Cyber Attack on OT-PLC-Railway System
 
-- **Black Energy 3**
-- **False data Injection attack** 
-
 #### Introduction 
 
-This project will demo the "Black Energy 3" attack on the OT-PLC-Railway system. When the attack happens, all the PLC output coils will be turn off but the system HMI center will show every thing normal.
+This project will demo two kinds of cyber attack situation on the OT-PLC-Railway system. (The introduction of OT-PLC-Railway system was shown in the main project readme file)
 
-Steps to implement the attack demo: 
+- **Black Out Attack** : This is one attack situation of Black Energy 3 cyber attack. When the attack happens, all the PLC output coils(energy output) will be turn off. The system HMI center energy may detect the exception situation and the user can not recover to normal situation by using the SCADA PC. ( The SCADA HMI shows every thing normal when the user do recover action but actually all the PLC related output still keep turned off)
+- **False Data Injection Attack** : When the attack happens, the reversed user control commend will be injected into the system and the exception situation is not detectable from the SCADA HMI system. (When the user try to turn on the Runway lights in the airport, all the lights will be turn off.)
+
+###### Steps to implement the attack demo: 
 
 1. Connect the attack device (A Raspberry PI with the attack server program) to the OT-PLC-Railway network system by a CAT-5 cable. 
 
 2. Attack situation I : Attacker can use a remote attack control panel to turn off all the PLC output coils without detectable by the train supervisory control and data acquisition (SCADA) system. 
+
 3. Attack situation II : When a normal user open a MS-Word document, a document edit enable message box will pop up. If the confirm button was clicked, the attack server will turn off all the PLC output coils. 
+
 4. Attack situation III : when a normal user click the "PLC detail menu" hyper-link in a MS-Word document the attack start. 
+
+5. Attack situation IV: Connected the attack PC to the system from internet/local Ethernet. Start the attack from the attack control Web interface.
+
+   
 
 ------
 
 #### Program Setup
 
-###### Development Environment: Python 2.7 & python 3.7
+###### Development Environment: Python 2.7 & python 3.7 + HTML5
 
 ###### Additional Lib/Software Need:
 
@@ -36,6 +42,12 @@ Steps to implement the attack demo:
    $ sudo apt-get update -y
    $ sudo apt-get install -y ettercap-graphical
    ```
+   
+3. Flask (need to install on the attakerPC to show the attack control web)
+
+   ```
+   pip install Flask
+   ```
 
 ###### Hardware Needed: 
 
@@ -47,16 +59,17 @@ $ ifconfig eth0 192.168.10.244 netmask 255.255.255.0 up
 
 ###### Program File List:
 
-| Program File          | Execution Env     | Description                                                  |
-| --------------------- | ----------------- | :----------------------------------------------------------- |
-| attckBlackE3.py       | python2.7/python3 | This module will be called from the macro in doc "operation manual.docm"to simulation the black energy 3 attack on the OT-PLC-platform. |
-| attackHost.py         | python2.7/python3 | This module is used to create a http server on port 8080 to handle the get request. |
-| attackServ.py         | python2.7/python3 | This module will create a attack service program to run the Ettercap false data injection attack. |
-| controlPanel.py       | python2.7/python3 | This module will create attack control panel to start and stop the man in the middle attack. |
-| M2PLC221.py           | python2.7/python3 | This module is used to connect the Schneider M2xx PLC.       |
-| S7PLC1200.py          | python3           | This module is used to connect the siemens s7-1200 PLC       |
-| m221_3 filter         | C                 | This filter is used to do block all the PLC feedback data to the HMI computer.(192.168.10.21) |
-| operation manual.docm | MS word/VBA       | MS-Word document with Macro to active the attack.            |
+| Program File            | Execution Env     | Description                                                  |
+| ----------------------- | ----------------- | :----------------------------------------------------------- |
+| attckBlackE3.py         | python2.7/python3 | This module will be called from the macro in doc "operation manual.docm"to simulation the black out attack on the OT-PLC-platform. |
+| attackhost.py           | python2.7/python3 | This module is used to create a http server on port 8080 to handle the attack get request. |
+| attackServ.py           | python2.7/python3 | This module will create a attack service program to run the Ettercap false data injection attack. |
+| controlPanel.py         | python2.7/python3 | This module will create attack control panel to start and stop the man in the middle attack. |
+| M2PLC221.py             | python2.7/python3 | This module is used to connect the Schneider M2xx PLC.       |
+| S7PLC1200.py            | python3           | This module is used to connect the siemens s7-1200 PLC       |
+| m221_3 filter           | C                 | This filter is used to do block all the PLC feedback data to the HMI computer.(192.168.10.21) |
+| operation manual.docm   | MS word/VBA       | MS-Word document with Macro to active the attack.            |
+| attackWeb/attackHost.py | python3           | flask server to                                              |
 
 ------
 
