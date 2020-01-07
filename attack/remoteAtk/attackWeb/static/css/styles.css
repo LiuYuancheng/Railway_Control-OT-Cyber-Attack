@@ -13,6 +13,11 @@ form {
     display: inline;
 }
 
+#firstname {
+    font-size: 50px;
+    background-color: yellow
+  }
+
 #overlay1 {
     position: fixed;
     display: none;
