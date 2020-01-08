@@ -13,9 +13,9 @@ form {
     display: inline;
 }
 
-#firstname {
-    font-size: 50px;
-    background-color: yellow
+p#firstname {
+    color: white;
+    background-color: black
   }
 
 #overlay1 {
