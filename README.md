@@ -1,7 +1,27 @@
-# Railway_PLC_Control
+# Railway_PLC_Control/Attack
 #### Introduction
 
-##### This project will create a 2 trains HMI system for the user to simulation different railway operation. The system use Schneider M221 and siemens s7 1200 to control the hardware. The program can also simulate 3 kind of cyber attack for the railway system. 
+This project contains two section :  
+
+**PLC-Railway HMI System** : In this section we will create 2 Railway PLC SCADA HMI system with schneider wonderware(R) program and python for the user to control the PLC railway modules or simulate different railway operation for training or research purpose. 
+
+**PLC-SCADA System Attack **:  In this section we will show different kinds of cyber attack situation on the Railway SCADA system which we have build in the previous section.
+
+UI view of the PLC-Railway HMI system: 
+
+###### Python Railway HMI UI
+
+![](doc/RMimg/pythonmain.png)
+
+> python railway HMI is used to simulate different control situation. 
+
+###### Schneider Wonderware HMI UI
+
+Main control window:
+
+
+
+##### The system use Schneider M221 and siemens s7 1200 to control the hardware. The program can also simulate 3 kind of cyber attack for the railway system. 
 
 ![](https://github.com/LiuYuancheng/RailWay_PLC_Control/blob/master/doc/readme0.png)
 
