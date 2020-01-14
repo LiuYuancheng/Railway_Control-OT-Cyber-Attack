@@ -11,8 +11,8 @@
 <body style="background-image: url('../static/images/bgimg3.png');"></body>>
 
 <h1 style="color:white">Enhancement of OT Security Cyber Range Platform</h1>
+<!-- Section 1: attack control -->
 <hr>
-
 <p id="firstname"> Active/De-active the attack.</p>
 
 <div id="overlay1" onclick="off1()">
@@ -30,7 +30,7 @@
 </div>
 
 <div style="padding:20px">
-    <h2 style="color:white">Black Out Attack </h2>
+    <h2 style="color:white">Black Out Attack  <small><a href="#attack1">[link]</a></small></h2> 
     <form action="http://localhost:5000/index" method="post">
         <button class="btn danger" type="submit" name="submit_button" value="startAtt1">Start attack</button>
         <button class="btn success" type="submit" name="submit_button" value="stopAtt1">Stop attack</button>
@@ -49,7 +49,7 @@
 </script>
 
 <div style="padding:20px">
-    <h2 style="color:white"> False Data Injection Attack </h2>
+    <h2 style="color:white">False Data Injection Attack  <small><a href="#attack2">[link]</a></small></h2>
     <form action="http://localhost:5000/index" method="post">
         <button class="btn danger" type="submit" name="submit_button" value="startAtt2">Start attack</button>
         <button class="btn success" type="submit" name="submit_button" value="stopAtt2">Stop attack</button>
@@ -67,7 +67,31 @@
         document.getElementById("overlay2").style.display = "none";
     }
 </script>
+<!-- Section 2 -->
+<hr>
+<p id="firstname"> Attack situation introduction.</p>
 
+<pre style="color:white"><a id = attack1> 
+    Black Out Attack : This is one attack situation of Black Energy 3 cyber attack. 
+    When the attack happens, all the PLC output coils(energy output) will be turn 
+    off. The system HMI center energy may detect the exception situation and the 
+    user can not recover to normal situation by using the SCADA PC. ( The SCADA HMI 
+    shows every thing normal when the user do recover action but actually all the PLC 
+    related output still keep turned off)
+</a>
+</pre>
+
+<pre style="color:white"><a id = attack2> 
+    False Data Injection Attack : When the attack happens, the reversed user control 
+    commend will be injected into the system and the exception situation is not 
+    detectable from the SCADA HMI system. (When the user try to turn on the Runway 
+    lights in the airport, all the lights will be turn off.)
+</a>
+</pre>
+
+
+
+<a href="mailto:liu_yuan_cheng@hotmail.com?subject=Report A problem&body=found a bug"> Report a problem </a>
 </body>
 
 </html>
