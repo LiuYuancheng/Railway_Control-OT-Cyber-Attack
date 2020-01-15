@@ -18,6 +18,24 @@ p#firstname {
     background-color: black
   }
 
+a {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: bold;
+    text-decoration: #e7e7e7;
+}
+
+a:link {
+    color: #0679a0;
+}
+
+a:visited{
+    color: #cccccc
+}
+
+a:hover, a:active{
+    color:#E03a3e
+}
+
 #overlay1 {
     position: fixed;
     display: none;
