@@ -73,7 +73,7 @@ $ ifconfig eth0 192.168.10.244 netmask 255.255.255.0 up
 | ----------------------- | ----------------- | :----------------------------------------------------------- |
 | attckBlackE3.py         | python2.7/python3 | This module will be called from the macro in doc "operation manual.docm" to simulation the black out attack on the OT-PLC-platform. |
 | attackhost.py           | python2.7/python3 | This module is used to create a http server on port 8080 to handle the attack get request. |
-| attackServ.py           | python2.7/python3 | This module will create a attack service program to run the Ettercap false data injection attack. |
+| attackServ.py           | python3          | This module will create a attack service program to run the Ettercap false data injection attack. |
 | controlPanel.py         | python2.7/python3 | This module will create attack control panel to start and stop the man in the middle attack. |
 | M2PLC221.py             | python2.7/python3 | This module is used to connect the Schneider M2xx PLC.       |
 | S7PLC1200.py            | python3           | This module is used to connect the siemens s7-1200 PLC       |
@@ -122,12 +122,12 @@ Ettercap filter network sniffing algorithm:
      $ sudo ifconfig eth0 192.168.10.244 netmask 255.255.255.0 up
      ```
 
-   - Copy the file **m221_3.ef** and **attackServ.py** in to the same folder and run the attack server:
+   - Copy the file **m221_1.ef**, **m221_3.ef** and **attackServ.py** in to the same folder and run the attack server:
 
      ```
-     $ python attackServ.py
+     $ sudo python3 attackServ.py
      ```
-
+     > Better use sudo to avoid permission deney error. 
 2. ######  Start/Stop Black Out Attack From Attack Control Panel
 
    - Make should the client computer is also connected in the OT-PLC-Railway system and its IP address is set to same subnet(192.168.10.XXX), run/double click the **controlPanel.py** : 
@@ -195,7 +195,7 @@ Ettercap filter network sniffing algorithm:
 
 ------
 
-> Last edit by LiuYuancheng(liu_yuan_cheng@hotmail.com) at 07/01/2020
+> Last edit by LiuYuancheng(liu_yuan_cheng@hotmail.com) at 16/01/2020
 
 
 
