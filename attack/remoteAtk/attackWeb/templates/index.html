@@ -10,11 +10,18 @@
 
 <body style="background-image: url('../static/images/bgimg3.png');"></body>>
 
-<h1 style="color:white"><img src="../static/images/logo.png" alt="trustwave log" width="200"
+<h1 style="color:white"><img src="../static/images/logoSingtel.png" usemap="#linkmap" alt="trustwave log" width="200"
         style="float: left; padding: 10px;">
     Enhancement of OT Security Cyber
     Range Platform
 </h1>
+<map name="linkmap" id="linkedweb">
+    <area shape="rect" coords="0, 0, 200, 40" href="https://www.trustwave.com/en-us/"
+        alt="Jump to Trustwave offical webpage." title="Jump to Trustwave offical webpage">
+    <area shape="rect" coords="0, 40, 200, 60" href="https://www.singtel.com/" alt="Jump to Singtel offical webpage"
+        title="Jump to Singtel offical webpage">
+</map>
+
 <!-- Section 1: attack control -->
 <hr>
 <p id="firstname"> Active/De-active the attack.</p>
@@ -34,7 +41,7 @@
 </div>
 
 <div style="padding:20px">
-    <h2 style="color:white">Black Out Attack <small><a href="#attack1">[link]</a></small></h2>
+    <h2 style="color:white">Black Out Attack <small><a href="#attack1">[View attack video]</a></small></h2>
     <form action="http://localhost:5000/index" method="post">
         <button class="btn danger" type="submit" name="submit_button" value="startAtt1">Start attack</button>
         <button class="btn success" type="submit" name="submit_button" value="stopAtt1">Stop attack</button>
@@ -53,7 +60,7 @@
 </script>
 
 <div style="padding:20px">
-    <h2 style="color:white">False Data Injection Attack <small><a href="#attack2">[link]</a></small></h2>
+    <h2 style="color:white">False Data Injection Attack <small><a href="#attack2">[View attack video]</a></small></h2>
     <form action="http://localhost:5000/index" method="post">
         <button class="btn danger" type="submit" name="submit_button" value="startAtt2">Start attack</button>
         <button class="btn success" type="submit" name="submit_button" value="stopAtt2">Stop attack</button>
@@ -85,6 +92,21 @@
 
 </pre>
 
+<video width="640" height="480" controls>
+    <source src="../static/images/blackoutAtt.mp4" type="video/mp4">
+    Your browser does not support HTML5 video.
+</video>
+<!--
+<object classid="CLSID:CAFEEFAC-0014-0002-0000-ABCDEFFEDCBA" width="640" height="480">
+    <param name="type" value="video/x-msvideo">
+    <param name="URL" value="../static/images/black_out_attack.avi">
+    <param name="uiMode" value="full">
+    <param name="autoStart" value="false">
+    <embed width="640" height="480" type="video/x-msvideo" src="../static/images/black_out_attack.avi" control="All" loop="false" autostart="false"
+    pluginspage="https://add0n.com/the-media-player.html"
+    >
+</object>
+-->
 <pre style="color:white"><a id = attack2> 
     False Data Injection Attack </a>: When the attack happens, the reversed user control 
     commend will be injected into the system and the exception situation is not 
@@ -93,6 +115,12 @@
 
 </pre>
 
+<video width="640" height="480" controls>
+    <source src="../static/images/falseDataAtt.mp4" type="video/mp4">
+    Your browser does not support HTML5 video.
+</video>
+
+<hr>
 <a href="mailto:liu_yuan_cheng@hotmail.com?subject=Report A problem&body=found a bug"> Report a problem </a>
 </body>
 
