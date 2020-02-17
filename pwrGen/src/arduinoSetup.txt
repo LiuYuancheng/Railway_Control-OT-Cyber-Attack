@@ -1,0 +1,343 @@
+#include <Adafruit_NeoPixel.h>
+#include <Button.h> //by Michael Adams, available in Lib Manager
+
+#ifdef __AVR__
+#include <avr/power.h>
+#endif
+
+#define BARRIER_OPENING_DELAY_MS    4000 //time taken to open the barriers
+#define BARRIER_CLOSING_DELAY_MS    4000 //time taken to close the  barriers
+#define TURNOUT_ON_DURATION_MS      50
+#define PRESSURE_THRESH 300
+#define STATION_STOP_TIME_MS        3000
+//PIN Map
+
+//Neopixcel LED strips
+#define STRIP1_DATA   7
+#define STRIP2_DATA   6
+#define STRIP3_DATA   5
+#define STRIP1_LENGTH 122//No of LEDs
+#define STRIP2_LENGTH 120
+#define STRIP3_LENGTH 120
+
+#define PRESSURE_SENSOR A10
+#define IR_DETECTOR     A14
+
+//outputs, Open collector, Up to 20V/100mA for T1-T5, Upto 100V/1A for T6(open Drain)
+#define TRANSISTOR_1  17
+#define TRANSISTOR_2  15
+#define TRANSISTOR_3  14
+#define TRANSISTOR_4  4
+#define TRANSISTOR_5  5
+#define TRANSISTOR_6  2
+
+#define RELAY_1       A7
+#define RELAY_2       A6
+#define RELAY_3       A5
+#define RELAY_4       A4
+#define RELAY_5       A3
+#define RELAY_6       A2
+#define RELAY_7       A1
+#define RELAY_8       A0
+
+
+#define POWERPLANT_PWR    TRANSISTOR_1
+#define AIRPORT_PWR       TRANSISTOR_2
+#define STATION_PWR       TRANSISTOR_3
+#define BARRIER_PWR       RELAY_1
+#define TURNOUT_RELAY1    RELAY_8
+#define TURNOUT_RELAY2    RELAY_7
+#define TRACK_A_PWR       RELAY_2  //2
+#define TRACK_B_PWR       RELAY_3  //3
+
+//for Relays, LOW is ON; for Transistors HIGH is ON
+#define POWERPLANT_PWR_ON     HIGH
+#define AIRPORT_PWR_ON        HIGH
+#define STATION_PWR_ON        HIGH
+#define BARRIER_PWR_ON     LOW
+#define TURNOUT_RELAY1_ON  LOW
+#define TURNOUT_RELAY2_ON  LOW
+#define TRACK_A_PWR_ON        LOW
+#define TRACK_B_PWR_ON        LOW
+
+//inputs, short to ground to activate. Internal Pullups
+#define S1_POWERPLANT 53
+#define S1_AIRPORT    51
+#define S1_LIGHTBOX   49
+#define S2_STATION    47
+#define S2_BARRIER    45
+#define S2_LIGHTBOX   43
+#define S3_TURNOUT    41
+#define S3_TRACK_A    39
+#define S3_TRACK_B    37
+#define S3_LIGHTBOX   35
+#define S3_ATTACK_A   33
+#define S3_ATTACK_B   31
+
+
+Adafruit_NeoPixel strip1 = Adafruit_NeoPixel(STRIP1_LENGTH, STRIP1_DATA, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(STRIP2_LENGTH, STRIP2_DATA, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip3 = Adafruit_NeoPixel(STRIP3_LENGTH, STRIP3_DATA, NEO_GRB + NEO_KHZ800);
+
+Button but_S1_POWERPLANT(S1_POWERPLANT);
+Button but_S1_AIRPORT(S1_AIRPORT);
+Button but_S1_LIGHTBOX(S1_LIGHTBOX);
+Button but_S2_STATION(S2_STATION);
+Button but_S2_BARRIER(S2_BARRIER);
+Button but_S2_LIGHTBOX(S2_LIGHTBOX);
+Button but_S3_TURNOUT(S3_TURNOUT);
+Button but_S3_TRACK_A(S3_TRACK_A);
+Button but_S3_TRACK_B(S3_TRACK_B);
+Button but_S3_LIGHTBOX(S3_LIGHTBOX);
+Button but_S3_ATTACK_A(S3_ATTACK_A);
+Button but_S3_ATTACK_B(S3_ATTACK_B);
+
+bool turnoutToggeled = false;
+bool barrierStateOpen = true;
+unsigned long battierOpStartMillis = 0;
+
+uint32_t color_white = strip1.Color(255, 255, 255);
+uint32_t color_red = strip1.Color(255, 0, 0);
+uint32_t color_blue = strip1.Color(0, 0, 255);
+
+void setShack(bool beBlue) {
+  for (uint16_t i = 118; i < 120; i++) {
+    if (beBlue) {
+      strip3.setPixelColor(i, color_blue);
+    }
+    else {
+      strip3.setPixelColor(i, color_red);
+    }
+    strip3.show();
+  }
+}
+
+void setup() {
+  // put your setup code here, to run once:
+  // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
+#if defined (__AVR_ATtiny85__)
+  if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
+#endif
+  // End of trinket special code
+
+
+  //OUTPUTS
+  Serial.begin(9600);
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+  strip1.begin();
+  strip2.begin();
+  strip3.begin();
+
+  colorWipe1(color_white, 0); // White
+  colorWipe2(color_white, 0); // White
+  colorWipe3(color_white, 0); // White
+
+  strip1.show(); // Initialize all pixels to 'off'
+  strip2.show();
+  strip3.show();
+  setShack(false);
+
+  pinMode(IR_DETECTOR, INPUT);
+
+
+  pinMode(TRANSISTOR_1, OUTPUT);
+  pinMode(TRANSISTOR_2, OUTPUT);
+  pinMode(TRANSISTOR_3, OUTPUT);
+  pinMode(TRANSISTOR_4, OUTPUT);
+  pinMode(TRANSISTOR_5, OUTPUT);
+  pinMode(TRANSISTOR_6, OUTPUT);
+  digitalWrite(TRANSISTOR_1, LOW);
+  digitalWrite(TRANSISTOR_2, LOW);
+  digitalWrite(TRANSISTOR_3, LOW);
+  digitalWrite(TRANSISTOR_4, LOW);
+  digitalWrite(TRANSISTOR_5, LOW);
+  digitalWrite(TRANSISTOR_6, LOW);
+
+  pinMode(RELAY_1, OUTPUT);
+  pinMode(RELAY_2, OUTPUT);
+  pinMode(RELAY_3, OUTPUT);
+  pinMode(RELAY_4, OUTPUT);
+  pinMode(RELAY_5, OUTPUT);
+  pinMode(RELAY_6, OUTPUT);
+  pinMode(RELAY_7, OUTPUT);
+  pinMode(RELAY_8, OUTPUT);
+  digitalWrite(RELAY_1, HIGH);//Relay On when INx = 0V
+  digitalWrite(RELAY_2, HIGH);
+  digitalWrite(RELAY_3, HIGH);
+  digitalWrite(RELAY_4, HIGH);
+  digitalWrite(RELAY_5, HIGH);
+  digitalWrite(RELAY_6, HIGH);
+  digitalWrite(RELAY_7, HIGH);
+  digitalWrite(RELAY_8, HIGH);
+
+
+
+  //INPUTS
+  but_S1_POWERPLANT.begin();
+  but_S1_AIRPORT.begin();
+  but_S1_LIGHTBOX.begin();
+  but_S2_STATION.begin();
+  but_S2_BARRIER.begin();
+  but_S2_LIGHTBOX.begin();
+  but_S3_TURNOUT.begin();
+  but_S3_TRACK_A.begin();
+  but_S3_TRACK_B.begin();
+  but_S3_LIGHTBOX.begin();
+  but_S3_ATTACK_A.begin();
+  but_S3_ATTACK_B.begin();
+}
+
+void loop() {
+ 
+  if (but_S1_POWERPLANT.toggled()) {
+    Serial.println("POWERPLANT");
+    if (but_S1_POWERPLANT.read() == Button::PRESSED) {
+      digitalWrite (POWERPLANT_PWR, POWERPLANT_PWR_ON);
+    }
+    else {
+      digitalWrite (POWERPLANT_PWR, !POWERPLANT_PWR_ON);
+    }
+  }
+
+  if (but_S1_AIRPORT.toggled()) {
+    Serial.println("AIRPORT");
+
+    if (but_S1_AIRPORT.read() == Button::PRESSED) {
+      digitalWrite (AIRPORT_PWR, AIRPORT_PWR_ON);
+    }
+    else {
+      digitalWrite (AIRPORT_PWR, !AIRPORT_PWR_ON);
+    }
+  }
+
+
+  if (but_S1_LIGHTBOX.toggled()) {
+    Serial.println("S1 LIGHTBOX");
+
+    if (but_S1_LIGHTBOX.read() == Button::PRESSED) {
+      colorWipe1(color_red, 0); // Red
+    }
+    else {
+      // colorWipe1(strip1.Color(242, 228, 69), 0); // White
+      colorWipe1(color_white, 0); // White
+    }
+  }
+
+
+  if (but_S2_STATION.toggled()) {
+    Serial.println("STATION");
+
+    if (but_S2_STATION.read() == Button::PRESSED) {
+      digitalWrite (STATION_PWR, STATION_PWR_ON);
+    }
+    else {
+      digitalWrite (STATION_PWR, !STATION_PWR_ON);
+    }
+  }
+
+  if (but_S2_BARRIER.toggled()) {
+    Serial.println("BARRIER");
+
+    if (but_S2_BARRIER.read() == Button::PRESSED) {
+      digitalWrite (BARRIER_PWR, BARRIER_PWR_ON);
+    }
+    else {
+      digitalWrite (BARRIER_PWR, !BARRIER_PWR_ON);
+    }
+  }
+
+  if (but_S2_LIGHTBOX.toggled()) {
+    Serial.println("S2 LIGHTBOX");
+
+    if (but_S2_LIGHTBOX.read() == Button::PRESSED) {
+      colorWipe2(color_red, 0); // Red
+    }
+    else {
+      colorWipe2(color_white, 0); // White
+    }
+  }
+
+  if (but_S3_TURNOUT.toggled() ) {
+    static int lastRelay = 1;
+
+    Serial.println("TURNOUT");
+    // turnoutToggeled = true;
+    //both off, for safty
+    digitalWrite (TURNOUT_RELAY1, !TURNOUT_RELAY1_ON);
+    digitalWrite (TURNOUT_RELAY2, !TURNOUT_RELAY2_ON);
+    delay(100);
+    if (lastRelay == 1) {
+      digitalWrite (TURNOUT_RELAY2, TURNOUT_RELAY2_ON);
+      lastRelay = 2;
+    } else {
+      lastRelay = 1;
+      digitalWrite (TURNOUT_RELAY1, TURNOUT_RELAY1_ON);
+    }
+    delay(TURNOUT_ON_DURATION_MS);
+    digitalWrite (TURNOUT_RELAY1, !TURNOUT_RELAY1_ON);
+    digitalWrite (TURNOUT_RELAY2, !TURNOUT_RELAY2_ON);
+
+  }
+
+
+
+  if (but_S3_TRACK_A.toggled()) {
+    Serial.println("TRACK A POWER");
+
+    if (but_S3_TRACK_A.read() == Button::PRESSED) {
+      digitalWrite (TRACK_A_PWR, TRACK_A_PWR_ON);
+    }
+    else {
+      digitalWrite (TRACK_A_PWR, !TRACK_A_PWR_ON);
+    }
+  }
+
+  if (but_S3_TRACK_B.toggled()) {
+    Serial.println("TRACK B POWER");
+
+    if (but_S3_TRACK_B.read() == Button::PRESSED) {
+      digitalWrite (TRACK_B_PWR, TRACK_B_PWR_ON);
+    }
+    else {
+      digitalWrite (TRACK_B_PWR, !TRACK_B_PWR_ON);
+    }
+  }
+
+  if (but_S3_LIGHTBOX.toggled()) {
+    Serial.println("S3 LIGHTBOX");
+
+    if (but_S3_LIGHTBOX.read() == Button::PRESSED) {
+      colorWipe3(color_red, 0); // Red
+      setShack(false);
+    }
+    else {
+      colorWipe3(color_white, 0); // White
+      setShack(true);
+    }
+
+  }
+
+  if (but_S2_STATION.read() == Button::PRESSED) {
+    int p = analogRead(PRESSURE_SENSOR);
+    Serial.println(p);
+    if (p < PRESSURE_THRESH) {
+
+      if (but_S3_TRACK_A.read() == Button::PRESSED) {
+        digitalWrite (TRACK_A_PWR, !TRACK_A_PWR_ON);
+        //digitalWrite (BARRIER_PWR, BARRIER_PWR_ON);
+        delay(STATION_STOP_TIME_MS);
+
+        digitalWrite (TRACK_A_PWR, TRACK_A_PWR_ON);
+        delay(3000);//delay for train to pass away from pressure sensor
+
+        //digitalWrite (BARRIER_PWR, !BARRIER_PWR_ON);
+      }
+      
+    }
+  }
+
+}
+
+Tello IP: 192.168.10.1  UDP PORT:8889  <<-->>  PC/Mac/Mobile
