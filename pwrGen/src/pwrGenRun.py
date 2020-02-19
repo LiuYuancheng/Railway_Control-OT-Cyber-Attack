@@ -13,9 +13,10 @@
 import os, sys
 import time
 import wx
-import uiGobal as gv
-import uiPanel as pl
-PERIODIC = 500      # update in every 500ms
+import pwrGenGobal as gv
+import pwrGenPanel as pl
+import pwrGenMgr as gm
+PERIODIC = 100      # update in every 500ms
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -27,12 +28,21 @@ class UIFrame(wx.Frame):
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetIcon(wx.Icon(gv.ICO_PATH))
         self.SetSizer(self._buidUISizer())
+
+        gv.iGnMgr = gm.pwrGenMgr(self, 0, "Gen mgr")
+        gv.iGnMgr.start()
+        gv.iGnMgr.setLoad([],[])
+
         # Set the periodic call back
         self.lastPeriodicTime = time.time()
         self.timer = wx.Timer(self)
         self.updateLock = False
         self.Bind(wx.EVT_TIMER, self.periodic)
         self.timer.Start(PERIODIC)  # every 500 ms
+
+        self.Bind(wx.EVT_CLOSE, self.onClose)
+        print("Program init finished.")
+
 
 #--UIFrame---------------------------------------------------------------------
     def _buidUISizer(self):
@@ -57,6 +67,16 @@ class UIFrame(wx.Frame):
         if (not self.updateLock) and now - self.lastPeriodicTime >= gv.iUpdateRate:
             print("main frame update at %s" % str(now))
             self.lastPeriodicTime = now
+
+#--<telloFrame>----------------------------------------------------------------
+    def onClose(self, event):
+        """ Stop all the thread and close the UI."""
+        gv.iGnMgr.stop()
+        self.timer.Stop()
+        self.Destroy()
+
+
+
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

@@ -26,3 +26,4 @@ iMainFrame = None   # MainFrame.
 iImagePanel = None  # Image panel.
 iCtrlPanel = None   # control panel
 iUpdateRate = 1     # main frame update rate 1 sec.
+iGnMgr = None
