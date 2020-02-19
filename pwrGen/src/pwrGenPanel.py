@@ -10,6 +10,8 @@
 # License:     YC
 #-----------------------------------------------------------------------------
 import wx
+from math import sin, cos, radians
+
 
 from datetime import datetime
 import pwrGenGobal as gv
@@ -19,13 +21,14 @@ import pwrGenGobal as gv
 class PanelImge(wx.Panel):
     """ Panel to display image. """
 
-    def __init__(self, parent, panelSize=(640, 480)):
+    def __init__(self, parent, panelSize=(120, 120)):
         wx.Panel.__init__(self, parent, size=panelSize)
         self.SetBackgroundColour(wx.Colour(200, 200, 200))
         self.panelSize = panelSize
         self.bmp = wx.Bitmap(gv.BGIMG_PATH, wx.BITMAP_TYPE_ANY)
         self.Bind(wx.EVT_PAINT, self.onPaint)
         self.SetDoubleBuffered(True)
+        self.angle = 0 
 
 #--PanelImge--------------------------------------------------------------------
     def onPaint(self, evt):
@@ -34,7 +37,9 @@ class PanelImge(wx.Panel):
         w, h = self.panelSize
         dc.DrawBitmap(self._scaleBitmap(self.bmp, w, h), 0, 0)
         dc.SetPen(wx.Pen('RED'))
-        dc.DrawText('This is a sample image', w//2, h//2)
+        dc.DrawText(str(gv.iGnMgr.getMotorSp()), 5, 5)
+        dc.SetPen(wx.Pen('GREEN', width=5, style=wx.PENSTYLE_SOLID))
+        dc.DrawLine(w//2, h//2, int(w//2+60*sin(radians(self.angle))), int(h//2-60*cos(radians(self.angle))))
 
 #--PanelImge--------------------------------------------------------------------
     def _scaleBitmap(self, bitmap, width, height):
@@ -66,6 +71,8 @@ class PanelImge(wx.Panel):
             update the panel, if called as updateDisplay(updateFlag=?) the function
             will set the self update flag.
         """
+        self.angle += 30 
+        self.angle = self.angle%360
         self.Refresh(False)
         self.Update()
 

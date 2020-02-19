@@ -40,7 +40,13 @@ class pwrGenMgr(threading.Thread):
         else:
             self.motorSp = 50 - 2*(val-3)
             self.pumpSp = 2
-        
+    
+    def getMotorSp(self):
+        return self.motorSp
+    
+    def getPumpSp(self):
+        return self.pumpSp
+
     def run(self):
         while not self.terminate:
             time.sleep(PERIOD)
