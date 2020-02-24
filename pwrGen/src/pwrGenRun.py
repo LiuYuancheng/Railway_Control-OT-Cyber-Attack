@@ -38,7 +38,7 @@ class UIFrame(wx.Frame):
         gv.iGnMgr.setLoad([],[])
 
 
-        self.parmList = [50, 22, 50, 50, gv.iGnMgr.getMotorSp(), gv.iGnMgr.getPumpSp(), 0, 0]
+        self.parmList = [50, 22, 50, 50, gv.iGnMgr.getMotorSp(), gv.iGnMgr.getPumpSp(), 0, 1]
         self.setLEDVal(0, self.parmList[0]*100)
         self.setLEDVal(1, self.parmList[1]*10)
         self.setLEDVal(2, gv.iGnMgr.getMotorSp())
@@ -109,11 +109,10 @@ class UIFrame(wx.Frame):
         mSizer.AddSpacer(5)
         mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 140),
                             style=wx.LI_VERTICAL), flag=flagsR, border=2)
+
         mSizer.AddSpacer(5)
-
-        
-
- 
+        gv.iCtrlPanel = pl.PanelCtrl(self)
+        mSizer.Add(gv.iCtrlPanel, flag=flagsR, border=2)
         sizerAll.Add(mSizer, flag=flagsR, border=2)
 
         return sizerAll
@@ -137,6 +136,9 @@ class UIFrame(wx.Frame):
             gv.iPumpImgPnl.updateDisplay()
             self.setLEDVal(2, gv.iGnMgr.getMotorSp())
             self.setLEDVal(3, gv.iGnMgr.getPumpSp())
+            self.parmList[5] = gv.iGnMgr.getMotorSp()
+            self.parmList[6] = gv.iGnMgr.getPumpSp()
+            self.statusbar.SetStatusText('COM Msg to Arduino: %s ' % str(self.parmList))
 
     def setLEDVal(self, idx, val):
         self.ledList[idx].SetValue(str(val))
@@ -147,9 +149,6 @@ class UIFrame(wx.Frame):
         gv.iGnMgr.stop()
         self.timer.Stop()
         self.Destroy()
-
-
-
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

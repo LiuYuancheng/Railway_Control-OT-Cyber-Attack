@@ -185,14 +185,23 @@ class PanelCtrl(wx.Panel):
 #--PanelCtrl-------------------------------------------------------------------
     def _buidUISizer(self):
         """ build the control panel sizer. """
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.RIGHT 
         ctSizer = wx.BoxSizer(wx.VERTICAL)
-        hbox0 = wx.BoxSizer(wx.HORIZONTAL)
-        ctSizer.AddSpacer(5)
+        ctSizer.AddSpacer(10)
         # Row idx 0: show the search key and map zoom in level.
-        hbox0.Add(wx.StaticText(self, label="Control panel".ljust(15)),
+        ctSizer.Add(wx.StaticText(self, label=" Indicator panel".ljust(15)),
                   flag=flagsR, border=2)
-        ctSizer.Add(hbox0, flag=flagsR, border=2)
+
+        ctSizer.AddSpacer(20)
+        self.smkIdc = wx.Button(self, label='Smoke [OFF] ', size=(120, 30), name='smoke')
+        self.smkIdc.SetBackgroundColour(wx.Colour('GRAY'))
+        ctSizer.Add(self.smkIdc, flag=flagsR, border=2)
+        ctSizer.AddSpacer(20)
+
+        self.sirenIdc = wx.Button(self, label='Siren [ON] ', size=(120, 30), name='smoke')
+        self.sirenIdc.SetBackgroundColour(wx.Colour('RED'))
+        ctSizer.Add(self.sirenIdc, flag=flagsR, border=2)
+        ctSizer.AddSpacer(10)
         return ctSizer
 
 
