@@ -24,7 +24,7 @@ class UIFrame(wx.Frame):
     """ URL/IP gps position finder main UI frame."""
     def __init__(self, parent, id, title):
         """ Init the UI and parameters """
-        wx.Frame.__init__(self, parent, id, title, size=(600, 360))
+        wx.Frame.__init__(self, parent, id, title, size=(600, 220))
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetIcon(wx.Icon(gv.ICO_PATH))
         self.SetSizer(self._buidUISizer())
@@ -53,19 +53,30 @@ class UIFrame(wx.Frame):
         vbox = wx.BoxSizer(wx.VERTICAL)
         vbox.Add(wx.StaticText(self, label="Load setting: "), flag=flagsR, border=2)
         vbox.AddSpacer(5)
+        loadLb = ('Airport', 'Train track A', 'Train track B', 'City Pwr', 'Industrial Pwr')
         for i in range(5):
-            cb = wx.CheckBox(self, label = 'Load :%s' %str(i)) 
+            cb = wx.CheckBox(self, label = 'Load[%s]: %s' %(str(i),loadLb[i])) 
             cb.Bind(wx.EVT_CHECKBOX, self.onCheck)
             vbox.Add(cb, flag=flagsR, border=2)
             vbox.AddSpacer(5)
         mSizer.Add(vbox, flag=flagsR, border=2)
+        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 210),
+                            style=wx.LI_VERTICAL), flag=flagsR, border=2)
+
         # Col 1: moto
         mSizer.AddSpacer(5)
-        gv.iImagePanel = pl.PanelImge(self)
-        mSizer.Add(gv.iImagePanel, flag=flagsR, border=2)
+        gv.iMotoImgPnl = pl.PanelMoto(self)
+        mSizer.Add(gv.iMotoImgPnl, flag=flagsR, border=2)
         mSizer.AddSpacer(5)
-        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 560),
+        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 210),
                                  style=wx.LI_VERTICAL), flag=flagsR, border=2)
+        mSizer.AddSpacer(5)
+
+        gv.iPumpImgPnl = pl.PanelPump(self)
+        mSizer.Add(gv.iPumpImgPnl, flag=flagsR, border=2)
+        mSizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 210),
+                            style=wx.LI_VERTICAL), flag=flagsR, border=2)
+
         mSizer.AddSpacer(5)
         gv.iCtrlPanel = pl.PanelCtrl(self)
         mSizer.Add(gv.iCtrlPanel, flag=flagsR, border=2)
@@ -74,7 +85,7 @@ class UIFrame(wx.Frame):
 
     def onCheck(self, evnt):
         cb = evnt.GetEventObject()
-        idx = int(cb.GetLabel().split(':')[-1])
+        idx = int(cb.GetLabel().split('[')[-1][0])
         val = 1 if cb.GetValue() else 0
         gv.iGnMgr.setLoad([idx],[val])
 
@@ -84,10 +95,9 @@ class UIFrame(wx.Frame):
         """ Call back every periodic time."""
         now = time.time()
         if (not self.updateLock) and now - self.lastPeriodicTime >= gv.iUpdateRate:
-            print("main frame update at %s" % str(now))
+            #print("main frame update at %s" % str(now))
             self.lastPeriodicTime = now
-            gv.iImagePanel.updateDisplay()
-
+            gv.iMotoImgPnl.updateDisplay()
 
 
 #--<telloFrame>----------------------------------------------------------------

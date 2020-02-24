@@ -14,16 +14,18 @@ import os
 
 dirpath = os.getcwd()
 print("Current working directory is : %s" % dirpath)
-APP_NAME = 'uiFrame'
+APP_NAME = 'Generator Mgr'
 
 #------<IMAGES PATH>-------------------------------------------------------------
 IMG_FD = 'img'
 ICO_PATH = os.path.join(dirpath, IMG_FD, "geoIcon.ico")
-BGIMG_PATH = os.path.join(dirpath, IMG_FD, "motor.png")
+MOIMG_PATH = os.path.join(dirpath, IMG_FD, "motor.png")
+PUIMG_PATH = os.path.join(dirpath, IMG_FD, "pump.png")
 
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
 iMainFrame = None   # MainFrame.
-iImagePanel = None  # Image panel.
+iMotoImgPnl = None  # Image panel.
+iPumpImgPnl = None
 iCtrlPanel = None   # control panel
 iUpdateRate = 0.3     # main frame update rate 1 sec.
 iGnMgr = None
