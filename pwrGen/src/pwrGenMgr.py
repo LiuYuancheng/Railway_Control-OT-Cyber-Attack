@@ -20,6 +20,7 @@ class pwrGenMgr(threading.Thread):
         threading.Thread.__init__(self)
         self.parent = parent
         self.loadPins = [0]*5   # load connect to the generator.
+        self.loadCount = sum(self.loadPins)
         self.motorSp = 50        # motor speed 0:low, 1:medium, 2:high
         self.pumpSp = 1         # pump speed 0:low, 1 medium, 2:high
         self.respT = 3          # time interval to response back to normal.
@@ -31,16 +32,25 @@ class pwrGenMgr(threading.Thread):
             self.loadPins[idx] = val
         # simulate the frequency imediatly change.
         val = sum(self.loadPins)
-        if  val == 3:
-            self.motorSp = 50
-            self.pumpSp = 1
-        elif val < 3:
-            self.motorSp = 50 + 2*(3-val)
+        
+        # Set pump speed
+        if  val == 0:
             self.pumpSp = 0
-        else:
-            self.motorSp = 50 - 2*(val-3)
+        elif val == 3:
             self.pumpSp = 2
-    
+        elif val < 3:
+            self.pumpSp = 1
+        else:
+            self.pumpSp = 3
+
+        # set moto speed
+        if val > self.loadCount:
+            self.motorSp -= 3
+        elif val < self.loadCount:
+            self.motorSp += 3
+        self.loadCount = val
+
+
     def getMotorSp(self):
         return self.motorSp
     

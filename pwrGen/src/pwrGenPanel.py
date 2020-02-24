@@ -42,8 +42,9 @@ class PanelMoto(wx.Panel):
             color = 'YELLOW'
         elif motoSp > 50: 
             color = 'RED'
-        dc.DrawText(str(motoSp), 5, 5)
+        
         dc.SetPen(wx.Pen(color, width=5, style=wx.PENSTYLE_SOLID))
+        dc.DrawText(str(motoSp), 5, 5)
         dc.DrawLine(w//2, h//2, int(w//2+60*sin(radians(self.angle))), 
                      int(h//2-60*cos(radians(self.angle))))
         
@@ -107,6 +108,8 @@ class PanelPump(wx.Panel):
         self.bmp = wx.Bitmap(gv.PUIMG_PATH, wx.BITMAP_TYPE_ANY)
         self.Bind(wx.EVT_PAINT, self.onPaint)
         self.SetDoubleBuffered(True)
+        self.maxVal = 50
+        self.pos = 50
 
 #--PanelImge--------------------------------------------------------------------
     def onPaint(self, evt):
@@ -115,15 +118,16 @@ class PanelPump(wx.Panel):
         w, h = self.panelSize
         dc.DrawBitmap(self._scaleBitmap(self.bmp, w, h), 0, 0)
         dc.SetPen(wx.Pen('BLACK'))
-        dc.DrawText(str(gv.iGnMgr.getMotorSp()), 5, 5)
-        pos = 10
-        rect = pos / 5
+        textList = ('Neutral', 'Lower', 'Medium', 'Higher')
+        dc.DrawText(textList[gv.iGnMgr.getPumpSp()], 5, 5)
+        colorList = ('GRAy','YELLOW', '#36ff27', 'RED')
+        rect = self.pos / 5
         for i in range(1, 21):
             if i < rect:
                 dc.SetBrush(wx.Brush('#075100'))
                 dc.DrawRectangle(88, i*3+27, 25, 4)
             else:
-                dc.SetBrush(wx.Brush('#36ff27'))
+                dc.SetBrush(wx.Brush(colorList[gv.iGnMgr.getPumpSp()]))
                 dc.DrawRectangle(88, i*3+27, 25, 4)
 
 #--PanelImge--------------------------------------------------------------------
@@ -156,6 +160,14 @@ class PanelPump(wx.Panel):
             update the panel, if called as updateDisplay(updateFlag=?) the function
             will set the self update flag.
         """
+        maxValList = (10,30, 50, 80)
+        addValList = (5, 5, 10, 15) 
+        self.maxVal = maxValList[gv.iGnMgr.getPumpSp()]
+        addVal = addValList[gv.iGnMgr.getPumpSp()]
+        if self.pos < 100 - self.maxVal:
+            self.pos = 100
+        else:
+            self.pos -= addVal
         self.Refresh(False)
         self.Update()
 
