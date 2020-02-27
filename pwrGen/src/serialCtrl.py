@@ -130,7 +130,7 @@ class UIFrame(wx.Frame):
             self.lastPeriodicTime = now
 
     def onSend(self, event):
-        msgStr = ','.join([item.GetValue() for item in self.fieldlList])
+        msgStr = ','.join([item.GetValue() for item in self.fieldlList])+'\r'
         self.statusbar.SetStatusText(msgStr)
         if self.serComm:
             print('Send message [%s] to cmd ' %msgStr)
