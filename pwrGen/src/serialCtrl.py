@@ -103,7 +103,7 @@ class UIFrame(wx.Frame):
         gs.Add(pumLedCB, flag=flagsR, border=2)
 
         gs.Add(wx.StaticText(self, label=' Smoke : '), flag=flagsR, border=2)
-        smokeCB= wx.ComboBox(self, -1, choices=['on', 'off'])
+        smokeCB= wx.ComboBox(self, -1, choices=['slow','fast', 'off'])
         self.fieldlList.append(smokeCB)
         gs.Add(smokeCB, flag=flagsR, border=2)
 
@@ -130,7 +130,7 @@ class UIFrame(wx.Frame):
             self.lastPeriodicTime = now
 
     def onSend(self, event):
-        msgStr = ','.join([item.GetValue() for item in self.fieldlList])+'\r'
+        msgStr = ':'.join([item.GetValue() for item in self.fieldlList])#+'\r'
         self.statusbar.SetStatusText(msgStr)
         if self.serComm:
             print('Send message [%s] to cmd ' %msgStr)
