@@ -41,6 +41,10 @@ BIT_COUNT = '0001'
 BYTE_COUNT = '01'
 LENGTH = '0008'
 M_FC = '0f' # memory access function code.
+M_RD = '01' # read internal bits %M
+
+
+
 
 VALUES = {'0': '00', '1': '01'}
 #-----------------------------------------------------------------------------
@@ -50,6 +54,19 @@ class M221(object):
         self.ip = ip
         self.plcAgent = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.plcAgent.connect((self.ip, 502))
+
+    def redMem(self):
+        """ Set the plc memory address. mTag: (str)memory tag, val:(int) 0/1
+        """
+        modbus_payload = TID + PROTOCOL_ID + '0006' + UID + M_RD+"0000003d"
+        print(modbus_payload)
+        bdata = bytes.fromhex(modbus_payload)
+        self.plcAgent.send(bdata)
+        #response = self.plcAgent.recv(1024).dencode('hex')
+        response = self.plcAgent.recv(1024).hex()
+        #response = self.plcAgent.recv(1024).hex()
+        print(response)
+        return str(response)
 
 
     def writeMem(self, mTag, val):
@@ -76,8 +93,14 @@ class M221(object):
 
 #-----------------------------------------------------------------------------
 def testCase():
-    plc = M221('192.168.10.72') 
-    plc.writeMem('M10', 0)
+    plc = M221('192.168.10.71')
+    plc.redMem()
+    #plc.writeMem('M10', 0)
+
+
+
+
+
     plc.disconnect()
 	
 #-----------------------------------------------------------------------------
