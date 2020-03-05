@@ -14,11 +14,12 @@ import os, sys
 import time
 import wx
 import wx.gizmos as gizmos
-
+import udpCom
 import pwrGenGobal as gv
 import pwrGenPanel as pl
 import pwrGenMgr as gm
 PERIODIC = 100      # update in every 500ms
+UDP_PORT = 5005
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -38,11 +39,14 @@ class UIFrame(wx.Frame):
         gv.iGnMgr.setLoad([],[])
 
 
+        self.client = udpCom.udpClient(('127.0.0.1', UDP_PORT))
+
+
         self.parmList = [50, 22, 50, 50, gv.iGnMgr.getMotorSp(), gv.iGnMgr.getPumpSp(), 0, 1]
         self.setLEDVal(0, self.parmList[0]*100)
         self.setLEDVal(1, self.parmList[1]*10)
         self.setLEDVal(2, gv.iGnMgr.getMotorSp())
-        self.setLEDVal(3, gv.iGnMgr.getPumpSp())
+        #self.setLEDVal(3, gv.iGnMgr.getPumpSp())
 
         # Set the periodic call back
         self.lastPeriodicTime = time.time()
@@ -66,8 +70,8 @@ class UIFrame(wx.Frame):
         sizerAll.AddSpacer(5)
         # LED area
         uSizer = wx.BoxSizer(wx.HORIZONTAL)
-        lbList = ('Frequency : ', 'Voltage : ', 'MotoSpeed : ', 'PumpSpeed : ')
-        for i in range(4):
+        lbList = ('Frequency : ', 'Voltage : ', 'LoadNum : ')
+        for i in range(3):
             uSizer.Add(wx.StaticText(self, label=lbList[i]), flag=flagsR, border=2)
             led = gizmos.LEDNumberCtrl(self, -1, size = (60, 25), style=gizmos.LED_ALIGN_CENTER)
             self.ledList.append(led)
@@ -75,6 +79,12 @@ class UIFrame(wx.Frame):
             uSizer.Add(led, flag=flagsR, border=2)
             uSizer.AddSpacer(10)
 
+        uSizer.Add(wx.StaticText(self, label="pump Speed"), flag=flagsR, border=2)
+        self.MotoSP= wx.ComboBox(self, -1, choices=['off', 'low', 'high'])
+        self.MotoSP.SetSelection(0)
+        self.MotoSP.Bind(wx.EVT_COMBOBOX, self.onPumpSpdChange)
+        uSizer.Add(self.MotoSP, flag=flagsR, border=2)
+        
         sizerAll.Add(uSizer, flag=flagsR, border=2)
         sizerAll.AddSpacer(5)
 
@@ -132,13 +142,32 @@ class UIFrame(wx.Frame):
         if (not self.updateLock) and now - self.lastPeriodicTime >= gv.iUpdateRate:
             #print("main frame update at %s" % str(now))
             self.lastPeriodicTime = now
+
             gv.iMotoImgPnl.updateDisplay()
             gv.iPumpImgPnl.updateDisplay()
-            self.setLEDVal(2, gv.iGnMgr.getMotorSp())
-            self.setLEDVal(3, gv.iGnMgr.getPumpSp())
-            self.parmList[5] = gv.iGnMgr.getMotorSp()
-            self.parmList[6] = gv.iGnMgr.getPumpSp()
+
+            result = self.client.sendMsg('Get', resp=True)
+            result = result.decode('utf-8')
+            freq, vol, smk, siren, ldNum = result.split(';')
+            self.setLEDVal(0, str(freq))
+            self.setLEDVal(1, str(vol))
+            self.setLEDVal(2, ldNum)
+            if smk != 'off':
+                gv.iCtrlPanel.smkIdc.SetBackgroundColour(wx.Colour('RED'))
+            else:
+                gv.iCtrlPanel.smkIdc.SetBackgroundColour(wx.Colour('GRAY'))
+
+            if siren != 'off':
+                gv.iCtrlPanel.sirenIdc.SetBackgroundColour(wx.Colour('RED'))
+            else:
+                gv.iCtrlPanel.sirenIdc.SetBackgroundColour(wx.Colour('GRAY'))
+
+            #self.parmList[5] = gv.iGnMgr.getMotorSp()
+            #self.parmList[6] = gv.iGnMgr.getPumpSp()
             self.statusbar.SetStatusText('COM Msg to Arduino: %s ' % str(self.parmList))
+
+    def onPumpSpdChange(self, event):
+        result = self.client.sendMsg('Set;'+str(self.MotoSP.GetSelection()), resp=True)
 
     def setLEDVal(self, idx, val):
         self.ledList[idx].SetValue(str(val))

@@ -193,12 +193,12 @@ class PanelCtrl(wx.Panel):
                   flag=flagsR, border=2)
 
         ctSizer.AddSpacer(20)
-        self.smkIdc = wx.Button(self, label='Smoke [OFF] ', size=(120, 30), name='smoke')
+        self.smkIdc = wx.Button(self, label='Smoke  ', size=(120, 30), name='smoke')
         self.smkIdc.SetBackgroundColour(wx.Colour('GRAY'))
         ctSizer.Add(self.smkIdc, flag=flagsR, border=2)
         ctSizer.AddSpacer(20)
 
-        self.sirenIdc = wx.Button(self, label='Siren [ON] ', size=(120, 30), name='smoke')
+        self.sirenIdc = wx.Button(self, label='Siren ', size=(120, 30), name='smoke')
         self.sirenIdc.SetBackgroundColour(wx.Colour('RED'))
         ctSizer.Add(self.sirenIdc, flag=flagsR, border=2)
         ctSizer.AddSpacer(10)

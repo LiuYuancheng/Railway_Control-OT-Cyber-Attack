@@ -23,6 +23,7 @@ import S7PLC1200 as s71200
 
 PERIOD = 1  # update frequency
 UDP_PORT = 5005
+TEST_MODE = True
 
 
 class pwrGenClient(object):
@@ -30,9 +31,10 @@ class pwrGenClient(object):
         self.serialComm = ArduinoCOMM(self)
         self.loadNum = 0 
         # connect to the PLC
-        self.se1 = m221.M221('192.168.10.72')
-        self.se2 = s71200.S7PLC1200('192.168.10.73')
-        self.se3 = m221.M221('192.168.10.71')
+        if not TEST_MODE:
+            self.se1 = m221.M221('192.168.10.72')
+            self.se2 = s71200.S7PLC1200('192.168.10.73')
+            self.se3 = m221.M221('192.168.10.71')
 
         # Init the UDP server.
         self.server = udpCom.udpServer(None, UDP_PORT)
@@ -45,12 +47,13 @@ class pwrGenClient(object):
             incoming messages.
         """
         print("Incomming message: %s" %str(msg))
+        msg = msg.decode('utf-8')
         if msg == 'Get':
             pass
         else:
             pumpSp = int(msg.split(';')[-1])
             print("set speed %s" %str(pumpSp))
-            self.setPumpSpeed(pumpSp)
+            #self.setPumpSpeed(pumpSp)
 
         self.loadNum = self.getLoadNum()
         if 0 < self.loadNum <= 5 :
@@ -60,10 +63,11 @@ class pwrGenClient(object):
         else:
             self.setMotoSpeed(1)
         strList = self.serialComm.autoSet(self.loadNum)
-        msg = ';'.join([strList[0], strList[1], strList[6], strList[7]])
+        msg = ';'.join([strList[0], strList[1], strList[6], strList[7], str(self.loadNum)])
         return msg
 
     def setPumpSpeed(self, spdNum):
+        if TEST_MODE: return
         if spdNum == 0:
             self.se1.writeMem('M4', 0)
             self.se1.writeMem('M5', 0)
@@ -75,6 +79,7 @@ class pwrGenClient(object):
             self.se1.writeMem('M5', 0)
 
     def setMotoSpeed(self, spdNum):
+        if TEST_MODE: return
         if spdNum == 0:
             self.se2.writeMem('qx0.3', False)
             self.se2.writeMem('qx0.4', False)
@@ -87,6 +92,7 @@ class pwrGenClient(object):
 
 
     def getLoadNum(self):
+        if TEST_MODE: return 0
         count = 0
         # Residential
         if self.se2.getMem('qx0.2', True):
@@ -122,17 +128,18 @@ class ArduinoCOMM(object):
         """ Init the arduino communication."""
         # sequence "Frequency:Voltage:Frequency LED:Voltage LED:Motor LED:Pump LED:Smoke:Siren "
         self.msgDict = {
-            '0' : ['52.00', '11.0', 'red', 'green', 'green', 'green', 'off', 'on'], 
-            '1' : ['51.20', '11.0', 'amber', 'green', 'green', 'green', 'fast', 'on'], 
-            '2' : ['50.80', '11.0', 'amber', 'green', 'green', 'green', 'fast', 'off'], 
-            '3' : ['50.40', '11.0', 'green', 'green', 'green', 'green', 'fast', 'off'], 
-            '4' : ['50.00', '11.0', 'green', 'green', 'green', 'green', 'fast', 'off'], 
-            '5' : ['49.80', '11.0', 'green', 'green', 'green', 'green', 'fast', 'off'], 
-            '6' : ['49.40', '11.0', 'amber', 'green', 'amber', 'amber', 'slow', 'on'], 
-            '7' : ['48.20', '11.0', 'red', 'green', 'amber', 'amber', 'slow', 'on'], 
+            '0' : ['52.00', '11.00', 'red', 'green', 'green', 'green', 'off', 'on'], 
+            '1' : ['51.20', '11.00', 'amber', 'green', 'green', 'green', 'fast', 'on'], 
+            '2' : ['50.80', '11.00', 'amber', 'green', 'green', 'green', 'fast', 'off'], 
+            '3' : ['50.40', '11.00', 'green', 'green', 'green', 'green', 'fast', 'off'], 
+            '4' : ['50.00', '11.00', 'green', 'green', 'green', 'green', 'fast', 'off'], 
+            '5' : ['49.80', '11.00', 'green', 'green', 'green', 'green', 'fast', 'off'], 
+            '6' : ['49.40', '11.00', 'amber', 'green', 'amber', 'amber', 'slow', 'on'], 
+            '7' : ['48.20', '11.00', 'red', 'green', 'amber', 'amber', 'slow', 'on'], 
         }
-
+        
         self.serComm = None
+        if TEST_MODE: return
         portList = []
         if sys.platform.startswith('win'):
             ports = ['COM%s' % (i + 1) for i in range(256)]
@@ -163,7 +170,7 @@ class ArduinoCOMM(object):
         if 0 <= loadNum < 8 :
             strList = self.msgDict[str(loadNum)]
             msgStr = ':'.join(strList)
-            if self.serComm:
+            if self.serComm and not TEST_MODE:
                 print('Send message [%s] to cmd ' %msgStr)
                 self.serComm.write(msgStr.encode('utf-8'))
             return strList
