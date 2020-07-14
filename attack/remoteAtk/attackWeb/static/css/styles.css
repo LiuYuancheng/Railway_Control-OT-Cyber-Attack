@@ -78,8 +78,8 @@ a:hover, a:active{
     border: 2px solid black;
     background-color: white;
     color: black;
-    padding: 14px 28px;
-    font-size: 16px;
+    padding: 8px 16px;
+    font-size: 12px;
     cursor: pointer;
 }
 

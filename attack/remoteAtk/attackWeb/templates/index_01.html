@@ -1,0 +1,97 @@
+<?xml version="1.0" encording="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+<head>
+    <title>Enhancement of OT security cyber range platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+
+    <div id="overlay1" onclick="off1()">
+        <div id="text">back to control</div>
+        <p>
+            <img src="../static/images/attack.png" alt="Nature" border="3" style="width:100%">
+        </p>
+    </div>
+
+    <div id="overlay2" onclick="off2()">
+        <div id="text">back to control</div>
+        <p>
+            <img src="../static/images/mimAttack.png" alt="Nature" border="3" style="width:100%">
+        </p>
+    </div>
+
+    <script>
+        function on1() {
+            document.getElementById("overlay1").style.display = "block";
+        }
+
+        function off1() {
+            document.getElementById("overlay1").style.display = "none";
+        }
+    </script>
+
+    <script>
+        function on2() {
+            document.getElementById("overlay2").style.display = "block";
+        }
+
+        function off2() {
+            document.getElementById("overlay2").style.display = "none";
+        }
+    </script>
+
+    <!-- Section 2 -->
+
+
+    <table style="width:100%">
+        <tr>
+            <th> </th>
+            <th> </th>
+            <th> </th>
+            <th> </th>
+            <th> </th>
+            <th> </th>
+        </tr>
+        <tr>
+            <td> <img src="../static/images/icon_title.jpg" alt="Nature" style="width:100%"></td>
+            <td> <b> Airport runway lights</b> </td>
+            <td> False Data Injection Attack</td>
+            <td>
+                <form action="http://localhost:5000/index" method="post">
+                    <button class="btn danger" type="submit" name="submit_button" value="startAtt2">Start
+                        attack</button>
+                    <button class="btn success" type="submit" name="submit_button" value="stopAtt2">Stop attack</button>
+                </form>
+            </td>
+            <td> <img src="../static/images/icon_state.jpg" alt="Nature" style="width:100%"></td>
+            <td>
+                <img src="../static/images/icon_detail.jpg" alt="Nature" style="width:100%">
+            </td>
+        </tr>
+
+        <tr>
+            <td> <img src="../static/images/icon_title.jpg" alt="Nature" style="width:100%"></td>
+            <td> <b> OT railway system</b> </td>
+            <td> Black Out Attack</td>
+            <td>
+                <form action="http://localhost:5000/index" method="post">
+                    <button class="btn danger" type="submit" name="submit_button" value="startAtt1">Start
+                        attack</button>
+                    <button class="btn success" type="submit" name="submit_button" value="stopAtt1">Stop attack</button>
+                </form>
+            </td>
+            <td> <img src="../static/images/icon_state.jpg" alt="Nature" style="width:100%"></td>
+            <td>
+                <img src="../static/images/icon_detail.jpg" alt="Nature" style="width:100%">
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+
+</html>
