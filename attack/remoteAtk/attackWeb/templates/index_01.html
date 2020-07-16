@@ -62,9 +62,11 @@
             <td> False Data Injection Attack</td>
             <td>
                 <form action="http://localhost:5000/index" method="post">
-                    <button class="btn danger" type="submit" name="submit_button" value="startAtt2">Start
-                        attack</button>
-                    <button class="btn success" type="submit" name="submit_button" value="stopAtt2">Stop attack</button>
+                    {% if attState.att2 %}
+                        <button id="att2e"  class="btn success" type="submit" name="submit_button" value="stopAtt2" >Stop attack</button>
+                    {% else %}
+                        <button id="att2s" class="btn danger" type="submit" name="submit_button" value="startAtt2" >Start attack</button>
+                    {% endif %}
                 </form>
             </td>
             <td> <img src="../static/images/icon_state.jpg" alt="Nature" style="width:100%"></td>
@@ -79,9 +81,11 @@
             <td> Black Out Attack</td>
             <td>
                 <form action="http://localhost:5000/index" method="post">
-                    <button class="btn danger" type="submit" name="submit_button" value="startAtt1">Start
-                        attack</button>
-                    <button class="btn success" type="submit" name="submit_button" value="stopAtt1">Stop attack</button>
+                    {% if attState.att1 %}
+                        <button id="att1e"  class="btn success" type="submit" name="submit_button" value="stopAtt1" >Stop attack</button>
+                    {% else %}    
+                        <button id="att1s"  class="btn danger" type="submit" name="submit_button" value="startAtt1" >Start attack</button>
+                    {% endif %}
                 </form>
             </td>
             <td> <img src="../static/images/icon_state.jpg" alt="Nature" style="width:100%"></td>
@@ -91,6 +95,34 @@
         </tr>
 
     </table>
+
+   <script>
+        function onatt1() {
+            document.getElementById("att1s").style.display = "none";
+            document.getElementById("att1e").style.display = "block";
+        }
+
+        function offatt1() {
+            document.getElementById("att1s").style.display = "block";
+            document.getElementById("att1e").style.display = "none";
+        }
+    </script>
+
+    <script>
+        function onatt2() {
+            document.getElementById("att2s").style.display = "none";
+            document.getElementById("att2e").style.display = "block";
+        }
+
+        function offatt2() {
+            document.getElementById("att2s").style.display = "block";
+            document.getElementById("att2e").style.display = "none";
+        } 
+    </script>
+
+
+
+
 
 </body>
 
