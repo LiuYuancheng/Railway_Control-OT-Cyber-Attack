@@ -77,7 +77,7 @@ a:hover, a:active{
 .btn {
     position: static;
     border: none;
-    border-radius: 8px;
+    border-radius: 4px;
     background-color: #1173CA;
     color: white;
     padding: 8px 16px;
