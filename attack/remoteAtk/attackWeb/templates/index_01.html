@@ -53,7 +53,7 @@
             <th style="width: 130px;"></th>
             <th style="width: 430px;"></th>
             <th style="width: 130px;"></th>
-	    <th style="width: 50px;"></th>
+            <th style="width: 50px;"></th>
             <th style="width: 220px;"></th>
             <th style="width: 50px;"></th>
             <th style="width: 50px;"></th>
@@ -65,15 +65,17 @@
             <td>
                 <form action="http://localhost:5000/index" method="post">
                     {% if attState.att2 %}
-                        <button id="att2e"  class="btn success" type="submit" name="submit_button" value="stopAtt2" >Stop attack</button>
+                    <button id="att2e" class="btn success" type="submit" name="submit_button" value="stopAtt2">Stop
+                        attack</button>
                     {% else %}
-                        <button id="att2s" class="btn danger" type="submit" name="submit_button" value="startAtt2" >Start attack</button>
+                    <button id="att2s" class="btn danger" type="submit" name="submit_button" value="startAtt2">Start
+                        attack</button>
                     {% endif %}
                 </form>
             </td>
-	    <td> </td>
+            <td> </td>
             <td> <img src="../static/images/icon_state.jpg" alt="Nature" style="width:100%"></td>
-	    <td> </td>
+            <td> </td>
             <td>
                 <img src="../static/images/icon_detail.jpg" alt="Nature" style="width:100%">
             </td>
@@ -86,15 +88,17 @@
             <td>
                 <form action="http://localhost:5000/index" method="post">
                     {% if attState.att1 %}
-                        <button id="att1e"  class="btn success" type="submit" name="submit_button" value="stopAtt1" >Stop attack</button>
-                    {% else %}    
-                        <button id="att1s"  class="btn danger" type="submit" name="submit_button" value="startAtt1" >Start attack</button>
+                    <button id="att1e" class="btn success" type="submit" name="submit_button" value="stopAtt1">Stop
+                        attack</button>
+                    {% else %}
+                    <button id="att1s" class="btn danger" type="submit" name="submit_button" value="startAtt1">Start
+                        attack</button>
                     {% endif %}
                 </form>
             </td>
-	    <td> </td>
+            <td> </td>
             <td> <img src="../static/images/icon_state.jpg" alt="Nature" style="width:100%"></td>
-	    <td></td>
+            <td></td>
             <td>
                 <img src="../static/images/icon_detail.jpg" alt="Nature" style="width:100%">
             </td>
@@ -102,7 +106,7 @@
 
     </table>
 
-   <script>
+    <script>
         function onatt1() {
             document.getElementById("att1s").style.display = "none";
             document.getElementById("att1e").style.display = "block";
@@ -125,11 +129,6 @@
             document.getElementById("att2e").style.display = "none";
         } 
     </script>
-
-
-
-
-
 </body>
 
 </html>

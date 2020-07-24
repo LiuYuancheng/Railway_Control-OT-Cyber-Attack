@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html class="ng-cloak" lang="en" ng-app="page">
+
+<head>
+	<link rel="stylesheet" href="lib/angular/angular-material.min.css">
+	<link rel="stylesheet" href="lib/angular-material-data-table/dist/md-data-table.min.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link rel="stylesheet" href="css/sb-admin-2.css">
+	<link rel="stylesheet" href="css/radiflow-css/material-icons.css">
+	<link rel="stylesheet" href="css/radiflow-css/material-override.css">
+	<link rel="stylesheet" href="css/radiflow-css/rf-style.css">
+</head>
+
+
+
+<!-- Radiflow styles -->
+<link rel="icon" href="images/titleicon.png">
+<title> Radiflow - Cyber Security Training</title>
+
+<body layout="column" flex ng-controller="MainController as main">
+
+	<!-- Angular Material requires Angular.js Libraries -->
+	<script src="lib/angular/angular.min.js"></script>
+	<script src="lib/angular/angular-animate.min.js"></script>
+	<script src="lib/angular/angular-aria.min.js"></script>
+	<script src="lib/angular/angular-messages.min.js"></script>
+	<script src="lib/angular/angular-material.min.js"></script>
+	<script src="js/socket.io.js"></script>
+
+	<!-- md-data-table -->
+	<script type="text/javascript" src="lib/angular-material-data-table/dist/md-data-table.min.js"></script>
+
+	<style>
+		body {
+			background-color: white;
+			margin-bottom: 0%;
+		}
+
+		.center {
+			text-align: center;
+			align-items: center;
+		}
+
+		.inner-shadow {
+			-moz-box-shadow: inset 0 0 10px #636363;
+			-webkit-box-shadow: inset 0 0 10px #636363;
+			box-shadow: inset 0 0 10px #636363;
+		}
+	</style>
+
+
+	<md-toolbar style="box-shadow: 0px -12px 21px 8px; background-color: #8899b5 !important" class="md-hue-2 main-navbar">
+	<!-- md-toolbar style="box-shadow: 0px -12px 21px 8px; background-color: #1f97f3 !important" class="md-hue-2 main-navbar" -->
+		<div class="layout-row" style="align-items: center;">
+
+			<a>
+				<img class="logo-rf" src="images/logo.png" alt="Radiflow">
+			</a>
+			<a class="navbar-brand" style="color:white; font-size:25px">Cyber Security Training</a>
+			<span flex></span>
+		</div>
+	</md-toolbar>
+
+	<div flex="40" layout="column" layout-align="center center">
+		<table>
+			<tr>
+				<th style="width: 50px;"></th>
+				<th style="width: 130px;"></th>
+				<th style="width: 450px;"></th>
+				<th style="width: 130px;"></th>
+				<th style="width: 200px;"></th>
+				<th style="width: 50px;"></th>
+				<th style="width: 50px;"></th>
+				<th style="width: 50px;"></th>
+			</tr>
+
+			<tr style="height: 60px;">
+			<td>
+					<i style="color: #0b79c8;" class="material-icons">airplanemode_active</i>
+				</td>
+				<td>
+					<strong>Industrial Area</strong>
+				</td>
+				<td>
+					Ransomware in the HMI.
+				</td>
+				<td>
+					<md-button ng-hide="main.state.mitm == 'on'" ng-click="main.startMitm()" ng-disabled="['on','idle'].indexOf(main.state.mitm) < 0"
+					 class="md-raised md-primary">Start Attack
+					</md-button>
+					<md-button ng-show="main.state.mitm == 'on'" ng-click="main.stopMitm()" ng-disabled="['on','idle'].indexOf(main.state.mitm) < 0"
+					 class="md-raised md-primary md-warn">Stop Attack
+					</md-button>
+				</td>
+				<td style="text-align: center;padding:  20px;">
+					<div ng-if="main.state.mitm == 'on'" style="border-radius: 20px; background-color: #82cc54; color: white;">
+						Attack is on
+					</div>
+					<div ng-if="main.state.mitm == 'progress'" style="border-radius: 20px; background-color: #6aacff; color: white;">
+						Attack in progress...
+					</div>
+					<div ng-if="main.state.mitm == 'idle'" style="border-radius: 20px; background-color: #ffbd6a; color: white;">
+						Idle
+					</div>
+					<div ng-if="main.state.mitm == 'none'" style="border-radius: 20px; background-color: grey; color: white;">
+						Status: Unknown
+					</div>
+					<div ng-if="main.state.mitm == ''" style="border-radius: 20px; background-color: #cecece; color: white;">
+						Machine is offline
+					</div>
+				</td>
+				<td class="center">
+					<md-button ng-click="main.currentLog = 'mitm'" title="Show logs" class="md-icon-button md-accent" aria-label="logs">
+						<i class="material-icons">event_note</i>
+					</md-button>
+				</td>
+
+			</tr>
+
+
+			<tr style="height: 60px;">
+				<td>
+					<i style="color: #0b79c8;" class="material-icons">domain</i>
+				</td>
+				<td>
+					<strong>Residential Area</strong>
+				</td>
+				<td>
+					Man in the Middle (MitM) from IoT Device.
+				</td>
+				<td>
+					<md-button ng-hide="main.state.m221 == 'on'" ng-click="main.startM221()" ng-disabled="['on','idle'].indexOf(main.state.m221) < 0"
+					 class="md-raised md-primary">Start Attack
+					</md-button>
+					<md-button ng-show="main.state.m221 == 'on'" ng-click="main.stopM221()" ng-disabled="['on','idle'].indexOf(main.state.m221) < 0"
+					 class="md-raised md-primary md-warn">Stop Attack
+					</md-button>
+				</td>
+				<td style="text-align: center;padding:  20px;">
+					<div ng-if="main.state.m221 == 'on'" style="border-radius: 20px; background-color: #82cc54; color: white;">
+						Attack is on
+					</div>
+					<div ng-if="main.state.m221 == 'progress'" style="border-radius: 20px; background-color: #6aacff; color: white;">
+						Attack in progress...
+					</div>
+					<div ng-if="main.state.m221 == 'idle'" style="border-radius: 20px; background-color: #ffbd6a; color: white;">
+						Idle
+					</div>
+					<div ng-if="main.state.m221 == 'none'" style="border-radius: 20px; background-color: grey; color: white;">
+						Status: Unknown
+					</div>
+					<div ng-if="main.state.m221 == ''" style="border-radius: 20px; background-color: #cecece; color: white;">
+						Machine is offline
+					</div>
+				</td>
+				<td class="center">
+					<md-button ng-click="main.currentLog = 'm221'" title="Show logs" class="md-icon-button md-accent" aria-label="logs">
+						<i class="material-icons">event_note</i>
+					</md-button>
+				</td>
+	
+			</tr>
+
+
+			<tr style="height: 60px;">
+				<td>
+					<i style="color: #0b79c8;" class="material-icons">location_city</i>
+				</td>
+				<td>
+					<strong>City Area</strong>
+				</td>
+				<td>
+					Trojan in the technician PC
+				</td>
+				<td>
+
+					<span ng-hide="main.attackType">
+						<md-button ng-hide="main.state.download_program == 'on'" ng-click="main.startDownloadProgram()" ng-disabled="['on','idle'].indexOf(main.state.download_program) < 0"
+						 class="md-raised md-primary">Start Attack
+						</md-button>
+						<md-button ng-show="main.state.download_program == 'on'" ng-click="main.stopDownloadProgram()" ng-disabled="['on','idle'].indexOf(main.state.download_program) < 0"
+						 class="md-raised md-primary md-warn">Stop Attack
+						</md-button>
+					</span>
+					<span ng-show="main.attackType">
+						<md-button ng-hide="main.state.download_program == 'on'" ng-click="main.startDownloadProgram2()" ng-disabled="['on','idle'].indexOf(main.state.download_program) < 0"
+						 class="md-raised md-primary">Start Attack2
+						</md-button>
+						<md-button ng-show="main.state.download_program == 'on'" ng-click="main.stopDownloadProgram2()" ng-disabled="['on','idle'].indexOf(main.state.download_program) < 0"
+						 class="md-raised md-primary md-warn">Stop Attack2
+						</md-button>
+					</span>
+				</td>
+				<td style="text-align: center;padding:  20px;">
+					<div ng-if="main.state.download_program == 'on'" style="border-radius: 20px; background-color: #82cc54; color: white;">
+						Attack is on
+					</div>
+					<div ng-if="main.state.download_program == 'progress'" style="border-radius: 20px; background-color: #6aacff; color: white;">
+						Attack in progress...
+					</div>
+					<div ng-if="main.state.download_program == 'idle'" style="border-radius: 20px; background-color: #ffbd6a; color: white;">
+						Idle
+					</div>
+					<div ng-if="main.state.download_program == 'none'" style="border-radius: 20px; background-color: grey; color: white;">
+						Status: Unknown
+					</div>
+					<div ng-if="main.state.download_program == ''" style="border-radius: 20px; background-color: #cecece; color: white;">
+						Machine is offline
+					</div>
+				</td>
+				<td class="center">
+					<md-button ng-click="main.currentLog = 'download_program'" title="Show logs" class="md-icon-button md-accent" aria-label="logs">
+						<i class="material-icons">event_note</i>
+					</md-button>
+				</td>
+
+			</tr>
+
+
+			<tr>
+
+			</tr>
+
+		</table>
+	</div>
+
+	<div flex="45" layout="column" ng-hide="main.currentLog == 'none'" layout-align="center center">
+
+		<md-card style="border-radius: 6px; background-color: #1f97f3; width: 55%;">
+
+			<md-card-title>
+				<md-card-title-text layout="row" layout-align="center center">
+
+					<div layout="row" ng-if="main.currentLog == 'mitm'">
+						<i style="color: white; margin-top: 4px; margin-right: 10px;" class="material-icons">airplanemode_active</i>
+						<span style="color: white;" class="md-headline">Industrial Area log</span>
+					</div>
+					<div layout="row" ng-if="main.currentLog == 'm221'">
+						<i style="color: white; margin-top: 4px; margin-right: 10px;" class="material-icons">domain</i>
+						<span style="color: white;" class="md-headline">Residential Area</span>
+					</div>
+					<div layout="row" ng-if="main.currentLog == 'download_program'">
+						<i style="color: white; margin-top: 4px; margin-right: 10px;" class="material-icons">location_city</i>
+						<span style="color: white;" class="md-headline">City Area log</span>
+					</div>
+
+					<span flex></span>
+					<md-button ng-click="main.currentLog = 'none'" title="close" class="md-icon-button md-accent" aria-label="logs">
+						<i style="color: white;" class="material-icons">cancel</i>
+					</md-button>
+				</md-card-title-text>
+			</md-card-title>
+
+			<md-card-content class="inner-shadow" layout="column" style="color: #717171; background-color: #ddf1ff; margin: 16px; border-radius: 6px; padding-top: 16px;">
+				<div flex="100" style="overflow: auto;">
+					<p ng-if="main.syslogs[main.currentLog].length == 0">No logs found</p>
+					<p ng-repeat="record in main.syslogs[main.currentLog] | orderBy:'$index':true">{{ record.time }} --
+						<span style="color: #313131;">{{ record.msg }} </span>
+					</p>
+				</div>
+			</md-card-content>
+		</md-card>
+	</div>
+
+
+
+
+	<script type="text/javascript" src="js/index.js"></script>
+	</div>
+	<iframe src="http://localhost:5000/" style="width:800px;height:700px">
+	</div>
+
+
+
+</body>
+
+</html>
