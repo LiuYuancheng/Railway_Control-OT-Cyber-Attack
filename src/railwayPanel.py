@@ -43,7 +43,7 @@ class PanelAttackSimu(wx.Panel):
 #--PanelAttackSimu-------------------------------------------------------------
     def buidUISizer(self):
         """ Build the UI and the return the wx.sizer. """
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.CENTER
         vsizer = wx.BoxSizer(wx.VERTICAL)
         vsizer.Add(wx.StaticText(
             self, label="Active Attack Simulation:"), flag=flagsR, border=2)
@@ -165,7 +165,7 @@ class PanelInfoGrid(wx.Panel):
 
 #-----------------------------------------------------------------------------
     def buidUISizer(self):
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.CENTER
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         for _ in range(3):
             vSizer = wx.BoxSizer(wx.VERTICAL)
@@ -250,7 +250,7 @@ class PanelPLC(wx.Panel):
     def buidUISizer(self):
         """ Build the UI and the return the wx.sizer. """
         mSizer = wx.BoxSizer(wx.VERTICAL) # main sizer
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.CENTER
         mSizer.AddSpacer(5)
         # Row idx = 0 : set the basic PLC informaiton.
         self.nameLb = wx.StaticText(
@@ -363,7 +363,7 @@ class PanelPointAtt(wx.Panel):
 #--PanelPointAtt---------------------------------------------------------------
     def buidUISizer(self):
         """ Build the UI and the return the wx.sizer. """
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.CENTER
         vsizer = wx.BoxSizer(wx.VERTICAL)
         vsizer.Add(wx.StaticText(
             self, label="Active component attack:"), flag=flagsR, border=2)
@@ -465,7 +465,7 @@ class PanelSysCtrl(wx.Panel):
 #--PanelSysCtrl----------------------------------------------------------------
     def buidUISizer(self):
         """ Build the UI and the return the wx.sizer. """
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.CENTER
         vsizer = wx.BoxSizer(wx.VERTICAL)
         vsizer.Add(wx.StaticText(self, label="System Power Control"),
                    flag=flagsR, border=2)
@@ -513,7 +513,7 @@ class PanelTrainCtrl(wx.Panel):
 #--PanelTrainCtrl--------------------------------------------------------------
     def buidUISizer(self):
         """ Build the UI and the return the wx.sizer. """
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.CENTER
         vsizer = wx.BoxSizer(wx.VERTICAL)
         # Set the panel title.
         self.ctrlAct = wx.CheckBox(self, -1, self.tName+" Control")
@@ -641,7 +641,7 @@ class PanelDetailInfo(wx.Panel):
 #--PanelDetailInfo-------------------------------------------------------------
     def buidUISizer(self):
         """ Build the UI and the return the wx.sizer. """
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.CENTER
         vsizer = wx.BoxSizer(wx.VERTICAL)
         self.idLb = wx.StaticText(
             self, label="Attack point ID: [%s] " % str(self.idx).zfill(3))
@@ -742,7 +742,7 @@ class TrojanAttFrame(wx.Frame):
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.ctrl = AnimationCtrl(self, -1, Animation(gv.TAGIF_PATH))
         self.ctrl.Play()
-        sizer.Add(self.ctrl, flag=wx.ALIGN_CENTER_VERTICAL |
+        sizer.Add(self.ctrl, flag=wx.CENTER |
                   wx.ALIGN_CENTER_HORIZONTAL, border=2)
         self.stTxt = wx.StaticText(
             self, -1, "Your computer has been took over by YC's Trojan, we will release control in 10 sec")

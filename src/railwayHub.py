@@ -52,7 +52,7 @@ class railWayHubFrame(wx.Frame):
     def buildUISizerM1(self):
         """ Build the UI under display mode 0 and the return the wx.sizer. """
         # Init all the UI components: 
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.CENTER
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
 
         # Col idx 0: 
@@ -125,7 +125,7 @@ class railWayHubFrame(wx.Frame):
     def buidUISizerM0(self):
         """ Build the UI under display mode 0 and the return the wx.sizer. """
         # Init all the UI components: 
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.CENTER
         vsizer = wx.BoxSizer(wx.VERTICAL)
         # Row idx = 0 : Set all the control and information display panel in a wx NoteBook.
         nb = wx.Notebook(self)
