@@ -745,7 +745,7 @@ class TrojanAttFrame(wx.Frame):
         sizer.Add(self.ctrl, flag=wx.CENTER |
                   wx.ALIGN_CENTER_HORIZONTAL, border=2)
         self.stTxt = wx.StaticText(
-            self, -1, "Your computer has been took over by YC's Trojan, we will release control in 10 sec")
+            self, -1, "Your computer has been taken over by YC's Trojan, we will release control in 10 sec")
         self.stTxt.SetBackgroundColour(wx.Colour('GREEN'))
         self.stTxt.SetFont(wx.Font(30, wx.SWISS, wx.NORMAL, wx.NORMAL))
         sizer.Add(self.stTxt, flag=wx.ALIGN_CENTER, border=2)
@@ -773,7 +773,7 @@ class TrojanAttFrame(wx.Frame):
         # Show the release time text.
         self.count -=1
         if self.count%100 == 0:
-            self.stTxt.SetLabel("Your computer has been took over by the Trojan, we will release control in "+str(self.count//100).zfill(2)+" sec")
+            self.stTxt.SetLabel("Your computer has been taken over by the Trojan, we will release control in "+str(self.count//100).zfill(2)+" sec")
         if self.count == 0:
             self.onCloseWindow(None)
         self.SetTransparent(self.alphaValue)
