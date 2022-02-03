@@ -78,6 +78,8 @@ To run the demo, please deploy the programs by following below diagram:
 
 ###### Hardware Needed : 
 
+![](doc/plantform.JPG)
+
 ​	The system use Schneider M221 and Siemens s7-1200 to control the hardware. 
 
 ​	PLC memory and coils setting: 
