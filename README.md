@@ -16,7 +16,9 @@ This project contains two section :
 
 []: https://github.com/LiuYuancheng/RailWay_PLC_Control/tree/master/attack/remoteAtk	"Attack Readme"
 
-UI view of the PLC-Railway HMI system: 
+#### UI view of the PLC-Railway HMI system
+
+![](doc/img/rail_way_480p.gif)
 
 ###### Python Railway HMI UI
 
