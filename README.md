@@ -4,25 +4,81 @@
 
 > All rights reserved by NUS-Singtel Cyber Security R&D Lab (Jun 2016 to Jun 2021)
 
-**Program Design Purpose**:  We want to build a city simulator module with two railways system and create two kinds of HMI software (Engineer monitoring HMI and the Lecturer training HMI) to control the system. We also want to provide different kinds of PLC OT-Cyber attack simulation function for the system. 
+**Program Design Purpose**:  We want to build a city simulator OT(Operational Technology) system with two railways and create two kinds of HMI software (Engineer monitoring HMI and the Lecturer training HMI) to control the system. We also want to use this system to demo different kinds of PLC OT-Cyber attack by implementing the related attack simulation function. 
 
 [TOC]
 
-
-
-
-
 ### Introduction
 
-This project will provide a supervisory control and data acquisition (SCADA) human-machine interface (HMI) program to control the components in CSI OT-3D Cyber-attack demonstration platform. We will create two kinds of SCADA HMI system by using Schneider-Wonderware(R) software and python to let the user control the PLC railway modules or simulate different kinds of railway operation for training or research purpose. 
+This project will implement an HMI for the OT-3D-City simulator platform and power management simulator platform (generator and substation). Then we will demonstrate different kinds of cyber-attack situation on both simulator platform. The project contains four main sections: 
+
+1. **OT-City Simulator HMI Program**: In this section we will create a SCADA HMI system with Schneider Wonderware(R) program running on the SCADA PC for the user to control the OT-3D-city simulator modules for the training and research purpose. We will also create a plug-and-play engineer monitoring HMI for the system analysis and exception checking. 
+2. **OT Platform Cyber Attack Simulation**: In this section we will demonstrate 3 different kinds of cyber-attack situation on the OT-platform and power management module: False data injection attack, Blackout attack and the Stealthy situation attack. The attack demonstration will be activated by the attack control website and launched from an attack control device (Raspberry PI) which connected to the system network. `Reference link:` https://github.com/LiuYuancheng/RailWay_PLC_Control/tree/master/attack/remoteAtk
+3. **OT-Cyber-Attack Control Website**: In this section we will create a website server running on the orchestrator PC to provide a web interface to let the user control different cyber-attack demos on OT-platform and show current system feedback/attack detail information during the presentation. The user will active/stop the attack demo by login the attack control webpage. `Reference link:`https://github.com/LiuYuancheng/OT_Platform_Attack_Web
+4. **OT-Cyber-Attack Power Generator and Substation Manager**: We will provide a user interface running on the SCADA PC to remote control the OT-Power Generator Module. We will provide a module controller made by one Raspberry PI and an Arduino to receive the control request from the remove controller UI and change the state of the hardware components of Power Generator Module such as Pump, moto, and LED display panel. The control program will also do the automatically adjustment of the generator's motor and pump speed based on the loads in the system. `Reference link:` https://github.com/LiuYuancheng/Power_Generator_Manager
+
+#### System Overview Diagram
+
+The relation ship of the four main section is show as the below overview diagram: 
+
+![](doc/img/systemOverview.png)
+
+`version 2.1`
+
+
+
+------
+
+### System/Program Design
+
+#### Design of Engineer Monitoring HMI
+
+Engineer Monitoring HMI running on engineer's laptop, the engineer can use it to monitor/overwrite all the parameters when plug  it into the system. The use can also run the HMI independently to simulate different control situation and simulate three kinds of general program attack without connect it to the system. The main function contents: 
+
+- Control/simulate different components in the city-railway system and 2 trains.
+- Show the real time PLC Input/Output coils signal or simulate the signal change.
+- Show the PLC Memory /register status or overwrite these PLC data.
+- Change the system setting and start different cyber attack simulation. (man in mid, Trojan and  Ransomware attack)
+
+##### Engineer Monitoring HMI UI View 
+
+![](doc/img/rail_way_480p.gif)
+
+
+
+#### Design of Lecturer Training HMI
+
+Lecturer Training HMI will provide a supervisory control and data acquisition (SCADA) human-machine interface (HMI) program to control the components in CSI OT-3D Cyber-attack demonstration platform. We will create two kinds of SCADA HMI system by using Schneider-Wonderware(R) software and python to let the user control the PLC railway modules or simulate different kinds of railway operation for training or research purpose. 
+
+##### Lecturer Training HMI UI View
 
 The Schneider-Wonderware HMI program are mainly used for the demo purpose, it contents three main pages:
 
-\-     Training SCADA HMI page is mainly used for training and demonstration task.
+- Training SCADA HMI page is mainly used for training and demonstration task.
 
-\-     PLC Status View HMI page is used the for showing the working flow logic of the PLC modules in the system. 
+  ![](doc/img/mainUI.png)
 
-\-     Railway Command and Control HMI page is used to simulate and demonstrate the railway command control centre’s operational sequence. 
+- PLC Status View HMI page is used the for showing the working flow logic of the PLC modules in the system. 
+
+  ![](doc/RMimg/wonderwPLC.jpg)
+
+- Railway Command and Control HMI page is used to simulate and demonstrate the railway command control center's operational sequence. 
+
+  ![](doc/RMimg/wonderwHMI.jpg)
+
+
+
+#### OT Cyber Attack Simulation Design 
+
+
+
+![](/attack/remoteAtk/doc/fileDeploy.png)
+
+
+
+
+
+
 
 ![](doc/img/systemImg.png)
 
@@ -32,42 +88,7 @@ This project contains two section :
 
 **PLC-SCADA System Attack** :  In this section we will show different kinds of cyber attack situation on the Railway SCADA system which we have build in the previous section. Detail introduction for the attack section: 
 
-[]: https://github.com/LiuYuancheng/RailWay_PLC_Control/tree/master/attack/remoteAtk	"Attack Readme"
-
-#### UI view of the PLC-Railway HMI system
-
-![](doc/img/rail_way_480p.gif)
-
-###### Python Railway HMI UI
-
-![](doc/RMimg/pythonmain.png)
-
-> Python railway HMI is used to simulate different control situation and simulate three kinds of general program attack. 
->
-> - Control the different components in the rail way system and 2 trains.
-> -  Show the PLC information on the PLC control area and user can turn on/off PLC coils from this tab.
-> - Show the PLC Memory /register status or overwrite PLC data.\
-> - Change the system setting and start different cyber attack simulation.(man in mid, Trojan and  Ransomware attack)
-
-
-
-###### Schneider Wonderware HMI UI
-
-Main control window :
-
-![](doc/RMimg/wonderwMain.jpg)
-
-PLC control window : 
-
-![](doc/RMimg/wonderwPLC.jpg)
-
-RailWay state window : 
-
-![](doc/RMimg/wonderwHMI.jpg)
-
-> Schneider Wonderware HMI is used for training and cyber-attack demo.
-
-
+#### 
 
 ###### Cyber attack : 
 
