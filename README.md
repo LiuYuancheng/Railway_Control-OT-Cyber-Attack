@@ -1,5 +1,7 @@
 
 
+
+
 # Railway_Control/OT-Cyber Attack
 
 > All rights reserved by NUS-Singtel Cyber Security R&D Lab (Jun 2016 to Jun 2021)
@@ -70,39 +72,23 @@ The Schneider-Wonderware HMI program are mainly used for the demo purpose, it co
 
 #### OT Cyber Attack Simulation Design 
 
+The system will provide three new cyberattack demo on the CSI OT Demo platform, namely the “False Data Injection Attack”, “Blackout Attack” and “Stealthy situation attack”. The attack detail is shown in :  https://github.com/LiuYuancheng/RailWay_PLC_Control/tree/master/attack/remoteAtk
+
+##### Attack Work Flow Diagram
+
+![](doc/img/attackDiagram.png)
 
 
-![](/attack/remoteAtk/doc/fileDeploy.png)
-
-
-
-
-
-
-
-![](doc/img/systemImg.png)
-
-This project contains two section :  
-
-**PLC-Railway HMI System** : In this section we will create 2 Railway PLC SCADA HMI system with schneider wonderware(R) program and python for the user to control the PLC railway modules or simulate different railway operation for training or research purpose. 
-
-**PLC-SCADA System Attack** :  In this section we will show different kinds of cyber attack situation on the Railway SCADA system which we have build in the previous section. Detail introduction for the attack section: 
-
-#### 
-
-###### Cyber attack : 
-
-To run the demo, please deploy the programs by following below diagram: 
-
-![](https://github.com/LiuYuancheng/RailWay_PLC_Control/blob/master/attack/remoteAtk/doc/fileDeploy.png)
 
 ------
 
-#### Program Setup
+### Program Setup
 
-###### Development Environment : Python 2.7 & python 3.7,  HTML5, Schneider Wonderware IDE
+###### Development Environment  
 
-###### Additional Lib/Software Need :
+Python 2.7 & python 3.7,  HTML5, Schneider Wonderware IDE
+
+###### Additional Lib/Software Need 
 
 1. wxPython 4.0.6 (build UI this lib need to be installed) 
 
@@ -117,13 +103,23 @@ To run the demo, please deploy the programs by following below diagram:
    http://simplyautomationized.blogspot.com/2014/12/raspberry-pi-getting-data-from-s7-1200.html
    ```
 
-###### Hardware Needed : 
+##### Hardware Needed 
 
-![](doc/plantform.JPG)
+| **Idx** | **Name**                              | **Components**                                               | **Function**                                                 |
+| ------- | ------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **0**   | OT 3D Platform                        | OT 3D Platform  M221 PLC X 2   S7-1200 PLC X 1  Control Arduino | Main OT-City simulator platform.                             |
+| **1**   | SCADA PC                              | Dell  server #2  Monitor 3  Touch  screen                    | Show the  HMI for user to control and show the presentation. |
+| **2**   | Technical PC                          | ThinkPad laptop  Monitor 2                                   | Edit the PLC ladder diagram and show  the Back out attack presentation. |
+| **3**   | Orchestrator  PC                      | Dell  server #3  Monitor  1                                  | Host the  attack control website and for user to launch/stop the attack. |
+| **4**   | Attack Raspberry PI                   | Control Raspberry PI                                         | Implement the attack at the background.                      |
+| **5**   | Power Generator  Control Raspberry PI | Power  generator platform  Control  Raspberry PI  Control  Arduino | Control  the power generator module.                         |
+| **6**   | Network switch                        | Network switch X2                                            | Config the network.                                          |
 
-​	The system use Schneider M221 and Siemens s7-1200 to control the hardware. 
+![](doc/img/systemImg.png)
 
-​	PLC memory and coils setting: 
+The system use Schneider M221 and Siemens s7-1200 to control the hardware. 
+
+PLC memory and coils setting: 
 
 | PLC 0 [schneider M221]      | PLC 1 [seimens S7-1200]         | PLC 2 [schneider M221]   |
 | --------------------------- | ------------------------------- | ------------------------ |
@@ -132,6 +128,10 @@ To run the demo, please deploy the programs by following below diagram:
 | M10 => Q0.1 Power Plant     | Qx0.1=> Q0.1 level crossing pwr | M10 => Q0.1 track A pwr  |
 | M60 => Q0.2 Industrial LED  | Qx0.2=> Q0.2 Resident LED       | M20 => Q0.2 track B pwr  |
 | attack/Industrial_Zone.smbp | attack/ City_Zone.smbp          | M60 = > Q0.3 city LED    |
+
+![](doc/img/PLCpos.png)
+
+
 
 ###### Program File List :
 
@@ -148,9 +148,11 @@ To run the demo, please deploy the programs by following below diagram:
 | attack/ City_Zone.smbp      | Schneider Wonderware IDE | City Zone PLC ladder diagram.                                |
 | attack/Industrial_Zone.smbp | Schneider Wonderware IDE | Industrial Zome PLC ladder diagram.                          |
 
+`version V_2.1` 
+
 ------
 
-#### Program Usage
+### Program Usage/Execution
 
 ###### Program execution cmd: 
 
@@ -162,4 +164,20 @@ python railwayHub.py
 
 ------
 
-> Last edit by LiuYuancheng(liu_yuan_cheng@hotmail.com) at 08/01/2020
+### Problem and Solution
+
+N.A
+
+
+
+------
+
+### Reference
+
+N.A
+
+
+
+------
+
+> Last edit by LiuYuancheng(liu_yuan_cheng@hotmail.com) at 15/02/2022
