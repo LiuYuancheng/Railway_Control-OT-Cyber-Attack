@@ -743,12 +743,12 @@ class TrojanAttFrame(wx.Frame):
         self.ctrl = AnimationCtrl(self, -1, Animation(gv.TAGIF_PATH))
         self.ctrl.Play()
         sizer.Add(self.ctrl, flag=wx.LEFT |
-                  wx.ALIGN_LEFT_HORIZONTAL, border=2)
+                  wx.LEFT, border=2)
         self.stTxt = wx.StaticText(
             self, -1, "Your computer has been taken over by YC's Trojan, we will release control in 10 sec")
         self.stTxt.SetBackgroundColour(wx.Colour('GREEN'))
         self.stTxt.SetFont(wx.Font(30, wx.SWISS, wx.NORMAL, wx.NORMAL))
-        sizer.Add(self.stTxt, flag=wx.ALIGN_LEFT, border=2)
+        sizer.Add(self.stTxt, flag=wx.LEFT, border=2)
         return sizer
 
  #--TrojanAttFrame--------------------------------------------------------------

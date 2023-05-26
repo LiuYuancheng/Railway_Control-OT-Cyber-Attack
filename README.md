@@ -44,7 +44,13 @@ Engineer Monitoring HMI running on engineer's laptop, the engineer can use it to
 
 ##### Engineer Monitoring HMI UI View 
 
+Normal Mode Controller UI: 
+
 ![](doc/img/rail_way_480p.gif)
+
+Debug Mode Controller UI: 
+
+![](doc/img/debugModeUI.png)
 
 
 
